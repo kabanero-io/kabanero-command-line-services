@@ -107,6 +107,7 @@ public class CollectionsAccess {
 	}
 
 	private String issueKubeCommand(String cmd) {
+		// Develop and test in OKD envs
 		String kubeResponse = "";
 		return kubeResponse;
 	}
