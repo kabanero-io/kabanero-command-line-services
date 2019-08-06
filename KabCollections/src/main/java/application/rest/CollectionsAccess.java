@@ -97,6 +97,7 @@ public class CollectionsAccess {
     @Path("/collections/{colllectionid}")
     public Response removeCollection(@Context final HttpServletRequest request,
                              @PathParam("colllectionid") final String colllectionid) {
+		// need to develop and test in OKD env
 		// kube call to delete collection
 		String response="";
 		JSONObject msg = new JSONObject();
@@ -111,6 +112,7 @@ public class CollectionsAccess {
 	}
 	
 	private String accessGitHub(String func, String identifier) {
+		// waiting on login/logout PAT code from Chun Long's team
 		String gitResponse="";
 		return gitResponse;
 	}
