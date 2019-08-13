@@ -2,11 +2,13 @@ package application.rest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -19,21 +21,26 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.yaml.snakeyaml.Yaml;
+
 import com.ibm.json.java.JSONObject;
 
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import io.kubernetes.client.Configuration;
-import io.kubernetes.client.PodLogs;
-import io.kubernetes.client.apis.AppsV1Api;
 import io.kubernetes.client.apis.CoreV1Api;
-import io.kubernetes.client.models.V1APIResourceList;
 import io.kubernetes.client.models.V1Pod;
 import io.kubernetes.client.models.V1PodList;
 import io.kubernetes.client.util.ClientBuilder;
 
 @Path("/v1")
 public class CollectionsAccess {
+
+	// Only support v4 stream protocol as it was available since k8s 1.4
+	public static final String V4_STREAM_PROTOCOL = "v4.channel.k8s.io";
+	public static final String STREAM_PROTOCOL_HEADER = "Sec-WebSocket-Protocol";
+	public static final String SPDY_3_1 = "SPDY/3.1";
+
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/collections")
@@ -43,8 +50,32 @@ public class CollectionsAccess {
 		// POJO to translate yaml to List
 		String gitResponse = accessGitHub("listCollections", null);
 		JSONObject msg = new JSONObject();
-		msg.put("collections", "collections");
+		try {
+			Map m = readYaml("index.yaml");
+			ArrayList<Map> list = (ArrayList) m.get("stacks");
+			String collNames="";
+			for (Map map :list) {
+				String name=(String) map.get("name");
+				System.out.println(name);
+				collNames=collNames+name+",";
+			}
+			collNames=collNames.substring(0, collNames.length() - 1);
+			msg.put("collections", collNames);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		//msg.put("collections", "collections");
 		return Response.ok(msg).build();
+	}
+	
+	public static void printMap(Map mp) {
+	    Iterator it = mp.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pair = (Map.Entry)it.next();
+	        System.out.println(pair.getKey() + " = " + pair.getValue());
+	        it.remove(); // avoids a ConcurrentModificationException
+	    }
 	}
 
 	@GET
@@ -70,8 +101,8 @@ public class CollectionsAccess {
 	public Response activateCollection(@Context final HttpServletRequest request,
 			@PathParam("colllectionid") final String colllectionid) {
 		// kube call to activate collection
-		
-		ApiClient client=null;
+
+		ApiClient client = null;
 		try {
 			client = ClientBuilder.cluster().build();
 		} catch (IOException e) {
@@ -79,26 +110,24 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 
-	    // set the global default api-client to the in-cluster one from above
-	    Configuration.setDefaultApiClient(client);
+		// set the global default api-client to the in-cluster one from above
+		Configuration.setDefaultApiClient(client);
 
-	    // the CoreV1Api loads default api-client from global configuration.
-	    CoreV1Api api = new CoreV1Api();
-	    
-	    
-	    // invokes the CoreV1Api client
-	    V1PodList list=null;
+		// the CoreV1Api loads default api-client from global configuration.
+		CoreV1Api api = new CoreV1Api();
+
+		// invokes the CoreV1Api client
+		V1PodList list = null;
 		try {
-			list = api.listPodForAllNamespaces(null, null, null, null, null, null, null, null,null);
+			list = api.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null);
 		} catch (ApiException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    for (V1Pod item : list.getItems()) {
-	      System.out.println(item.getMetadata().getName());
-	    }
-		
-		
+		for (V1Pod item : list.getItems()) {
+			System.out.println(item.getMetadata().getName());
+		}
+
 		String response = "collection activated";
 		JSONObject msg = new JSONObject();
 		msg.put("response", list.toString());
@@ -125,25 +154,24 @@ public class CollectionsAccess {
 //		    System.err.println("Exception when calling AppsV1Api#getAPIResources");
 //		    e.printStackTrace();
 //		}
-		
+
 		// create a new array of 2 strings
-        String[] cmdArray = new String[1];
+		String[] cmdArray = new String[1];
 
-        // first argument is the program we want to open
-        cmdArray[0] = "cmd kubectl get pods";
+		// first argument is the program we want to open
+		cmdArray[0] = "cmd kubectl get pods";
 
-        // create a process and execute cmdArray and currect environment
-        Process process=null;
+		// create a process and execute cmdArray and currect environment
+		Process process = null;
 		try {
-			process = Runtime.getRuntime().exec(cmdArray,null);
+			process = Runtime.getRuntime().exec(cmdArray, null);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        BufferedReader reader = new BufferedReader(
-				new InputStreamReader(process.getInputStream()));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-        StringBuilder output = new StringBuilder();
+		StringBuilder output = new StringBuilder();
 		String line;
 		try {
 			while ((line = reader.readLine()) != null) {
@@ -154,7 +182,7 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 
-		int exitVal=0;
+		int exitVal = 0;
 		try {
 			exitVal = process.waitFor();
 		} catch (InterruptedException e) {
@@ -216,4 +244,19 @@ public class CollectionsAccess {
 		String gitResponse = "";
 		return gitResponse;
 	}
+
+	private Map readYaml(String file) {
+		Yaml yaml = new Yaml();
+		Map<String, Object> obj = null;
+		try {
+			InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("WEB-INF/"+file);
+			obj = yaml.load(inputStream);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return obj;
+	}
+	
+	
 }
