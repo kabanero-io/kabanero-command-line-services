@@ -1,16 +1,18 @@
 <server description="Sample Liberty server">
 
   <featureManager>
-      <feature>microprofile-1.2</feature>
-      <feature>jndi-1.0</feature>
-      <feature>jsp-2.3</feature>
-      <feature>servlet-3.1</feature>
-      <feature>managedBeans-1.0</feature>
-      <feature>websocket-1.1</feature>
-  </featureManager>
+        <feature>appSecurity-2.0</feature> 
+        <feature>microProfile-2.0</feature>
+    </featureManager>
+  <httpEndpoint httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint" host="*" />
+  
+      
+  <mpJwt id="kabmpjwt" issuer="https://kabasec.com" keyName="default" />
 
-  <httpEndpoint httpPort="${default.http.port}" httpsPort="${default.https.port}"
-      id="defaultHttpEndpoint" host="*" />
+    <jwtBuilder id="kabsecbuilder" expiresInSeconds="86400" issuer="https://kabasec.com" keyAlias="default" />
+    
+    
+    <keyStore id="defaultKeyStore" password="keyspass"/>	
 
 
 
@@ -19,6 +21,6 @@
 
   <applicationMonitor pollingRate="1000ms"/>
 
-  <webApplication name="KabCollections" location="${app.location}" contextRoot="/"/>
+  
 
 </server>
