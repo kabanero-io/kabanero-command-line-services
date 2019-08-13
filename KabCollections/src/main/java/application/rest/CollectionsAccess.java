@@ -1,5 +1,8 @@
 package application.rest;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +20,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.ibm.json.java.JSONObject;
+
+import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.ApiException;
+import io.kubernetes.client.Configuration;
+import io.kubernetes.client.PodLogs;
+import io.kubernetes.client.apis.AppsV1Api;
+import io.kubernetes.client.apis.CoreV1Api;
+import io.kubernetes.client.models.V1APIResourceList;
+import io.kubernetes.client.models.V1Pod;
+import io.kubernetes.client.models.V1PodList;
+import io.kubernetes.client.util.ClientBuilder;
 
 @Path("/v1")
 public class CollectionsAccess {
@@ -56,9 +70,38 @@ public class CollectionsAccess {
 	public Response activateCollection(@Context final HttpServletRequest request,
 			@PathParam("colllectionid") final String colllectionid) {
 		// kube call to activate collection
-		String response = "";
+		
+		ApiClient client=null;
+		try {
+			client = ClientBuilder.cluster().build();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	    // set the global default api-client to the in-cluster one from above
+	    Configuration.setDefaultApiClient(client);
+
+	    // the CoreV1Api loads default api-client from global configuration.
+	    CoreV1Api api = new CoreV1Api();
+	    
+	    
+	    // invokes the CoreV1Api client
+	    V1PodList list=null;
+		try {
+			list = api.listPodForAllNamespaces(null, null, null, null, null, null, null, null,null);
+		} catch (ApiException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    for (V1Pod item : list.getItems()) {
+	      System.out.println(item.getMetadata().getName());
+	    }
+		
+		
+		String response = "collection activated";
 		JSONObject msg = new JSONObject();
-		msg.put("response", response);
+		msg.put("response", list.toString());
 		return Response.ok(msg).build();
 
 	}
@@ -70,9 +113,65 @@ public class CollectionsAccess {
 	public Response deActivateCollection(@Context final HttpServletRequest request,
 			@PathParam("colllectionid") final String colllectionid) {
 		// kube call to deactivate collection
-		String response = "";
+//		ApiClient defaultClient = Configuration.getDefaultApiClient();
+//
+//		String response="";
+//		AppsV1Api apiInstance = new AppsV1Api();
+//		try {
+//		    V1APIResourceList result = apiInstance.getAPIResources();
+//		    response=result.toString();
+//		    System.out.println(result);
+//		} catch (ApiException e) {
+//		    System.err.println("Exception when calling AppsV1Api#getAPIResources");
+//		    e.printStackTrace();
+//		}
+		
+		// create a new array of 2 strings
+        String[] cmdArray = new String[1];
+
+        // first argument is the program we want to open
+        cmdArray[0] = "cmd kubectl get pods";
+
+        // create a process and execute cmdArray and currect environment
+        Process process=null;
+		try {
+			process = Runtime.getRuntime().exec(cmdArray,null);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        BufferedReader reader = new BufferedReader(
+				new InputStreamReader(process.getInputStream()));
+
+        StringBuilder output = new StringBuilder();
+		String line;
+		try {
+			while ((line = reader.readLine()) != null) {
+				output.append(line + "\n");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		int exitVal=0;
+		try {
+			exitVal = process.waitFor();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (exitVal == 0) {
+			System.out.println("Success!");
+			System.out.println(output);
+			System.exit(0);
+		} else {
+			System.out.println("Failed!");
+			System.out.println(output);
+			System.exit(12);
+		}
 		JSONObject msg = new JSONObject();
-		msg.put("response", response);
+		msg.put("response", output.toString());
 		return Response.ok(msg).build();
 
 	}
