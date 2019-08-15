@@ -245,8 +245,8 @@ public class CollectionsAccess {
 		//OAuth2 token authentication
 		GitHubClient client = new GitHubClient(URL);
 		//client.setOAuth2Token(getPAT());
-		client.setOAuth2Token("93b592940c320cb9c8a82ba0e53e78bcd0a505b1");
-		//client.setCredentials("davco01a", "yu897237u!w");
+		client.setOAuth2Token("xxxxxxxxxxxxxx");
+		//client.setCredentials("davco01a", "xxxxxxxxxxxx");
 		// first use token service
 	    RepositoryService repoService = new RepositoryService(client);
 	    String fileContent = null, valueDecoded=null;
