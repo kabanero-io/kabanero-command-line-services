@@ -46,6 +46,17 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>kabasec</groupId>
+			<artifactId>kabasec</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+	    <dependency>
+  			<groupId>org.eclipse.mylyn.github</groupId>
+  			<artifactId>org.eclipse.egit.github.core</artifactId>
+  			<version>2.1.5</version>
+		</dependency>
+	   <dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
 			<version>1.21</version>
