@@ -1,0 +1,462 @@
+package application.rest;
+import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.ApiException;
+import io.kubernetes.client.Configuration;
+import io.kubernetes.client.apis.CoreV1Api;
+import io.kubernetes.client.apis.CustomObjectsApi;
+import io.kubernetes.client.util.Config;
+import io.kubernetes.client.models.V1DeleteOptions;
+import io.kubernetes.client.models.V1Secret;
+
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.HttpsURLConnection;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.LinkedTreeMap;
+import com.squareup.okhttp.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/* Kubernetes related Utilities */
+public class KubeUtils {
+    private static final Logger logger = LoggerFactory.getLogger(KubeUtils.class);
+
+    public static String TEKTON_GROUP = "tekton.dev";
+    public static String TEKTON_VERSION = "v1alpha1";
+    public static String TEKTON_PIPELINE_RESOURCE_PLURAL = "pipelineresources";
+    public static String TEKTON_PIPELINE_RUN_PLURAL = "pipelineruns";
+
+    /* Note: DO NOT change the time unit. This is being used in WatchResources.java */
+    public static int DEFAULT_READ_TIMEOUT = 60;
+    public static TimeUnit DEFAULT_READ_TIMEOUT_UNIT = TimeUnit.SECONDS;
+    
+
+    public static int MAX_LABEL_LENGTH= 63; // max length of a label in Kubernetes
+	public static int MAX_NAME_LENGTH = 253; // max length of a name in Kubernetes
+
+    /* Caclulate cache key for a resource
+       kind: resource kind
+       namesapce: resource namespace
+       name: resource name
+     */
+    public static String cacheKey(String kind, String namespace, String name) {
+        if (namespace == null || "".equals(namespace)) {
+            return kind + "/" + name;
+        } else {
+            return kind + "/" + namespace + "/" + name;
+        }
+    }
+
+    /* Calculate cache key for a resrouce */
+    public static String cacheKey(ResourceInfo resInfo ) {
+        return cacheKey(resInfo.kind, resInfo.namespace, resInfo.name);
+    }
+
+    /* Parsed Kubernetes resource */
+    public static class ResourceInfo {
+         Map resource; // The actual resource
+         String kind;
+         String name; 
+         String namespace;
+         String kubeCellName; // name of corresponding WAS-ND-Cell if this is a WAS-Traditional-App, or name of Liberty-Collective if this is a Libert-App
+         String version; // version of the resource
+    }
+
+
+    /* Parse JSON representtaion into ResourceInfo
+       resource: JSON representation of the resrouce
+     */
+    public static ResourceInfo getResourceInfo(Map resource ) {
+        return getResourceInfo(resource,  null);
+    }
+
+    /* Return a ResourceInfo structure containing information 
+       about a Kube resource. Return null if not all relevant info can be found
+       If kind is specified, use the specified kind when kind is
+       not present is the resoruce. This is needed when
+       the resource in the Map is not expected to contain kind (for example,
+       resources returned from list operation from Kube).
+     */
+    public static ResourceInfo getResourceInfo(Map resource, String kind) {
+
+        Object kindObj = resource.get("kind");
+        if (kindObj == null ) {
+             if ( kind == null) 
+                 return null;
+        } else {
+            kind = (String)kindObj;
+        }
+
+        Object metadataObj = resource.get("metadata");
+        if (metadataObj == null ) {
+             return null;
+        }
+        if ( ! (metadataObj instanceof Map)) {
+           return null;
+        }
+        Map metadata = (Map)metadataObj;
+
+        String kubeCellName = null;
+        Object annotationsObj = metadata.get("annotations");
+        if ( annotationsObj != null) {
+             Map annotations = (Map)annotationsObj;
+             Object kubeCellNameObj = annotations.get("prism.platform.name");
+             if ( kubeCellNameObj != null) {
+                 kubeCellName = (String)kubeCellNameObj;
+             }
+        }
+
+        Object nameObj = metadata.get("name");
+        if ( nameObj == null) {
+            return null;
+        }
+        String name = (String)nameObj;
+
+        String namespace = (String) metadata.get("namespace");
+
+
+        Object versionObj = metadata.get("resourceVersion");
+        if ( versionObj == null) {
+            return null;
+        }
+        String version = (String)versionObj;
+
+        ResourceInfo resInfo = new ResourceInfo();
+        resInfo.resource = resource;
+        resInfo.kind = kind;
+        resInfo.name = name;
+        resInfo.namespace = namespace;
+        resInfo.kubeCellName = kubeCellName;
+        resInfo.version = version;
+
+        return resInfo;
+    }
+
+     // get resource version from a resource
+    public static String getResourceVersion(Map resource) {
+        if (resource == null) return null;
+
+
+        Object metadataObj = resource.get("metadata");
+        if (metadataObj == null ) {
+             return null;
+        }
+        if ( ! (metadataObj instanceof Map)) {
+           return null;
+        }
+        Map metadata = (Map)metadataObj;
+
+        Object versionObj = metadata.get("resourceVersion");
+        if ( versionObj == null) {
+            return null;
+        }
+        return (String)versionObj;
+
+    }
+
+
+
+    private static void trustAllCerts(ApiClient apiClient) throws Exception {
+            TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+                public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+                public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+            } };
+    
+            SSLContext sc = SSLContext.getInstance("TLSv1.2");
+
+            // use the same key manager as kube client
+            sc.init(apiClient.getKeyManagers(), trustAllCerts, new SecureRandom());
+            // needed for SOAP connector
+            SSLContext.setDefault(sc);
+
+            // needed for Kube client
+            apiClient.getHttpClient().setSslSocketFactory(sc.getSocketFactory());
+            
+            ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS).allEnabledCipherSuites().build();
+            apiClient.getHttpClient().setConnectionSpecs(Collections.singletonList((spec)));
+    }
+
+
+    private static ApiClient apiClient;
+    public static ApiClient getApiClient() throws Exception {
+        synchronized(ApiClient.class) {
+            if ( apiClient == null ) {
+                apiClient = Config.defaultClient();
+                apiClient.getHttpClient().setReadTimeout(DEFAULT_READ_TIMEOUT, DEFAULT_READ_TIMEOUT_UNIT);
+                trustAllCerts(apiClient);
+                Configuration.setDefaultApiClient(apiClient);
+            }
+            return apiClient;
+        }
+    }
+
+
+    /* @Return true if character is valid for a domain name */
+    private static boolean isValidChar(char ch) {
+         return (ch == '.' || ch == '-' || 
+                   (ch >= 'a' && ch <= 'z') ||
+                   (ch >= '0' && ch <= '9'));
+    }
+
+
+    // Convert string to domain name with up to MAX_NAME_LENGTH 
+    public static String toDomainName(String name) {
+        return toDomainName(name, MAX_NAME_LENGTH);
+    }
+
+    /* Convert a name to domain name format.
+       The name must 
+       - Start with [a-z0-9]. If not, "0" is prepended.
+       - lower case. If not, lower case is used.
+       - contain only '.', '-', and [a-z0-9]. If not, "." is used insteaad.
+       - end with alpha numeric characters
+       - can't have consecutive '.'.  Consecutivie ".." is substituted with ".".
+    */
+    public static String toDomainName(String name, int maxLength) {
+         name = name.toLowerCase();
+         char [] chars = name.toCharArray();
+         StringBuffer ret = new StringBuffer();
+         int len = chars.length;
+         if ( len > maxLength)
+             len = maxLength;
+         for (int i=0; i < len; i++) {
+             char ch = chars[i];
+             if (i == 0 ) {
+                 // first character must be [a-z0-9]
+                 if ( (ch >= 'a' && ch <= 'z') || 
+                     (ch >= '0' && ch <= '9')){
+                     ret.append(ch);
+                 } else {
+                     ret.append('0');
+                     if (isValidChar(ch)) {
+                          ret.append(ch);
+                      } else {
+                          ret.append('.');
+                      }
+                 }
+              } else if ( i == len -1) {
+                  // laast char must be alphanumeric
+                 if ( (ch >= 'a' && ch <= 'z') || 
+                     (ch >= '0' && ch <= '9')){
+                     ret.append(ch);
+                 } else {
+                     // last char is not alphanumeric
+                     if ( isValidChar(ch) ){
+                         // still a valid domain name.
+                         if ( i < maxLength -1){
+                             // room for 2 more characters
+                             ret.append(ch);
+                             ret.append('0');
+                         } else {
+                             ret.append('0');
+                         }
+                     } else {
+                         // not valid 
+                         ret.append('0');
+                     }
+                 }
+              } else {
+                  if (isValidChar(ch)) {
+                      ret.append(ch);
+                  } else {
+                      ret.append('.');
+                  }
+               } 
+          }
+
+         // change all ".." to ".
+         String retStr = ret.toString().replaceAll("\\.\\.", ".");
+
+         if ( retStr.length() == 0 ) {
+             // can only happen if there is no alphnumeric in the incoming string
+             retStr = "no-alpha-numeric"  ;
+         }
+         return retStr;
+    }
+
+    private static boolean isValidLabelChar(char ch) {
+         return (ch == '.' || ch == '-' || (ch == '_') ||
+                   (ch >= 'a' && ch <= 'z') ||
+		   (ch >= 'A' && ch <= 'Z') ||
+                   (ch >= '0' && ch <= '9'));
+    }
+
+    /* Convert a name to a label 
+       The name must 
+       - Start with [a-z0-9A-Z]. If not, "0" is prepended.
+       - End with [a-z0-9A-Z]. If not, "0" is appended
+       - Intermediate characters can only be: [a-z0-9A-Z] or '_', '-', and '.' If not, '.' is used.
+	   - be maximum MAX_LABEL_LENGTH characters long 
+    */
+    public static String toLabelName(String name) {
+         char [] chars = name.toCharArray();
+         StringBuffer ret = new StringBuffer();
+         int len = chars.length;
+         if ( len >= MAX_LABEL_LENGTH)
+             len = MAX_LABEL_LENGTH;
+         for (int i= 0; i < len; i++) {
+             char ch = chars[i];
+             if (i == 0 ) {
+                 // first character must be [a-z0-9]
+                if ( (ch >= 'a' && ch <= 'z') || 
+                     (ch >= 'A' && ch <= 'Z') ||
+                     (ch >= '0' && ch <= '9')){
+                    ret.append(ch);
+                } else {
+                    ret.append('0');
+                    if (isValidLabelChar(ch)) {
+                         ret.append(ch);
+                     } else {
+                         ret.append('.');
+                     }
+                }
+             } else if ( i == len-1) {
+                 // last char must be [a-z0-9A-Z]
+                 if ( ( (ch >= 'a' && ch <= 'z') || 
+                     (ch >= 'A' && ch <= 'Z') ||
+                     (ch >= '0' && ch <= '9'))){
+                     // last char is valid
+                     ret.append(ch);
+                 } else { 
+                    if ( isValidLabelChar(ch)) {
+                        // last char is still a valid label character
+                        if ( i < MAX_LABEL_LENGTH -1 ) {
+                            // there is space for 2 chars
+                            ret.append(ch);
+                            ret.append('0');
+                        } else {
+                            // no space for two characters.
+                            // substitute with a valid character
+                            ret.append('0');
+                        }
+                    } else {
+                        // last char is not a valid label character
+                        ret.append('0');
+                    }
+                 }
+             } else {
+                 if (isValidLabelChar(ch)) {
+                     ret.append(ch);
+                 } else {
+                     ret.append('.');
+                 }
+              }
+         }
+
+         return ret.toString();
+    }
+
+    /* Delete a resource in Kubernetes
+       client: Client to Kubernetes
+       namespace: namespace of resource
+       name: name of resource
+       group: gruop of resource
+       version: version of resource
+       plural: plural of resource
+     */
+    public static void deleteKubeResource(ApiClient client, String namespace, String name,
+            String group, String version, String plural) throws Exception {
+    logger.info("Deleteing Resource {}/{}", namespace, name);
+    try {
+        CustomObjectsApi customApi = new CustomObjectsApi(client);
+        V1DeleteOptions body = new V1DeleteOptions();
+        customApi.deleteNamespacedCustomObject(group, version, namespace, plural, name, body, null, null, null);
+    } catch(ApiException ex) {
+        int code = ex.getCode();
+        if ( code == 404) {
+             // OK, object no longer exists
+             return;
+        }
+        logger.error("Unable to delete resource", ex);
+        throw ex;
+    }
+    }
+
+    /* Create a resource
+      apiClient: client to Kubernetes
+      group: gorup of resource
+      version; version of resource
+      plural: plural of resource
+      namespace: namespace of resource
+      jsonBody: body of resource
+      name: name of resource
+     */
+    public static void createResource(ApiClient apiClient, String group, String version, String plural, String namespace, String jsonBody, String name) throws Exception {
+       logger.info("Creating resource {}/{}/{} {}/{}:", group, version, plural, namespace,name);
+       JsonParser parser= new JsonParser();
+       JsonElement element= parser.parse(jsonBody);
+       JsonObject json= element.getAsJsonObject();
+       CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
+       customApi.createNamespacedCustomObject(group, version, namespace, plural, json, "false");
+    }
+
+    /* Set status of resource
+       apiClient: client to Kubernetes
+       group: group of resource
+       version: version of resource
+       namespace: namespace of resource
+       name: name of resource
+       jsonBody: JSON body of the status
+     */
+    public static void setResourceStatus(ApiClient apiClient, String group, String version, String plural, String namespace, String name, String jsonBody) throws ApiException {
+       logger.info("Setting resource status {}/{}/{}/{}/{}", group, version, plural, namespace, name);
+
+       JsonParser parser= new JsonParser();
+       JsonElement element= parser.parse(jsonBody);
+       JsonObject json= element.getAsJsonObject();
+       CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
+       customApi.patchNamespacedCustomObjectStatus(group, version, namespace, plural, name, json);
+    }
+    
+    public static String listResources(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
+        logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
+        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources(apiClient,group, version, plural, namespace);
+        List<Map> list=(List)map.get("items");
+        String collections="";
+        for (Map m:list) {
+        	Map metadata = (Map) m.get("metadata");
+        	String name = (String) metadata.get("name");
+        	Map spec = (Map) m.get("spec");
+        	String collectionVersion = (String) spec.get("version");
+        	String element = "( "+name+" , "+collectionVersion+" ) ";
+			collections = collections + element + ",";
+        }
+        collections = collections.substring(0, collections.length() - 1);
+        System.out.println("kab collection="+collections);
+        
+        return collections;
+     }
+    
+    public static Map mapResources(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
+        logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
+        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
+        Object obj = customApi.listNamespacedCustomObject(group, version, namespace, plural, "true", "", "", 60, false);
+        System.out.println("current kab collections="+obj.toString());
+        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) obj;
+        return map;
+     }
+    
+
+
+}
