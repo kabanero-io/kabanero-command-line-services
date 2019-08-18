@@ -20,7 +20,14 @@
   <applicationManager autoExpand="true"/>
 
   <applicationMonitor pollingRate="1000ms"/>
-
+  <webApplication id="KabCollections" location="KabCollections-1.0-SNAPSHOT.war" name="KabCollections">
+    	<application-bnd>
+          <security-role name="administrator">
+              <special-subject type="ALL_AUTHENTICATED_USERS"/>
+             <group name="test-roles" access-id="group:https://kabasec.com/test-roles@kabanero-io"/>
+         </security-role>
+       </application-bnd>
+    </webApplication>
   
 
 </server>

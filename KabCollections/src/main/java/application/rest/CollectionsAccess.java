@@ -1,14 +1,15 @@
 package application.rest;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -30,140 +31,173 @@ import org.yaml.snakeyaml.Yaml;
 
 import com.ibm.json.java.JSONObject;
 
+//import io.kabanero.event.KubeUtils;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
-import io.kubernetes.client.Configuration;
-import io.kubernetes.client.apis.CoreV1Api;
-import io.kubernetes.client.models.V1Pod;
-import io.kubernetes.client.models.V1PodList;
-import io.kubernetes.client.util.ClientBuilder;
 import kabasec.PATHelper;
 
+//@RolesAllowed("test-roles@kabanero-io")
 @Path("/v1")
 public class CollectionsAccess {
 
-	// Only support v4 stream protocol as it was available since k8s 1.4
-	private static final String MEDIA_TYPE = "application/vnd.kubernetes.protobuf";
-
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/collections")
-	public Response collections(@Context final HttpServletRequest request) {
-		// List collections=null;
-		// access git hub and read index.yaml (as per Ian Partridge and format response)
-		// POJO to translate yaml to List
+	private ArrayList<Map> getMasterCollectionsList() {
 		String url="api.github.com";
 		String repo = "kabanero-command-line-services";
-		//String gitResponse = getGithubFile("davco01a", url, repo, "README.md");
-		String gitResponse = getGithubFile("davco01a", url, repo, "index.yaml");
-		
+		String repoOwnerID="kabanero-io";
+		String gitResponse = getGithubFile(repoOwnerID, url, repo, "index.yaml");
 		 
-		JSONObject msg = new JSONObject();
+		
+		ArrayList<Map> list = null;
 		try {
-			Map m = readYaml("index.yaml");
-			ArrayList<Map> list = (ArrayList) m.get("stacks");
-			String collNames = "";
-			for (Map map : list) {
-				String name = (String) map.get("name");
-				System.out.println(name);
-				collNames = collNames + name + ",";
-			}
-			collNames = collNames.substring(0, collNames.length() - 1);
-			msg.put("collections", collNames);
+			Map m = readYaml(gitResponse);
+			list = (ArrayList<Map>) m.get("stacks");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		// msg.put("collections", "collections");
-		return Response.ok(msg).build();
-	}
-
-	public static void printMap(Map mp) {
-		Iterator it = mp.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry pair = (Map.Entry) it.next();
-			System.out.println(pair.getKey() + " = " + pair.getValue());
-			it.remove(); // avoids a ConcurrentModificationException
-		}
+		return list;
 	}
 	
-	private String getUser(HttpServletRequest request) {
-		String user=null;
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/list")
+	public Response listCollections(@Context final HttpServletRequest request) {
+		JSONObject msg=new JSONObject();
 		try {
-			user =request.getUserPrincipal().getName();
-		}
-		catch (Exception e) {
+			ArrayList<Map> masterCollections = (ArrayList<Map>) getMasterCollectionsList();
+			String collections = CollectionsUtils.changeCollectionIntoStringList(masterCollections);
+			msg.put("master collection", collections);
+						
+			// make call to kabanero to get current collection
+			ApiClient apiClient = KubeUtils.getApiClient();
+			String group="kabanero.io";
+			String version="v1alpha1";
+			String plural="collections";
+			String namespace="kabanero";
+			msg.put("kabanero collection", KubeUtils.listResources(apiClient, group, version, plural, namespace));
+			Map fromKabanero = null;	
+			try {
+				fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
+			} catch (ApiException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			List<Map> kabList=(List)fromKabanero.get("items");
+			try {
+				List<Map> newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
+				List<Map> deleletedCollections = (List<Map>) CollectionsUtils.filterDeletedCollections(masterCollections, kabList);
+				List<Map> versionChangeCollections = (List<Map>) CollectionsUtils.filterVersionChanges(masterCollections, kabList);
+				msg.put("new collections", newCollections.toString());
+				msg.put("obsolete collections", deleletedCollections.toString());
+				msg.put("version change collections", versionChangeCollections.toString());
+			} catch (Exception e) {
+				System.out.println("exception cause: "+e.getCause());
+				System.out.println("exception message: "+e.getMessage());
+				e.printStackTrace();
+			}
+			
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return user;
+		return Response.ok(msg).build();
 	}
 	
-	private String getPAT() {
-		return (new PATHelper()).extractGithubAccessTokenFromSubject();
-	}
-
-//	@GET
-//	@Produces(MediaType.APPLICATION_JSON)
-//	@Path("/collections/{colllectionid}")
-//	public Response readCollection(@Context final HttpServletRequest request,
-//			@PathParam("colllectionid") final String colllectionid) {
-//		JSONObject collection = null;
-//		// access git hub and read collection.yaml (as per Ian Partridge and format
-//		// response
-//		String gitResponse = accessGitHub("listCollection", colllectionid);
-//		// POJO to format collection.yaml to List
-//		JSONObject msg = new JSONObject();
-//		msg.put("collection", "collection");
-//		return Response.ok(msg).build();
-//
+	
+//	KubeRestClient krc = new KubeRestClient();
+//	String cmd="";
+//	try {
+//		krc.post(cmd);
+//	} catch (ApiException | IOException e1) {
+//		// TODO Auto-generated catch block
+//		e1.printStackTrace();
 //	}
+//
+//	ApiClient client = null;
+//	try {
+//		client = ClientBuilder.cluster().build();
+//	} catch (IOException e) {
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//	}
+//
+//	// set the global default api-client to the in-cluster one from above
+//	Configuration.setDefaultApiClient(client);
+//
+//	// the CoreV1Api loads default api-client from global configuration.
+//	CoreV1Api api = new CoreV1Api();
+//
+//	// invokes the CoreV1Api client
+//	V1PodList list = null;
+//	try {
+//		list = api.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null);
+//	} catch (ApiException e) {
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//	}
+//	for (V1Pod item : list.getItems()) {
+//		System.out.println(item.getMetadata().getName());
+//	}
+//
+//	String response = "collection activated";
+//	JSONObject msg = new JSONObject();
+//	msg.put("response", list.toString());
+//	return Response.ok(msg).build();
 
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/collections/{colllectionid}/activate")
-	public Response activateCollection(@Context final HttpServletRequest request,
-			@PathParam("colllectionid") final String colllectionid) {
-		// kube call to activate collection
-		
-		KubeRestClient krc = new KubeRestClient();
-		String cmd="";
+	@Path("/refresh")
+	public Response refreshCollections(@Context final HttpServletRequest request) {
+		// kube call to refresh collection
+		ApiClient apiClient=null;
 		try {
-			krc.issueKubeCommand(cmd);
-		} catch (ApiException | IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
-		ApiClient client = null;
-		try {
-			client = ClientBuilder.cluster().build();
-		} catch (IOException e) {
+			apiClient = KubeUtils.getApiClient();
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		// set the global default api-client to the in-cluster one from above
-		Configuration.setDefaultApiClient(client);
-
-		// the CoreV1Api loads default api-client from global configuration.
-		CoreV1Api api = new CoreV1Api();
-
-		// invokes the CoreV1Api client
-		V1PodList list = null;
+		String group="kabanero.io";
+		String version="v1alpha1";
+		String plural="collections";
+		String namespace="kabanero";
+		Map fromKabanero = null;	
 		try {
-			list = api.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null);
+			fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
 		} catch (ApiException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for (V1Pod item : list.getItems()) {
-			System.out.println(item.getMetadata().getName());
-		}
-
-		String response = "collection activated";
+		
+		List<Map> newCollections = null;
+		List<Map> deleletedCollections = null;
+		List<Map> versionChangeCollections = null;
 		JSONObject msg = new JSONObject();
-		msg.put("response", list.toString());
+		try {
+			System.out.println("<1>");
+			List<Map> kabList=(List)fromKabanero.get("items");
+			System.out.println("<2>");
+			List<Map> masterCollections=getMasterCollectionsList();
+			System.out.println("<3>");
+			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
+			System.out.println("*** new collections="+newCollections);
+			System.out.println(" ");
+			deleletedCollections = (List<Map>) CollectionsUtils.filterDeletedCollections(masterCollections, kabList);
+			System.out.println("*** deleted collections="+deleletedCollections);
+			System.out.println(" ");
+			versionChangeCollections = (List<Map>) CollectionsUtils.filterVersionChanges(masterCollections, kabList);
+			System.out.println("*** version Change Collections="+versionChangeCollections);
+			
+			msg.put("new collections", newCollections.toString());
+			msg.put("deleted collections", deleletedCollections.toString());
+			msg.put("version change collections", versionChangeCollections.toString());
+		} catch (Exception e) {
+			System.out.println("exception cause: "+e.getCause());
+			System.out.println("exception message: "+e.getMessage());
+			e.printStackTrace();
+		}
+		
 		return Response.ok(msg).build();
+		
 
 	}
 
@@ -173,65 +207,10 @@ public class CollectionsAccess {
 	@Path("/collections/{colllectionid}/deactivate")
 	public Response deActivateCollection(@Context final HttpServletRequest request,
 			@PathParam("colllectionid") final String colllectionid) {
-		// kube call to deactivate collection
-//		ApiClient defaultClient = Configuration.getDefaultApiClient();
-//
-//		String response="";
-//		AppsV1Api apiInstance = new AppsV1Api();
-//		try {
-//		    V1APIResourceList result = apiInstance.getAPIResources();
-//		    response=result.toString();
-//		    System.out.println(result);
-//		} catch (ApiException e) {
-//		    System.err.println("Exception when calling AppsV1Api#getAPIResources");
-//		    e.printStackTrace();
-//		}
-
-		// create a new array of 2 strings
-		String[] cmdArray = new String[1];
-
-		// first argument is the program we want to open
-		cmdArray[0] = "cmd kubectl get pods";
-
-		// create a process and execute cmdArray and currect environment
-		Process process = null;
-		try {
-			process = Runtime.getRuntime().exec(cmdArray, null);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-		StringBuilder output = new StringBuilder();
-		String line;
-		try {
-			while ((line = reader.readLine()) != null) {
-				output.append(line + "\n");
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		int exitVal = 0;
-		try {
-			exitVal = process.waitFor();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (exitVal == 0) {
-			System.out.println("Success!");
-			System.out.println(output);
-			System.exit(0);
-		} else {
-			System.out.println("Failed!");
-			System.out.println(output);
-			System.exit(12);
-		}
+		
+		
 		JSONObject msg = new JSONObject();
-		msg.put("response", output.toString());
+		msg.put("response", "");
 		return Response.ok(msg).build();
 
 	}
@@ -241,17 +220,17 @@ public class CollectionsAccess {
 	
 
 	private String getGithubFile(String user, String URL, String REPONAME, String FILENAME) {
-		//user="ralanlittle";
 		//OAuth2 token authentication
 		GitHubClient client = new GitHubClient(URL);
-		//client.setOAuth2Token(getPAT());
-		client.setOAuth2Token("xxxxxxxxxxxxxx");
-		//client.setCredentials("davco01a", "xxxxxxxxxxxx");
-		// first use token service
+//		String PAT=getPAT();
+//		System.out.println("PAT="+PAT);
+//		client.setOAuth2Token(getPAT());
+		//client.setOAuth2Token("xxxxxxxxx");
+		//client.setCredentials("xxxxxx", "xxxxxxxxxxxx");
+		
 	    RepositoryService repoService = new RepositoryService(client);
 	    String fileContent = null, valueDecoded=null;
 	    try {
-//	    	System.out.println(repoService.getRepository(user, REPONAME));
 	        Repository repo = repoService.getRepository(user, REPONAME);
 
 	        // now contents service
@@ -269,16 +248,49 @@ public class CollectionsAccess {
 		return valueDecoded;
 	}
 
-	private Map readYaml(String file) {
+	private Map readYaml(String response) {
 		Yaml yaml = new Yaml();
 		Map<String, Object> obj = null;
 		try {
-			InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("WEB-INF/" + file);
+			InputStream inputStream = new ByteArrayInputStream(response.getBytes(StandardCharsets.UTF_8));
+			//InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("WEB-INF/" + file);
 			obj = yaml.load(inputStream);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return obj;
+	}
+	
+	public static void printMap(Map mp) {
+		Iterator it = mp.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry pair = (Map.Entry) it.next();
+			System.out.println(pair.getKey() + " = " + pair.getValue());
+			it.remove(); // avoids a ConcurrentModificationException
+		}
+	}
+	
+//	private String getUser(HttpServletRequest request) {
+//		String user=null;
+//		try {
+//			user =request.getUserPrincipal().getName();
+//		}
+//		catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return user;
+//	}
+	
+	private String getPAT() {
+		String PAT=null;
+		try {
+			PAT=(new PATHelper()).extractGithubAccessTokenFromSubject();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return PAT;
 	}
 
 }
