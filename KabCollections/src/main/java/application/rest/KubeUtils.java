@@ -30,6 +30,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
+import com.ibm.json.java.JSONObject;
 import com.squareup.okhttp.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -402,14 +403,17 @@ public class KubeUtils {
       jsonBody: body of resource
       name: name of resource
      */
-    public static void createResource(ApiClient apiClient, String group, String version, String plural, String namespace, String jsonBody, String name) throws Exception {
-       logger.info("Creating resource {}/{}/{} {}/{}:", group, version, plural, namespace,name);
-       JsonParser parser= new JsonParser();
-       JsonElement element= parser.parse(jsonBody);
-       JsonObject json= element.getAsJsonObject();
+    public static void createResource(ApiClient apiClient, String group, String version, String plural, String namespace, JSONObject jsonBody) throws Exception {
+       logger.info("Creating resource {}/{}/{} {}/{}:", group, version, plural, namespace);
        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
-       customApi.createNamespacedCustomObject(group, version, namespace, plural, json, "false");
+       customApi.createNamespacedCustomObject(group, version, namespace, plural, jsonBody, "false");
     }
+    
+    public static void updateResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name, JSONObject jsonBody) throws Exception {
+        logger.info("updating resource {}/{}/{} {}/{}:", group, version, plural, namespace, name);
+        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
+        customApi.replaceNamespacedCustomObject(group, version, namespace, plural, name, jsonBody);
+     }
 
     /* Set status of resource
        apiClient: client to Kubernetes
@@ -419,14 +423,10 @@ public class KubeUtils {
        name: name of resource
        jsonBody: JSON body of the status
      */
-    public static void setResourceStatus(ApiClient apiClient, String group, String version, String plural, String namespace, String name, String jsonBody) throws ApiException {
+    public static void setResourceStatus(ApiClient apiClient, String group, String version, String plural, String namespace, String name, JSONObject jsonBody) throws ApiException {
        logger.info("Setting resource status {}/{}/{}/{}/{}", group, version, plural, namespace, name);
-
-       JsonParser parser= new JsonParser();
-       JsonElement element= parser.parse(jsonBody);
-       JsonObject json= element.getAsJsonObject();
        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
-       customApi.patchNamespacedCustomObjectStatus(group, version, namespace, plural, name, json);
+       customApi.patchNamespacedCustomObjectStatus(group, version, namespace, plural, name, jsonBody);
     }
     
     public static String listResources(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
