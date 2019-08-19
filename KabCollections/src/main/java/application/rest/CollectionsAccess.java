@@ -188,7 +188,7 @@ public class CollectionsAccess {
 			System.out.println("*** version Change Collections="+versionChangeCollections);
 			
 			msg.put("new collections", newCollections.toString());
-			msg.put("deleted collections", deleletedCollections.toString());
+			msg.put("collections to delete", deleletedCollections.toString());
 			msg.put("version change collections", versionChangeCollections.toString());
 		} catch (Exception e) {
 			System.out.println("exception cause: "+e.getCause());
@@ -196,23 +196,81 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 		
-		return Response.ok(msg).build();
+		// iterate over new collections and activate
+		try {
+			for (Map m:newCollections) {
+				try {
+					KubeUtils.createResource(apiClient, group, version, plural, namespace, makeJSONBody(m,namespace));
+					m.put("status", "activated");
+				} catch (Exception e) {
+					System.out.println("exception cause: "+e.getCause());
+					System.out.println("exception message: "+e.getMessage());
+					e.printStackTrace();
+					m.put("status", "activation failed, exception message="+e.getMessage());
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("exception cause: "+e.getCause());
+			System.out.println("exception message: "+e.getMessage());
+			e.printStackTrace();
+		}
 		
-
+		// iterate over version change collections and update
+		try {
+			for (Map m : versionChangeCollections) {
+				try {
+					KubeUtils.setResourceStatus(apiClient,group, version, plural, namespace, m.get("name").toString(), makeJSONBody(m,namespace));
+					m.put("status", "version change completed");
+				} catch (Exception e) {
+					System.out.println("exception cause: "+e.getCause());
+					System.out.println("exception message: "+e.getMessage());
+					e.printStackTrace();
+					m.put("status", "version change failed, exception message="+e.getMessage());
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("exception cause: " + e.getCause());
+			System.out.println("exception message: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return Response.ok(msg).build();
 	}
-
+	
+	private JSONObject makeJSONBody(Map m, String namespace) {
+		JSONObject jo = new JSONObject();
+		jo.put("apiVersion", "kabanero.io/v1alpha1");
+		jo.put("kind", "Collection");
+		JSONObject metadata = new JSONObject();
+		metadata.put("name", m.get("name").toString());
+		metadata.put("namespace", namespace);
+		jo.put("metadata", metadata);
+		JSONObject spec = new JSONObject();
+		spec.put("version", m.get("version").toString());
+		jo.put("spec", spec);
+		return jo;
+	}
+	
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/collections/{colllectionid}/deactivate")
+	@Path("/deactivate/{name}/{version}")
 	public Response deActivateCollection(@Context final HttpServletRequest request,
-			@PathParam("colllectionid") final String colllectionid) {
-		
-		
+			@PathParam("name") final String name) throws Exception {
+		// make call to kabanero to delete collection
+		ApiClient apiClient = KubeUtils.getApiClient();
+		String group="kabanero.io";
+		String version="v1alpha1";
+		String plural="collections";
+		String namespace="kabanero";
 		JSONObject msg = new JSONObject();
-		msg.put("response", "");
+		try {
+			KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, plural);
+			msg.put("status", "Collection name: "+name+" deactivated");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			msg.put("status", "Collection name: "+name+" failed to deactivate, exception message: "+e.getMessage());
+		}
 		return Response.ok(msg).build();
-
 	}
 
 	
