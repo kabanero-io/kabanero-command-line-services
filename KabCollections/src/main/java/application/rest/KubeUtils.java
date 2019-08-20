@@ -437,10 +437,16 @@ public class KubeUtils {
         for (Map m:list) {
         	Map metadata = (Map) m.get("metadata");
         	String name = (String) metadata.get("name");
+        	Map annotations = (Map) metadata.get("annotations");
+        	String originalName = "not set";
+        	if (annotations!=null) {
+        		originalName = (String) annotations.get("collexion_id");
+        	}
         	Map spec = (Map) m.get("spec");
         	String collectionVersion = (String) spec.get("version");
         	HashMap outMap = new HashMap();
         	outMap.put("name",name);
+        	outMap.put("originalName",originalName);
         	outMap.put("version", collectionVersion);
         	aList.add(outMap);
         } 

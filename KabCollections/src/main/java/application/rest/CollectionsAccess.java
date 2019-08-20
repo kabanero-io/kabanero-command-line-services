@@ -53,7 +53,7 @@ public class CollectionsAccess {
 		String url = "api.github.com";
 		String repo = "kabanero-command-line-services";
 		String repoOwnerID = "kabanero-io";
-		String gitResponse = getGithubFile(repoOwnerID, url, repo, "index.yaml");
+		String gitResponse = getGithubFile(repoOwnerID, url, repo, "kabanero.yaml");
 
 		ArrayList<Map> list = null;
 		try {
