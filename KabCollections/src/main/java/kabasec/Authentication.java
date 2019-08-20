@@ -23,7 +23,7 @@ public class Authentication {
         }
         String jwt = null;
         try {
-            String encryptedPat = (new PATHelper()).encrypt(creds.getPasswordOrPat());
+            String encryptedPat = new PATHelper().encrypt(creds.getPasswordOrPat());
             jwt = buildJwt(id, encryptedPat, teams);
         } catch (Exception e) {
             throw new KabaneroSecurityException("An error occurred while building a JWT for user [" + creds.getId() + "]. " + e, e);

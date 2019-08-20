@@ -403,7 +403,7 @@ public class KubeUtils {
       jsonBody: body of resource
       name: name of resource
      */
-    public static void createResource(ApiClient apiClient, String group, String version, String plural, String namespace, JSONObject jsonBody) throws Exception {
+    public static void createResource(ApiClient apiClient, String group, String version, String plural, String namespace, JsonObject jsonBody) throws Exception {
        logger.info("Creating resource {}/{}/{} {}/{}:", group, version, plural, namespace);
        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
        customApi.createNamespacedCustomObject(group, version, namespace, plural, jsonBody, "false");
@@ -423,29 +423,28 @@ public class KubeUtils {
        name: name of resource
        jsonBody: JSON body of the status
      */
-    public static void setResourceStatus(ApiClient apiClient, String group, String version, String plural, String namespace, String name, JSONObject jsonBody) throws ApiException {
+    public static void setResourceStatus(ApiClient apiClient, String group, String version, String plural, String namespace, String name, JsonObject jsonBody) throws ApiException {
        logger.info("Setting resource status {}/{}/{}/{}/{}", group, version, plural, namespace, name);
        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
        customApi.patchNamespacedCustomObjectStatus(group, version, namespace, plural, name, jsonBody);
     }
     
-    public static String listResources(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
+    public static List listResources(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
         logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
         LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources(apiClient,group, version, plural, namespace);
         List<Map> list=(List)map.get("items");
-        String collections="";
+        ArrayList aList = new ArrayList();
         for (Map m:list) {
         	Map metadata = (Map) m.get("metadata");
         	String name = (String) metadata.get("name");
         	Map spec = (Map) m.get("spec");
         	String collectionVersion = (String) spec.get("version");
-        	String element = "( "+name+" , "+collectionVersion+" ) ";
-			collections = collections + element + ",";
-        }
-        collections = collections.substring(0, collections.length() - 1);
-        System.out.println("kab collection="+collections);
-        
-        return collections;
+        	HashMap outMap = new HashMap();
+        	outMap.put("name",name);
+        	outMap.put("version", collectionVersion);
+        	aList.add(outMap);
+        } 
+        return aList;
      }
     
     public static Map mapResources(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {

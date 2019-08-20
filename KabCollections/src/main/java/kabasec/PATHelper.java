@@ -14,6 +14,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.NoSuchElementException;
 import java.util.Set;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
@@ -21,7 +22,6 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.Subject;
 
-import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
@@ -30,17 +30,16 @@ import com.ibm.websphere.security.WSSecurityException;
 /**
  *  Provides methods to AES encrypt and decrypt Github Personal Access Tokens or passwords.
  */
-// TODO: maybe just call passwordutil api instead of re-implementing it.
-public class PATHelper {
+public class PATHelper {   
     private static final String TRANSFORMATION_AES = "AES/CBC/PKCS5Padding";
     static final String AESKEY_PROPERTYNAME = "AESEncryptionKey";
-    static String aesKey = null;
+    private static String aesKey = null;
+    private static EncryptionParms encryptionParams = null;
     
- 
+    
     /**
      * Extract the Json Web Token  (JWT) from the security subject, then  decrypt 
      * the user's Github Personal Access Token from the JWT.
-     * @param  the Subject 
      * @return the PAT or password if available, null otherwise. 
      * 
      */
@@ -64,37 +63,32 @@ public class PATHelper {
         String encryptedPat = j.getClaim(Constants.PAT_JWT_CLAIM);
         if (encryptedPat == null) {
             return result;
-        }
-        System.out.println("** encryptedPat: "+ encryptedPat);
+        }       
         return decrypt(encryptedPat);
     }
     
     /**
      * AES encrypt the input string.
-     * Use an encryption key obtained from the mp-config parameter AESEncryptionKey
-     * If that environment variable / system prop / meta-inf prop is undefined,
-     * then generate a random one, which won't survive a server restart. 
-     * 
      * @param pat
      * @return encrypted String
      */
     String encrypt(String pat) {
-        init();
-        return aesEncrypt(pat);
+        //  result = PasswordUtil.encode(pat, ALG);
+        String result = aesEncrypt(pat);
+        // sensitive:System.out.println("** encrypt in: " + pat + " out: "+ result);
+        return result;
     }
     
     /**
-     * AES decrypt the input string. 
-     * Use an encryption key obtained from the mp-config parameter AESEncryptionKey
-     * If that environment variable / system prop / meta-inf prop is undefined,
-     * then generate a random one, which won't survive a server restart. 
-     * 
+     * AES decrypt the input string.
      * @param pat
      * @return decrypted String
      */
     String decrypt(String pat) {
-        init();
-        return aesDecrypt(pat);
+        //result = PasswordUtil.decode(pat);
+        String result = aesDecrypt(pat);
+        //sensitive: System.out.println("** decrypt in: " + pat + " out: "+ result);
+        return result;
     }
     
     /**
@@ -104,18 +98,19 @@ public class PATHelper {
      * @return
      */
     private String getEncryptionKey() {
-        Config config = ConfigProvider.getConfig();
+        org.eclipse.microprofile.config.Config config = ConfigProvider.getConfig();
         String key = null;
         try {
             key = config.getValue(AESKEY_PROPERTYNAME, String.class);
-            System.out.println("** got aes key from config");
+            //System.out.println("** got aes key from config");
         } catch (NoSuchElementException e) {
             // it's not there
         }
         if (key == null || key.isEmpty()) {
-            System.out.println("** generating random aes key");
+            //System.out.println("** generating random aes key");
             key = getRandomString();
         }
+        //System.out.println("** enc key is " + key);
         return key;
     }
     
@@ -124,28 +119,25 @@ public class PATHelper {
     }
     
     private  void init() {
-        if (aesKey == null) {
-            aesKey = getEncryptionKey();
-        }
+      
     }
     
     
     private String aesEncrypt(String input)  {
         String output = null;
         if(input==null) { return null; }
-        
-        EncryptionParms params = setupEncryption();
-        if(params == null) { return null; }
+        setupEncryption();
+        if(encryptionParams == null) { return null; }
         try {
             Cipher cipher = Cipher.getInstance(TRANSFORMATION_AES);
-            cipher.init(Cipher.ENCRYPT_MODE, params.keySpec, params.ivSpec);
+            cipher.init(Cipher.ENCRYPT_MODE, encryptionParams.keySpec, encryptionParams.ivSpec);
             byte[] encryptedBytes = cipher.doFinal(input.getBytes("UTF-8"));
             output = SecurityUtils.bytesToHexString(encryptedBytes);
         } catch (Exception e) {
             System.out.println("Exception occurred during encryption: " + e + " StackTrace:");
             e.printStackTrace(System.out);
         }
-        System.out.println("** encrypt in: "+ input + " out: " + output);
+        // sensitive: System.out.println("** encrypt in: "+ input + " out: " + output);
         return output;
     }
     
@@ -153,18 +145,18 @@ public class PATHelper {
     private String aesDecrypt(String input)  {
         String output = null;
         if(input==null) { return null; }
-        EncryptionParms params = setupEncryption();
-        if(params == null) { return null; }
+        setupEncryption();
+        if(encryptionParams == null) { return null; }
         try {
             Cipher cipher = Cipher.getInstance(TRANSFORMATION_AES);
-            cipher.init(Cipher.DECRYPT_MODE, params.keySpec, params.ivSpec);
+            cipher.init(Cipher.DECRYPT_MODE, encryptionParams.keySpec, encryptionParams.ivSpec);
             byte[] decryptedBytes = cipher.doFinal(SecurityUtils.hexStringToBytes(input));
             output =  new String(decryptedBytes, "UTF-8");
         } catch (Exception e)  {
             System.out.println("Exception occurred during decryption: " + e + " StackTrace:");
             e.printStackTrace(System.out);
         }
-        System.out.println("** decrypt in: "+ input + " out: " + output);
+        //sensitive: System.out.println("** decrypt in: "+ input + " out: " + output);
         return output;
     }
   
@@ -177,7 +169,13 @@ public class PATHelper {
         }
     }
     
-    private EncryptionParms setupEncryption() {
+    private void setupEncryption() {
+        if(encryptionParams != null) {
+            return;
+        }
+        if (aesKey == null) {
+            aesKey = getEncryptionKey();
+        }
         try {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
            
@@ -187,13 +185,13 @@ public class PATHelper {
             int keyLength = 128;
             KeySpec aesKey = new PBEKeySpec(password, salt,iterationCount, keyLength);
             byte[] data = keyFactory.generateSecret(aesKey).getEncoded();
-            return new PATHelper.EncryptionParms(new SecretKeySpec(data,"AES"), new IvParameterSpec(data));
+            encryptionParams =  new PATHelper.EncryptionParms(new SecretKeySpec(data,"AES"), new IvParameterSpec(data));
         } catch (InvalidKeySpecException e) {
-            return null;
+            encryptionParams = null;
         } catch (NoSuchAlgorithmException e) {
-            return null;
+            encryptionParams = null;
         }
     }
 
- 
+  
 }

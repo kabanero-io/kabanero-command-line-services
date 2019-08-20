@@ -49,18 +49,13 @@ public class Logout {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Properties logout() {
+      
         Properties p = new Properties();
         try {
             Principal principal = request.getUserPrincipal();
             if (principal != null && principal.getName() != null) {
                 request.logout();
                 trackLoggedOutJwt(request);
-            } else {
-                p.put("message", "Invalid or missing token.");
-                p.put("success", "false");
-                System.out.println("Null Principal, logout cannot succeed!");
-
-                return p;
             }
         } catch (Exception e) {
             p.put("message", "Exception occurred: " + e);
