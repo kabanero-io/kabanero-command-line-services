@@ -34,6 +34,7 @@ public class GitHubService {
     private String passwordOrPat = null;
 
     private HttpUtils httpUtils = new HttpUtils();
+    private Config config = new Config();
 
     public GitHubService(String id, String passwordOrPat) throws KabaneroSecurityException {
         this.userId = id;
@@ -64,7 +65,7 @@ public class GitHubService {
 
     private String getUserId() throws KabaneroSecurityException {
         try {
-            JsonObject userInfo = getJsonObjectFromApi("GET", Constants.USERINFO_API);
+            JsonObject userInfo = getJsonObjectFromApi("GET", config.getUserInfoUrl());
             return userInfo.getString("login");
         } catch (KabaneroSecurityException e) {
             throw new KabaneroSecurityException("Failed to obtain or process user info for user [" + userId + "]. " + e.getMessage(), e);
@@ -79,7 +80,7 @@ public class GitHubService {
      */
     private JsonArray getUserEmails() throws KabaneroSecurityException {
         try {
-            JsonArray emailInfo = getJsonArrayFromApi("GET", Constants.EMAIL_API);
+            JsonArray emailInfo = getJsonArrayFromApi("GET", config.getEmailUrl());
             JsonArrayBuilder responseBuilder = Json.createArrayBuilder();
             Iterator<JsonValue> iter = emailInfo.iterator();
             while (iter.hasNext()) {
@@ -117,7 +118,7 @@ public class GitHubService {
 
     private JsonArray getUserTeams() throws KabaneroSecurityException {
         try {
-            JsonArray teamInfo = getJsonArrayFromApi("GET", Constants.TEAMS_API);
+            JsonArray teamInfo = getJsonArrayFromApi("GET", config.getTeamsUrl());
             JsonArrayBuilder responseBuilder = Json.createArrayBuilder();
             Iterator<JsonValue> iter = teamInfo.iterator();
             while (iter.hasNext()) {

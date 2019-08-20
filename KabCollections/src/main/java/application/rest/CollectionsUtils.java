@@ -8,16 +8,19 @@ import java.util.Map;
 public class CollectionsUtils {
 	
 	
-	public static String changeCollectionIntoStringList(List<Map> list) {
-		String collections = "";
-		for (Map map : list) {
-			String name = (String) map.get("name");
+	public static List streamLineMasterMap(List<Map> list) {
+		ArrayList aList = new ArrayList();
+        for (Map map:list) {
+        	String name = (String) map.get("id");
+        	String originalName = (String) map.get("name");
 			String version = (String) map.get("version");
-			String element = "( "+name+" , "+version+" ) ";
-			collections = collections + element + ",";
-		}
-		collections = collections.substring(0, collections.length() - 1);
-		return collections;
+        	HashMap outMap = new HashMap();
+        	outMap.put("name",name);
+        	outMap.put("originalName",originalName);
+        	outMap.put("version", version);
+        	aList.add(outMap);
+        } 
+		return aList;
 	}
 	
 	public static List filterNewCollections(List<Map> fromGit, List<Map> fromKabanero) {
@@ -25,7 +28,7 @@ public class CollectionsUtils {
 		
 		try {
 			for (Map map : fromGit) {
-				String name = (String) map.get("name");
+				String name = (String) map.get("id");
 				String version = (String) map.get("version");
 				name=name.trim();
 				version=version.trim();
@@ -40,7 +43,8 @@ public class CollectionsUtils {
 					}
 				}
 				if (!match) {
-					gitMap.put("name", name);
+					gitMap.put("name", map.get("id"));
+					gitMap.put("originalName", map.get("name"));
 					gitMap.put("version", version);
 					newCollections.add(gitMap);
 				}
@@ -57,6 +61,7 @@ public class CollectionsUtils {
 		String version = null;
 		try {
 			for (Map map : fromKabanero) {
+				System.out.println("kab map: "+map);
 				Map metadata = (Map) map.get("metadata");
 	        	name = (String) metadata.get("name");
 	        	Map spec = (Map) map.get("spec");
@@ -65,7 +70,7 @@ public class CollectionsUtils {
 				HashMap kabMap = new HashMap();
 				boolean match=false;
 				for (Map map1 : fromGit) {
-					String name1 = (String) map1.get("name");
+					String name1 = (String) map1.get("id");
 					name1=name1.trim();
 					if (name1.contentEquals(name)) {
 						match=true;
@@ -107,7 +112,8 @@ public class CollectionsUtils {
 		        	}
 				}
 				if (!match) {
-					gitMap.put("name", name);
+					gitMap.put("name", map.get("id"));
+					gitMap.put("originalName", name);
 					gitMap.put("version", version);
 					newCollections.add(map);
 				}
