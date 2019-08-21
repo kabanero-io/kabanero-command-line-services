@@ -8,4 +8,5 @@ public class Constants {
     public static final String LOGIN_KEY_GITHUB_USER = "gituser";
     public static final String LOGIN_KEY_GITHUB_PASSWORD_OR_PAT = "gitpat";
     public static final String PAT_JWT_CLAIM = "pat";
-}
+    public static final String ROLESPREFIX = "groupsForTeam_";
+ }
