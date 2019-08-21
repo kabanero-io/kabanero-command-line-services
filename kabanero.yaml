@@ -24,7 +24,7 @@ stacks:
   templates:
   - id: default
     url: https://github.com/kabanero-io/collections/releases/download/v0.0.3/incubator.java-microprofile.v0.2.5.templates.default.tar.gz
-  version: 0.2.5
+  version: 0.2.6
 - default-image: java-spring-boot2
   default-pipeline: default
   default-template: default
@@ -48,7 +48,7 @@ stacks:
     url: https://github.com/kabanero-io/collections/releases/download/v0.0.3/incubator.java-spring-boot2.v0.3.2.templates.default.tar.gz
   - id: kotlin
     url: https://github.com/kabanero-io/collections/releases/download/v0.0.3/incubator.java-spring-boot2.v0.3.2.templates.kotlin.tar.gz
-  version: 0.3.2
+  version: 0.3.3
 - default-image: nodejs-express
   default-pipeline: default
   default-template: simple
