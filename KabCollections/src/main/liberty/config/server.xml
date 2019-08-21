@@ -14,7 +14,7 @@
     
     <keyStore id="defaultKeyStore" password="keyspass"/>	
 
-
+    <variable name="AESEncryptionKey  " value="dhug683wkgfalgtbu" />
 
   <!-- Automatically expand WAR files and EAR files -->
   <applicationManager autoExpand="true"/>
