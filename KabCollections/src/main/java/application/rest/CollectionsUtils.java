@@ -93,7 +93,7 @@ public class CollectionsUtils {
 		try {
 			for (Map map : fromGit) {
 				String version = (String) map.get("version");
-				String name = (String) map.get("name");
+				String name = (String) map.get("id");
 				name = name.trim();
 				version=version.trim();
 				boolean match=true;
@@ -113,9 +113,9 @@ public class CollectionsUtils {
 				}
 				if (!match) {
 					gitMap.put("name", map.get("id"));
-					gitMap.put("originalName", name);
+					gitMap.put("originalName", map.get("name"));
 					gitMap.put("version", version);
-					newCollections.add(map);
+					newCollections.add(gitMap);
 				}
 			}
 		} catch (Exception e) {

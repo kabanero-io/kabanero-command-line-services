@@ -206,8 +206,8 @@ public class CollectionsAccess {
 				for (Map m : versionChangeCollections) {
 					try {
 						JsonObject jo = makeJSONBody(m, namespace);
-						System.out.println("json object for version change: "+jo);
-						KubeUtils.setResourceStatus(apiClient, group, version, plural, namespace,
+						System.out.println("json object for version change: "+jo); 
+						KubeUtils.updateResource(apiClient, group, version, plural, namespace,
 								m.get("name").toString(), jo);
 						m.put("status",  m.get("name") + "version change completed");
 					} catch (Exception e) {
