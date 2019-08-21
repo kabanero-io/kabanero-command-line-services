@@ -41,7 +41,7 @@ import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import kabasec.PATHelper;
 
-@RolesAllowed("test-roles@kabanero-io")
+@RolesAllowed("admin")
 @Path("/v1")
 public class CollectionsAccess {
 
