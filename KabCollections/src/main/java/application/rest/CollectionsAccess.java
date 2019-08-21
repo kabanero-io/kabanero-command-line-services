@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -124,7 +125,29 @@ public class CollectionsAccess {
 		return Response.ok(msg).build();
 	}
 
-
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("/onboard")
+	public Response onboardDeveloper(@Context final HttpServletRequest request,
+			                         final JSONObject jsonInput) {
+		System.out.println("if only we could onboard you...");
+		String gituser = (String) jsonInput.get("gituser");
+		System.out.println("gituser: \"" + gituser + "\"");
+		String gittoken = (String) jsonInput.get("gittoken");
+		System.out.println("gittoken: \"" + gittoken + "\"");
+		String workaround = "Command development in progress, please go to the tekton dashboard in your browser and manually configure the webhook";
+		if (gituser!=null) {
+			workaround += " For gituser: " + gituser;
+		}
+		JSONObject msg = new JSONObject();
+		msg.put("message", workaround);
+		
+		return Response
+				.status(501)
+				.entity(msg)
+				.build();
+	}
 
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
