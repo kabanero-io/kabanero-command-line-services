@@ -22,11 +22,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryContents;
@@ -35,6 +30,9 @@ import org.eclipse.egit.github.core.service.ContentsService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.yaml.snakeyaml.Yaml;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
 
@@ -49,11 +47,11 @@ public class CollectionsAccess {
 
 	private boolean skip = false;
 
-	private ArrayList<Map> getMasterCollectionsList() {
+	private ArrayList<Map> getMasterCollectionsList(String user) {
 		String url = "api.github.com";
 		String repo = "kabanero-command-line-services";
 		String repoOwnerID = "kabanero-io";
-		String gitResponse = getGithubFile(repoOwnerID, url, repo, "kabanero.yaml");
+		String gitResponse = getGithubFile(repoOwnerID, user, url, repo, "kabanero.yaml");
 
 		ArrayList<Map> list = null;
 		try {
@@ -80,7 +78,9 @@ public class CollectionsAccess {
 	public Response listCollections(@Context final HttpServletRequest request) {
 		JSONObject msg = new JSONObject();
 		try {
-			ArrayList<Map> masterCollections = (ArrayList<Map>) getMasterCollectionsList();
+			String user=getUser(request);
+			System.out.println("user="+user);
+			ArrayList<Map> masterCollections = (ArrayList<Map>) getMasterCollectionsList(getUser(request));
 			//String collections = CollectionsUtils.changeCollectionIntoStringList(masterCollections);
 			msg.put("master collection", convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections)));
 
@@ -159,7 +159,7 @@ public class CollectionsAccess {
 			System.out.println("<1>");
 			List<Map> kabList = (List) fromKabanero.get("items");
 			System.out.println("<2>");
-			List<Map> masterCollections = getMasterCollectionsList();
+			List<Map> masterCollections = getMasterCollectionsList(getUser(request));
 			System.out.println("<3>");
 			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
 			System.out.println("*** new collections=" + newCollections);
@@ -307,23 +307,23 @@ public class CollectionsAccess {
 		return json;
 	}
 
-	private String getGithubFile(String user, String URL, String REPONAME, String FILENAME) {
+	private String getGithubFile(String repoOwner, String user, String URL, String REPONAME, String FILENAME) {
 		// OAuth2 token authentication
 		GitHubClient client = new GitHubClient(URL);
 		String PAT = getPAT();
 		System.out.println("PAT=" + PAT);
-		client.setOAuth2Token(getPAT());
+		//client.setOAuth2Token(getPAT());
 		// client.setOAuth2Token("xxxxxxxxx");
-		// client.setCredentials("xxxxxx", "xxxxxxxxxxxx");
+		client.setCredentials(user, getPAT());
 
 		RepositoryService repoService = new RepositoryService(client);
 		String fileContent = null, valueDecoded = null;
 		try {
-			Repository repo = repoService.getRepository(user, REPONAME);
+			Repository repo = repoService.getRepository(repoOwner, REPONAME);
 
 			// now contents service
 			ContentsService contentService = new ContentsService(client);
-			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(user, REPONAME),
+			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
 					FILENAME);
 			for (RepositoryContents content : test) {
 				fileContent = content.getContent();
@@ -360,16 +360,16 @@ public class CollectionsAccess {
 		}
 	}
 
-//	private String getUser(HttpServletRequest request) {
-//		String user=null;
-//		try {
-//			user =request.getUserPrincipal().getName();
-//		}
-//		catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return user;
-//	}
+	private String getUser(HttpServletRequest request) {
+		String user=null;
+		try {
+			user =request.getUserPrincipal().getName();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return user;
+	}
 
 	private String getPAT() {
 		String PAT = null;
