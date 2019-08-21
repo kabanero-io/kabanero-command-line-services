@@ -53,7 +53,7 @@ public class CollectionsAccess {
 		String url = "api.github.com";
 		String repo = "kabanero-command-line-services";
 		String repoOwnerID = "kabanero-io";
-		String gitResponse = getGithubFile(repoOwnerID, url, repo, "index.yaml");
+		String gitResponse = getGithubFile(repoOwnerID, url, repo, "kabanero.yaml");
 
 		ArrayList<Map> list = null;
 		try {
@@ -206,8 +206,8 @@ public class CollectionsAccess {
 				for (Map m : versionChangeCollections) {
 					try {
 						JsonObject jo = makeJSONBody(m, namespace);
-						System.out.println("json object for version change: "+jo);
-						KubeUtils.setResourceStatus(apiClient, group, version, plural, namespace,
+						System.out.println("json object for version change: "+jo); 
+						KubeUtils.updateResource(apiClient, group, version, plural, namespace,
 								m.get("name").toString(), jo);
 						m.put("status",  m.get("name") + "version change completed");
 					} catch (Exception e) {
