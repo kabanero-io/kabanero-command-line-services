@@ -59,11 +59,8 @@ import kabasec.PATHelper;
 public class CollectionsAccess {
 
 	private boolean skip = false;
+	private static String version="v1alpha1";
 	
-	private String GIT_URL=null;
-	private String GIT_REPONAME=null;
-	private String GIT_REPO_OWNER=null;
-	private String GIT_MASTER_COLLECTION_FILE=null;
 	private static Map envMap=System.getenv();
 	private static String namespace=(String) envMap.get("KABANERO_CLI_NAMESPACE");
 	
@@ -95,7 +92,6 @@ public class CollectionsAccess {
 			if (!skip) {
 				ApiClient apiClient = KubeUtils.getApiClient();
 				String group = "kabanero.io";
-				String version = "v1alpha1";
 				String plural = "collections";
 				//String namespace = "kabanero";
 				msg.put("active collections", convertMapToJSON(KubeUtils.listResources(apiClient, group, version, plural, namespace)));
@@ -169,7 +165,6 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 		String group = "kabanero.io";
-		String version = "v1alpha1";
 		String plural = "collections";
 		//String namespace = "kabanero";
 		Map fromKabanero = null;
@@ -284,7 +279,6 @@ public class CollectionsAccess {
 		// make call to kabanero to delete collection
 		ApiClient apiClient = KubeUtils.getApiClient();
 		String group = "kabanero.io";
-		String version = "v1alpha1";
 		String plural = "collections";
 		//String namespace = "kabanero";
 		JSONObject msg = new JSONObject();
@@ -308,7 +302,7 @@ public class CollectionsAccess {
 		
 		String joString =
 			    "{"+
-			    "    \"apiVersion\": \"kabanero.io/v1alpha1\","+
+			    "    \"apiVersion\": \"kabanero.io/"+version+"\","+
 			    "    \"kind\": \"Collection\","+
 			    "    \"metadata\": {"+
 			    "        \"name\": \"{{__NAME__}}\","+
@@ -336,44 +330,6 @@ public class CollectionsAccess {
 		return json;
 	}
 
-	private String getGithubFile(String repoOwner, String user, String URL, String REPONAME, String FILENAME) {
-		GitHubClient client = new GitHubClient(URL);
-		client.setCredentials(user, getPAT());
-
-		RepositoryService repoService = new RepositoryService(client);
-		String fileContent = null, valueDecoded = null;
-		try {
-			Repository repo = repoService.getRepository(repoOwner, REPONAME);
-
-			// now contents service
-			ContentsService contentService = new ContentsService(client);
-			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
-					FILENAME);
-			for (RepositoryContents content : test) {
-				fileContent = content.getContent();
-				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
-			}
-			
-			
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return valueDecoded;
-	}
-
-	private Map readYaml(String response) {
-		Yaml yaml = new Yaml();
-		Map<String, Object> obj = null;
-		try {
-			InputStream inputStream = new ByteArrayInputStream(response.getBytes(StandardCharsets.UTF_8));
-			obj = yaml.load(inputStream);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return obj;
-	}
 
 
 	private String getUser(HttpServletRequest request) {
@@ -393,6 +349,9 @@ public class CollectionsAccess {
 			PAT = (new PATHelper()).extractGithubAccessTokenFromSubject();
 		} catch (Exception e) {
 			e.printStackTrace();
+			JSONObject msg=new JSONObject();
+			msg.put("message", "your login token has expired, please login again");
+			Response.status(401).entity(msg).build();
 		}
 
 		return PAT;
