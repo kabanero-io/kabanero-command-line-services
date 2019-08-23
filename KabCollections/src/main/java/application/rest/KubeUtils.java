@@ -39,10 +39,7 @@ import org.slf4j.LoggerFactory;
 public class KubeUtils {
     private static final Logger logger = LoggerFactory.getLogger(KubeUtils.class);
 
-    public static String TEKTON_GROUP = "tekton.dev";
-    public static String TEKTON_VERSION = "v1alpha1";
-    public static String TEKTON_PIPELINE_RESOURCE_PLURAL = "pipelineresources";
-    public static String TEKTON_PIPELINE_RUN_PLURAL = "pipelineruns";
+    
 
     /* Note: DO NOT change the time unit. This is being used in WatchResources.java */
     public static int DEFAULT_READ_TIMEOUT = 60;

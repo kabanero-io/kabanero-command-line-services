@@ -94,16 +94,16 @@ public class Authentication {
         org.eclipse.microprofile.config.Config config = ConfigProvider.getConfig();
         String groups = null;
         try {
-            //System.out.println(" search: "+ Constants.ROLESPREFIX + teamName);
+            System.out.println(" search: "+ Constants.ROLESPREFIX + teamName);
             groups = config.getValue(Constants.ROLESPREFIX + teamName, String.class);
-            //System.out.println(" result: " + groups);
+            System.out.println(" result: " + groups);
         }catch (NoSuchElementException e) {
             try {
                 // mpconfig doesn't convert blanks to _, but we will for convenience.
                 String teamName2=teamName.replace(" ", "_");
-                //System.out.println(" search2: "+ Constants.ROLESPREFIX + teamName2);
+                System.out.println(" search2: "+ Constants.ROLESPREFIX + teamName2);
                 groups = config.getValue(Constants.ROLESPREFIX + teamName2, String.class); 
-                //System.out.println(" result2: "+ groups);
+                System.out.println(" result2: "+ groups);
             } catch (NoSuchElementException e2) {
                 // not there
             }
