@@ -57,7 +57,6 @@ public class CollectionsUtils {
 		try {
 			response = client.execute(request);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -67,7 +66,6 @@ public class CollectionsUtils {
 		try {
 			rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 		} catch (IllegalStateException | IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -78,7 +76,6 @@ public class CollectionsUtils {
 				result.append(line + "\n");
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return result.toString();
