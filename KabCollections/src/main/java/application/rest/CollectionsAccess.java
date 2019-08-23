@@ -1,11 +1,12 @@
 package application.rest;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryContents;
 import org.eclipse.egit.github.core.client.GitHubClient;
@@ -34,6 +44,7 @@ import org.yaml.snakeyaml.Yaml;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.internal.LinkedTreeMap;
 import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
 
@@ -42,28 +53,19 @@ import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import kabasec.PATHelper;
 
-@RolesAllowed("test-roles@kabanero-io")
+//@RolesAllowed("test-roles@kabanero-io")
+@RolesAllowed("admin")
 @Path("/v1")
 public class CollectionsAccess {
 
 	private boolean skip = false;
-
-	private ArrayList<Map> getMasterCollectionsList(String user) {
-		String url = "api.github.com";
-		String repo = "kabanero-command-line-services";
-		String repoOwnerID = "kabanero-io";
-		String gitResponse = getGithubFile(repoOwnerID, user, url, repo, "kabanero.yaml");
-
-		ArrayList<Map> list = null;
-		try {
-			Map m = readYaml(gitResponse);
-			list = (ArrayList<Map>) m.get("stacks");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return list;
-	}
+	private static String version="v1alpha1";
 	
+	private static Map envMap=System.getenv();
+	private static String namespace=(String) envMap.get("KABANERO_CLI_NAMESPACE");
+	
+	
+		
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/version")
@@ -79,20 +81,20 @@ public class CollectionsAccess {
 	public Response listCollections(@Context final HttpServletRequest request) {
 		JSONObject msg = new JSONObject();
 		try {
+			
 			String user=getUser(request);
 			System.out.println("user="+user);
-			ArrayList<Map> masterCollections = (ArrayList<Map>) getMasterCollectionsList(getUser(request));
-			//String collections = CollectionsUtils.changeCollectionIntoStringList(masterCollections);
-			msg.put("master collection", convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections)));
+			//ArrayList<Map> masterCollections = (ArrayList<Map>) getMasterCollectionsList(getUser(request));
+			ArrayList<Map> masterCollections=(ArrayList<Map>)CollectionsUtils.getMasterCollectionWithREST(getUser(request), getPAT(),namespace);
+			msg.put("master collections", convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections)));
 
 			// make call to kabanero to get current collection
 			if (!skip) {
 				ApiClient apiClient = KubeUtils.getApiClient();
 				String group = "kabanero.io";
-				String version = "v1alpha1";
 				String plural = "collections";
-				String namespace = "kabanero";
-				msg.put("kabanero collection", convertMapToJSON(KubeUtils.listResources(apiClient, group, version, plural, namespace)));
+				//String namespace = "kabanero";
+				msg.put("active collections", convertMapToJSON(KubeUtils.listResources(apiClient, group, version, plural, namespace)));
 				Map fromKabanero = null;
 				try {
 					fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
@@ -163,9 +165,8 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 		String group = "kabanero.io";
-		String version = "v1alpha1";
 		String plural = "collections";
-		String namespace = "kabanero";
+		//String namespace = "kabanero";
 		Map fromKabanero = null;
 		try {
 			fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
@@ -182,7 +183,7 @@ public class CollectionsAccess {
 			System.out.println("<1>");
 			List<Map> kabList = (List) fromKabanero.get("items");
 			System.out.println("<2>");
-			List<Map> masterCollections = getMasterCollectionsList(getUser(request));
+			List<Map> masterCollections = (ArrayList<Map>)CollectionsUtils.getMasterCollectionWithREST(getUser(request), getPAT(),namespace);
 			System.out.println("<3>");
 			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
 			System.out.println("*** new collections=" + newCollections);
@@ -278,9 +279,8 @@ public class CollectionsAccess {
 		// make call to kabanero to delete collection
 		ApiClient apiClient = KubeUtils.getApiClient();
 		String group = "kabanero.io";
-		String version = "v1alpha1";
 		String plural = "collections";
-		String namespace = "kabanero";
+		//String namespace = "kabanero";
 		JSONObject msg = new JSONObject();
 		if (!skip) {
 			try {
@@ -302,7 +302,7 @@ public class CollectionsAccess {
 		
 		String joString =
 			    "{"+
-			    "    \"apiVersion\": \"kabanero.io/v1alpha1\","+
+			    "    \"apiVersion\": \"kabanero.io/"+version+"\","+
 			    "    \"kind\": \"Collection\","+
 			    "    \"metadata\": {"+
 			    "        \"name\": \"{{__NAME__}}\","+
@@ -330,58 +330,7 @@ public class CollectionsAccess {
 		return json;
 	}
 
-	private String getGithubFile(String repoOwner, String user, String URL, String REPONAME, String FILENAME) {
-		// OAuth2 token authentication
-		GitHubClient client = new GitHubClient(URL);
-		String PAT = getPAT();
-		System.out.println("PAT=" + PAT);
-		//client.setOAuth2Token(getPAT());
-		// client.setOAuth2Token("xxxxxxxxx");
-		client.setCredentials(user, getPAT());
 
-		RepositoryService repoService = new RepositoryService(client);
-		String fileContent = null, valueDecoded = null;
-		try {
-			Repository repo = repoService.getRepository(repoOwner, REPONAME);
-
-			// now contents service
-			ContentsService contentService = new ContentsService(client);
-			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
-					FILENAME);
-			for (RepositoryContents content : test) {
-				fileContent = content.getContent();
-				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return valueDecoded;
-	}
-
-	private Map readYaml(String response) {
-		Yaml yaml = new Yaml();
-		Map<String, Object> obj = null;
-		try {
-			InputStream inputStream = new ByteArrayInputStream(response.getBytes(StandardCharsets.UTF_8));
-			// InputStream inputStream =
-			// this.getClass().getClassLoader().getResourceAsStream("WEB-INF/" + file);
-			obj = yaml.load(inputStream);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return obj;
-	}
-
-	private static void printMap(Map mp) {
-		Iterator it = mp.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry pair = (Map.Entry) it.next();
-			System.out.println(pair.getKey() + " = " + pair.getValue());
-			it.remove(); // avoids a ConcurrentModificationException
-		}
-	}
 
 	private String getUser(HttpServletRequest request) {
 		String user=null;
@@ -400,6 +349,9 @@ public class CollectionsAccess {
 			PAT = (new PATHelper()).extractGithubAccessTokenFromSubject();
 		} catch (Exception e) {
 			e.printStackTrace();
+			JSONObject msg=new JSONObject();
+			msg.put("message", "your login token has expired, please login again");
+			Response.status(401).entity(msg).build();
 		}
 
 		return PAT;

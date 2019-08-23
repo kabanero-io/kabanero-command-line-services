@@ -45,6 +45,11 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+  		<groupId>org.apache.httpcomponents</groupId>
+  <artifactId>httpclient</artifactId>
+  <version>4.3.6</version>
+</dependency>
 	<dependency>
       <groupId>com.ibm.websphere.appserver.api</groupId>
       <artifactId>com.ibm.websphere.appserver.api.basics</artifactId>

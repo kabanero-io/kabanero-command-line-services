@@ -2,10 +2,13 @@ package kabasec;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletResponse;
+
+import org.eclipse.microprofile.config.ConfigProvider;
 
 import com.ibm.websphere.security.jwt.Claims;
 import com.ibm.websphere.security.jwt.JwtBuilder;
@@ -44,7 +47,10 @@ public class Authentication {
                 .claim(Constants.PAT_JWT_CLAIM, pat);
         
         if (teams != null && !teams.isEmpty()) {
-            builder.claim("groups", convertJsonArrayToList(teams));
+            List<String> groupsList = convertJsonArrayToList(teams);
+            groupsList.add("allusers"); // default group for everyone
+            groupsList = addGroupNamesForTeamsFromEnvironment(teams, groupsList);
+            builder.claim("groups", groupsList);
         }
         return builder.buildJwt().compact();
     }
@@ -52,9 +58,63 @@ public class Authentication {
     private List<String> convertJsonArrayToList(JsonArray array) {
         List<String> convertedList = new ArrayList<String>();
         for (int i = 0; i < array.size(); i++) {
-            convertedList.add(array.getString(i));
+            // add explicit team name
+            String teamName = array.getString(i);
+            convertedList.add(teamName);
         }
         return convertedList;
     }
-
+    
+    private List<String> addGroupNamesForTeamsFromEnvironment(JsonArray array,  List<String> groupsList) {
+        for (int i = 0; i < array.size(); i++) {
+            String teamName = array.getString(i); 
+            // add group names for team, if defined
+            String[] groupsForThisTeam = getGroupNames(teamName);
+            for(int j=0; j< groupsForThisTeam.length; j++) {
+                if (! groupsList.contains(groupsForThisTeam[j])){
+                    groupsList.add(groupsForThisTeam[j]);
+                }
+            }
+        }
+        return groupsList;
+    }
+    
+    
+ 
+    /**
+     * get groups for a given team using mpConfig. 
+     * Groups are defined by variables named groupsForTeam_(teamname) in comma separated format.
+     * example: <variable name="groupsForTeam_all-ibmers@IBM" value="operator,admin" />
+     * If nothing found and name contains @, try again with @ --> _ so can use unix env vars.
+     * @param teamName
+     * @return group names if any were found
+     */
+    private String[] getGroupNames(String teamName){
+        String[] result = null;
+        org.eclipse.microprofile.config.Config config = ConfigProvider.getConfig();
+        String groups = null;
+        try {
+            System.out.println(" search: "+ Constants.ROLESPREFIX + teamName);
+            groups = config.getValue(Constants.ROLESPREFIX + teamName, String.class);
+            System.out.println(" result: " + groups);
+        }catch (NoSuchElementException e) {
+            try {
+                // mpconfig doesn't convert blanks to _, but we will for convenience.
+                String teamName2=teamName.replace(" ", "_");
+                System.out.println(" search2: "+ Constants.ROLESPREFIX + teamName2);
+                groups = config.getValue(Constants.ROLESPREFIX + teamName2, String.class); 
+                System.out.println(" result2: "+ groups);
+            } catch (NoSuchElementException e2) {
+                // not there
+            }
+        }
+        if (groups != null && groups.length() >0) {
+            groups.replace(" ", "");  // get rid of any spaces
+            result = groups.split(",");
+        } else {
+            result = new String[] {};
+        }
+        return result;
+    }
+    
 }
