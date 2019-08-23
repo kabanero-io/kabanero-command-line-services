@@ -101,7 +101,7 @@ stacks:
   templates:
   - id: scaffold
     url: https://github.com/kabanero-io/collections/releases/download/v0.0.5/incubator.nodejs-loopback.v0.1.2.templates.scaffold.tar.gz
-  version: 0.1.2
+  version: 0.1.8
 - default-image: nodejs
   default-pipeline: default
   default-template: simple
@@ -127,4 +127,4 @@ stacks:
   templates:
   - id: simple
     url: https://github.com/kabanero-io/collections/releases/download/v0.0.5/incubator.nodejs.v0.2.4.templates.simple.tar.gz
-  version: 0.2.4
+  version: 0.2.9
