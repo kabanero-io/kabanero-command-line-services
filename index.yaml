@@ -72,16 +72,3 @@ stacks:
   - id: simple
     url: https://github.com/kabanero-io/collections/releases/download/v0.0.1/incubator.nodejs.templates.simple.tar.gz
   version: 0.2.2
-- default-template: simple
-  description: Runtime for Swift applications
-  id: swift
-  license: Apache-2.0
-  maintainers:
-  - email: i.partridge@uk.ibm.com
-    github-id: ianpartridge
-    name: Ian Partridge
-  name: Swift
-  templates:
-  - id: simple
-    url: https://github.com/kabanero-io/collections/releases/download/v0.0.1/incubator.swift.templates.simple.tar.gz
-  version: 0.1.0
