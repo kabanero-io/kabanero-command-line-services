@@ -84,7 +84,7 @@ public class CollectionsAccess {
 			
 			String user=getUser(request);
 			System.out.println("user="+user);
-			//ArrayList<Map> masterCollections = (ArrayList<Map>) getMasterCollectionsList(getUser(request));
+			
 			ArrayList<Map> masterCollections=(ArrayList<Map>)CollectionsUtils.getMasterCollectionWithREST(getUser(request), getPAT(),namespace);
 			msg.put("master collections", convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections)));
 
@@ -93,13 +93,12 @@ public class CollectionsAccess {
 				ApiClient apiClient = KubeUtils.getApiClient();
 				String group = "kabanero.io";
 				String plural = "collections";
-				//String namespace = "kabanero";
+				
 				msg.put("active collections", convertMapToJSON(KubeUtils.listResources(apiClient, group, version, plural, namespace)));
 				Map fromKabanero = null;
 				try {
 					fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
 				} catch (ApiException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
@@ -161,17 +160,15 @@ public class CollectionsAccess {
 		try {
 			apiClient = KubeUtils.getApiClient();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		String group = "kabanero.io";
 		String plural = "collections";
-		//String namespace = "kabanero";
+		
 		Map fromKabanero = null;
 		try {
 			fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
 		} catch (ApiException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -280,7 +277,7 @@ public class CollectionsAccess {
 		ApiClient apiClient = KubeUtils.getApiClient();
 		String group = "kabanero.io";
 		String plural = "collections";
-		//String namespace = "kabanero";
+		
 		JSONObject msg = new JSONObject();
 		if (!skip) {
 			try {
