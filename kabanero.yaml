@@ -25,30 +25,6 @@ stacks:
   - id: default
     url: https://github.com/kabanero-io/collections/releases/download/v0.0.3/incubator.java-microprofile.v0.2.5.templates.default.tar.gz
   version: 0.2.5
-- default-image: java-spring-boot2
-  default-pipeline: default
-  default-template: default
-  description: Spring Boot using OpenJ9 and Maven
-  id: java-spring-boot2
-  images:
-  - id: java-spring-boot2
-    image: kabanero/java-spring-boot2:0.3
-  license: Apache-2.0
-  maintainers:
-  - email: schnabel@us.ibm.com
-    github-id: ebullient
-    name: Erin Schnabel
-  name: Spring Boot®
-  pipelines:
-  - id: default
-    sha256: a5d7441a4e19d320d19dc1f625b15a80fa6348b77e4796180fbfd5bf9850cdc8
-    url: https://github.com/kabanero-io/collections/releases/download/v0.0.3/incubator.java-spring-boot2.v0.3.2.pipeline.default.tar.gz
-  templates:
-  - id: default
-    url: https://github.com/kabanero-io/collections/releases/download/v0.0.3/incubator.java-spring-boot2.v0.3.2.templates.default.tar.gz
-  - id: kotlin
-    url: https://github.com/kabanero-io/collections/releases/download/v0.0.3/incubator.java-spring-boot2.v0.3.2.templates.kotlin.tar.gz
-  version: 0.3.2
 - default-image: nodejs-express
   default-pipeline: default
   default-template: simple
