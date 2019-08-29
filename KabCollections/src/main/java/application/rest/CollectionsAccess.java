@@ -91,6 +91,7 @@ public class CollectionsAccess {
 			// make call to kabanero to get current collection
 			if (!skip) {
 				ApiClient apiClient = KubeUtils.getApiClient();
+				// group name needs to be portable
 				String group = "kabanero.io";
 				String plural = "collections";
 				
@@ -245,6 +246,7 @@ public class CollectionsAccess {
 				e.printStackTrace();
 			}
 		}
+		// log successful changes too!
 		try {
 			msg.put("new collections", convertMapToJSON(newCollections));
 			msg.put("collections to delete", convertMapToJSON(deleletedCollections));
