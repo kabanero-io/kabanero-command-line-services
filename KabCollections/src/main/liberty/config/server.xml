@@ -7,12 +7,29 @@
   <httpEndpoint httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint" host="*" />
   
       
-  <mpJwt id="kabmpjwt" issuer="https://kabasec.com" keyName="default" />
+   <!-- The issuer specified here must match the issuer configured in the jwtBuilder -->
+    <mpJwt id="kabmpjwt" issuer="${jwt.issuer}" keyName="default" signatureAlgorithm="HS256" 
+        sharedKey="${AESEncryptionKey}"/> 
 
-    <jwtBuilder id="kabsecbuilder" expiresInSeconds="86400" issuer="https://kabasec.com" keyAlias="default" />
+    <!-- NOTE: This id cannot be changed since it's hard coded to be used in the runtime code -->
+    <jwtBuilder expiresInSeconds="86400" id="kabsecbuilder" issuer="${jwt.issuer}" 
+        keyStoreRef="defaultKeyStore" keyAlias="default" signatureAlgorithm="HS256" 
+        sharedKey="${AESEncryptionKey}"/>
     
     
-    <keyStore id="defaultKeyStore" password="keyspass"/>	
+    <!--
+    <keyStore id="defaultKeyStore" password="keyspass"/>
+    -->
+    <sslDefault sslRef="kabSSLConfig"/>
+    <ssl id="kabSSLConfig" keyStoreRef="defaultKeyStore" trustStoreRef="validationKeystore"/>
+    <keyStore id="defaultKeyStore" />
+    <keyStore id="validationKeystore" location="${server.config.dir}/resources/security/cacerts" type="jks" password="changeit"/>
+    
+    <!-- this will be the issuer of the jwts -->
+    <variable name="jwt.issuer" defaultValue="https://kabasec.com" />
+    
+    <!-- this will be the default base url for github api calls -->
+    <variable defaultValue="https://api.github.com" name="github.api.url" />
 
 
   <!-- Automatically expand WAR files and EAR files -->
