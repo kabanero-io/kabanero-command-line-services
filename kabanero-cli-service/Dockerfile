@@ -1,4 +1,14 @@
-FROM open-liberty:webProfile7-java8-openj9
+FROM openliberty/open-liberty:webProfile7-ubi-min
+# The following labels are required for Redhat container certification
+LABEL vendor="Kabanero" \
+      name="Kabanero CLI Service" \
+      summary="Image for Kabanero CLI Service" \
+      description="This image contains the service for the Kabanero CLI.  See https://github.com/kabanero-io/kabanero-command-line-services/"
+
+# The licence must be here for Redhat container certification
+COPY LICENSE /licenses/ 
+
+#FROM open-liberty:webProfile7-java8-openj9
 COPY --chown=1001:0 /target/KabCollections-1.0-SNAPSHOT.war /config/dropins
 COPY --chown=1001:0 /target/cacerts /config/resources/security/cacerts
 COPY --chown=1001:0 /target/liberty/wlp/usr/servers/defaultServer/server.xml /config

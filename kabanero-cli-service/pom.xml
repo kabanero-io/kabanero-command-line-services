@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>projects</groupId>
-	<artifactId>KabCollections</artifactId>
+	<artifactId>kabanero-cli-service</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 
@@ -23,7 +23,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 
 		<liberty.plugin.version>2.6.1</liberty.plugin.version>
-		<app.name>KabCollections</app.name>
+		<app.name>kabanero-cli-service</app.name>
 		<testServerHttpPort>9080</testServerHttpPort>
 		<testServerHttpsPort>9443</testServerHttpsPort>
 		<package.file>${project.build.directory}/${project.artifactId}-${project.version}.zip</package.file>
