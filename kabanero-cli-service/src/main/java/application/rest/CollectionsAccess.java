@@ -309,22 +309,25 @@ public class CollectionsAccess {
 			if (rc == 0) {
 				System.out.println("*** " + "Collection name: " + name + " deactivated");
 				msg.put("status", "Collection name: " + name + " deactivated");
+				return Response.ok(msg).build();
 			}
 			else if (rc == 404) {
 				System.out.println("*** " + "Collection name: " + name + " not found");
 				msg.put("status", "Collection name: " + name + " not found");
+				return Response.status(400).entity(msg).build();
 			} else {
 				System.out.println("*** " + "Collection name: " + name + " was not deactivated, rc="+rc);
 				msg.put("status", "Collection name: " + name + " was not deactivated, rc="+rc);
+				return Response.status(400).entity(msg).build();
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			msg.put("status",
 					"Collection name: " + name + " failed to deactivate, exception message: " + e.getMessage());
+			return Response.status(400).entity(msg).build();
 		}
 
-		return Response.ok(msg).build();
 	}
 
 	private JsonObject makeJSONBody(Map m, String namespace) {
