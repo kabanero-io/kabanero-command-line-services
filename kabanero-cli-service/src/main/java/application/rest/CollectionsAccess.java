@@ -305,9 +305,18 @@ public class CollectionsAccess {
 		JSONObject msg = new JSONObject();
 
 		try {
-			KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, plural);
-			System.out.println("*** " + "Collection name: " + name + " deactivated");
-			msg.put("status", "Collection name: " + name + " deactivated");
+			int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, plural);
+			if (rc == 0) {
+				System.out.println("*** " + "Collection name: " + name + " deactivated");
+				msg.put("status", "Collection name: " + name + " deactivated");
+			}
+			else if (rc == 404) {
+				System.out.println("*** " + "Collection name: " + name + " not found");
+				msg.put("status", "Collection name: " + name + " not found");
+			} else {
+				System.out.println("*** " + "Collection name: " + name + " was not deactivated, rc="+rc);
+				msg.put("status", "Collection name: " + name + " was not deactivated, rc="+rc);
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
