@@ -373,22 +373,23 @@ public class KubeUtils {
        version: version of resource
        plural: plural of resource
      */
-    public static void deleteKubeResource(ApiClient client, String namespace, String name,
-            String group, String version, String plural) throws Exception {
-    logger.info("Deleteing Resource {}/{}", namespace, name);
-    try {
-        CustomObjectsApi customApi = new CustomObjectsApi(client);
-        V1DeleteOptions body = new V1DeleteOptions();
-        customApi.deleteNamespacedCustomObject(group, version, namespace, plural, name, body, null, null, null);
-    } catch(ApiException ex) {
-        int code = ex.getCode();
-        if ( code == 404) {
-             // OK, object no longer exists
-             return;
-        }
-        logger.error("Unable to delete resource", ex);
-        throw ex;
-    }
+    public static int deleteKubeResource(ApiClient client, String namespace, String name,
+    		String group, String version, String plural) throws Exception {
+    	logger.info("Deleteing Resource {}/{}", namespace, name);
+    	try {
+    		CustomObjectsApi customApi = new CustomObjectsApi(client);
+    		V1DeleteOptions body = new V1DeleteOptions();
+    		customApi.deleteNamespacedCustomObject(group, version, namespace, plural, name, body, null, null, null);
+    	} catch(ApiException ex) {
+    		int code = ex.getCode();
+    		if ( code == 404) {
+    			// OK, object no longer exists
+    			return 404;
+    		}
+    		logger.error("Unable to delete resource", ex);
+    		throw ex;
+    	}
+    	return 0;
     }
 
     /* Create a resource
