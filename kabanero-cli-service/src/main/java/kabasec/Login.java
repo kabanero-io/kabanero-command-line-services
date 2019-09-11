@@ -81,7 +81,7 @@ public class Login {
         String jwt = null;
         try {
             Authentication auth = new Authentication();
-            jwt = auth.getJwt(creds);
+            jwt = auth.getJwt(creds);  // check id, password/PAT, and team membership here.
         } catch (KabaneroSecurityException e) {
             return returnError(e.getStatusCode(), "An error occurred during authentication for user [" + creds.getId() + "].", e);
         } catch (Exception e) {
