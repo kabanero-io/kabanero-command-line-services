@@ -96,7 +96,7 @@ public class CollectionsAccess {
 			ApiClient apiClient = KubeUtils.getApiClient();
 
 			String plural = "collections";
-			System.out.println("listing collections for organization: " + organization);
+			System.out.println("listing collections for namespace: "+namespace+" organization: " + organization);
 
 			msg.put("active collections",
 					convertMapToJSON(KubeUtils.listResources(apiClient, organization, version, plural, namespace)));
