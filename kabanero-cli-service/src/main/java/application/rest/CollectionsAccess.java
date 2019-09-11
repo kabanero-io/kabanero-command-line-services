@@ -61,7 +61,7 @@ public class CollectionsAccess {
 	private static String version = "v1alpha1";
 
 	private static Map envMap = System.getenv();
-	private static String group = ((String) envMap.get("KABANERO_CLI_GROUP") != null)
+	private static String organization = ((String) envMap.get("KABANERO_CLI_GROUP") != null)
 			? (String) envMap.get("KABANERO_CLI_GROUP")
 			: "kabanero.io";
 	private static String namespace = (String) envMap.get("KABANERO_CLI_NAMESPACE");
@@ -96,12 +96,13 @@ public class CollectionsAccess {
 			ApiClient apiClient = KubeUtils.getApiClient();
 
 			String plural = "collections";
+			System.out.println("listing collections for namespace: "+namespace+" organization: " + organization);
 
 			msg.put("active collections",
-					convertMapToJSON(KubeUtils.listResources(apiClient, group, version, plural, namespace)));
+					convertMapToJSON(KubeUtils.listResources(apiClient, organization, version, plural, namespace)));
 			Map fromKabanero = null;
 			try {
-				fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
+				fromKabanero = KubeUtils.mapResources(apiClient, organization, version, plural, namespace);
 			} catch (ApiException e) {
 				e.printStackTrace();
 			}
@@ -178,7 +179,7 @@ public class CollectionsAccess {
 
 		Map fromKabanero = null;
 		try {
-			fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
+			fromKabanero = KubeUtils.mapResources(apiClient, organization, version, plural, namespace);
 		} catch (ApiException e) {
 			e.printStackTrace();
 		}
@@ -224,13 +225,13 @@ public class CollectionsAccess {
 				try {
 					JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for activate: " + jo);
-					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
-					System.out.println("*** collection " + m.get("name") + " activated");
+					KubeUtils.createResource(apiClient, organization, version, plural, namespace, jo);
+					System.out.println("*** collection " + m.get("name") + " activated, organization "+organization);
 					m.put("status", m.get("name") + " activated");
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** collection " + m.get("name") + " failed to activate");
+					System.out.println("*** collection " + m.get("name") + " failed to activate, organization "+organization);
 					e.printStackTrace();
 					m.put("status", m.get("name") + " activation failed");
 					m.put("exception", e.getMessage());
@@ -248,15 +249,15 @@ public class CollectionsAccess {
 				try {
 					JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for version change: " + jo);
-					KubeUtils.updateResource(apiClient, group, version, plural, namespace, m.get("name").toString(),
+					KubeUtils.updateResource(apiClient, organization, version, plural, namespace, m.get("name").toString(),
 							jo);
 					System.out.println(
-							"*** " + m.get("name") + "version change completed, new version number: " + version);
+							"*** " + m.get("name") + "version change completed, new version number: " + version+", organization "+organization);
 					m.put("status", m.get("name") + "version change completed, new version number: " + version);
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** " + m.get("name") + "version change failed");
+					System.out.println("*** " + m.get("name") + "version change failed organization "+organization);
 					e.printStackTrace();
 					m.put("status", m.get("name") + "version change failed");
 					m.put("exception", e.getMessage());
@@ -305,15 +306,15 @@ public class CollectionsAccess {
 		JSONObject msg = new JSONObject();
 
 		try {
-			int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, plural);
+			int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, organization, version, plural);
 			if (rc == 0) {
 				System.out.println("*** " + "Collection name: " + name + " deactivated");
 				msg.put("status", "Collection name: " + name + " deactivated");
 				return Response.ok(msg).build();
 			}
 			else if (rc == 404) {
-				System.out.println("*** " + "Collection name: " + name + " not found");
-				msg.put("status", "Collection name: " + name + " not found");
+				System.out.println("*** " + "Collection name: " + name + " 404 not found");
+				msg.put("status", "Collection name: " + name + " 404 not found");
 				return Response.status(400).entity(msg).build();
 			} else {
 				System.out.println("*** " + "Collection name: " + name + " was not deactivated, rc="+rc);
