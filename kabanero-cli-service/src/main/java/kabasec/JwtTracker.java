@@ -54,7 +54,7 @@ public class JwtTracker {
         try {
             md = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
-            System.out.println("caught unexpected exception: "+ e);
+            System.out.println("caught unexpected exception: "+ e + " Cause: "+ e.getCause());
             e.printStackTrace(System.out);
             return null;
         }
