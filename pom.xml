@@ -28,4 +28,8 @@
         </dependency>
          
     </dependencies>
+	
+    <modules>
+    	<module>pkabanero-cli-service</module>
+    </modules>
 </project>
