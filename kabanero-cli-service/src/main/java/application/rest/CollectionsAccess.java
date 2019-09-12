@@ -88,7 +88,7 @@ public class CollectionsAccess {
 			ArrayList<Map> masterCollections = (ArrayList<Map>) CollectionsUtils
 					.getMasterCollectionWithREST(getUser(request), getPAT(), namespace);
 			JSONArray ja = convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections));
-			System.out.println("master collection= " + ja);
+			System.out.println("master collectionfor namespace: "+namespace+" organization: " + organization +"="+ ja);
 			msg.put("master collections", ja);
 
 			// make call to kabanero to get current collection
