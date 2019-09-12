@@ -8,8 +8,7 @@ REPOSITORY=$(firstword $(subst :, ,${IMAGE}))
 .PHONY: build deploy build-image push-image
 
 
-build-image: generate
-	# This is a workaround until manfistival can interact with the virtual file system
+build-image: 
 	docker build -t ${IMAGE} --build-arg IMAGE=${IMAGE} .
 
 push-image:
