@@ -259,8 +259,8 @@
 						<type>zip</type>
 					</assemblyArtifact>
 					<configFile>${basedir}/src/main/liberty/config/server.xml</configFile>
-					<configFile>${basedir}/src/main/liberty/config/cacerts</configFile>
-					<configFile>${basedir}/src/main/liberty/config/keystore.xml</configFile>
+					<configFile>${basedir}/kabanero-cli-service/src/main/liberty/config/cacerts</configFile>
+					<configFile>${basedir}/kabanero-cli-service/src/main/liberty/config/keystore.xml</configFile>
 					<serverEnv>${basedir}/src/main/liberty/config/server.env</serverEnv>
 					<jvmOptionsFile>${basedir}/src/main/liberty/config/jvm.options</jvmOptionsFile>
 					<packageFile>${package.file}</packageFile>
