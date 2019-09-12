@@ -10,7 +10,7 @@ env:
   - RELEASE_VERSION=v0.8.1
 
 before_install:
-- if [ ! -z \"$DOCKER_USERNAME\" ]; then docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD || true; fi
+- if [ ! -z \"$DOCKER_USERNAME\" && ! -z \"$DOCKER_PASSWORD\"]; then docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD || true; fi
 
 script:
 - make
