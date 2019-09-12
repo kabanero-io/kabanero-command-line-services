@@ -9,7 +9,6 @@ REPOSITORY=$(firstword $(subst :, ,${IMAGE}))
 
 
 build-image: generate
-	operator-sdk build ${IMAGE}
 	# This is a workaround until manfistival can interact with the virtual file system
 	docker build -t ${IMAGE} --build-arg IMAGE=${IMAGE} .
 
