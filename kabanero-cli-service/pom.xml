@@ -6,7 +6,7 @@
 	
 	<parent>
         	<groupId>projects</groupId>
-		<artifactId>kabanero-cli-service</artifactId>
+		<artifactId>parent-kabanero-cli-service</artifactId>
 		<version>1.0-SNAPSHOT</version>
     	</parent>
 	
