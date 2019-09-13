@@ -252,12 +252,12 @@
 			<plugin>
 				<groupId>io.openliberty.tools</groupId>
                 		<artifactId>liberty-maven-plugin</artifactId>
-                		<version>[3.0-M2,)</version>
+                		<version>3.0</version>
 				<configuration>
 					<assemblyArtifact>
 						<groupId>io.openliberty.tools</groupId>
                 				<artifactId>liberty-maven-plugin</artifactId>
-               					<version>[3.0-M2,)</version>
+               					<version>3.0</version>
 						<type>zip</type>
 					</assemblyArtifact>
 					<configFile>${basedir}/src/main/liberty/config/server.xml</configFile>
@@ -329,7 +329,7 @@
 						<plugin>
 							<groupId>io.openliberty.tools</groupId>
                 					<artifactId>liberty-maven-plugin</artifactId>
-                					<version>[3.0-M2,)</version>
+                					<version>3.0</version>
 							<configuration>
 								<outputDirectory>/tmp/liberty</outputDirectory>
 							</configuration>
@@ -443,7 +443,7 @@
 					<plugin>
 						<groupId>io.openliberty.tools</groupId>
                 				<artifactId>liberty-maven-plugin</artifactId>
-                				<version>[3.0-M2,)</version>
+                				<version>3.0</version>
 						<extensions>true</extensions>
 						<configuration>
 							<looseApplication>false</looseApplication>
@@ -500,7 +500,7 @@
 					<plugin>
 						<groupId>io.openliberty.tools</groupId>
                 				<artifactId>liberty-maven-plugin</artifactId>
-                				<version>[3.0-M2,)</version>
+                				<version>3.0</version>
 						<extensions>true</extensions>
 						<configuration>
 							<looseApplication>true</looseApplication>
