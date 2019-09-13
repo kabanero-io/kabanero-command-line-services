@@ -30,6 +30,6 @@
     </dependencies>
 	
     <modules>
-    	<module>pkabanero-cli-service</module>
+    	<module>kabanero-cli-service</module>
     </modules>
 </project>
