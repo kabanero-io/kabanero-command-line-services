@@ -29,6 +29,7 @@
          
     </dependencies>
     <build>
+	    <pluginManagement>
 	    <plugin>
 				<groupId>io.openliberty.tools</groupId>
                 		<artifactId>liberty-maven-plugin</artifactId>
@@ -56,6 +57,7 @@
 					<looseApplication>false</looseApplication>
 				</configuration>
 			</plugin>
+		    </pluginManagement>
 	</build>
 	
     <modules>
