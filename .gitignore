@@ -1,6 +1,4 @@
-/target/**/*
-!/target/cacerts
-!/target/keystore.xml
+/target
 /.m2
 /.classpath
 /.project
