@@ -15,6 +15,9 @@ build-image:
 push-image:
 #ifneq "$(IMAGE)" "kabanero-command-line-services:latest"
 	# Default push
+	@echo $(DOCKER_USERNAME)
+	@echo $(DOCKER_PASSWORD)
+	@echo $(FORK)
 	docker push $(FORK)/$(IMAGE)
 
 ifdef TRAVIS_TAG
