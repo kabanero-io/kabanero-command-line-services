@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2019 IBM Corporation and others
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package kabasec;
 
 import java.util.ArrayList;
@@ -20,6 +38,31 @@ public class Authentication {
     private final String JWT_BUILDER_ID = "kabsecbuilder";
     private HashSet<String> allKnownTeamNames = new HashSet<String>();
 
+    /**
+     * Build a JWT for the Github user credentials supplied.
+     * The JWT will have of the user's Github id as the subject.
+     * It will also contain the user's PAT or password in AES-encoded form, that can be 
+     * extracted for later use by PATHelper.
+     * 
+     * Groups in the JWT will contain: 
+     * allusers - for any authenticated user
+     * all fully qualified Github team names the user is a member of
+     * arbitrary group names mapped from environment variables defined as
+     * teamsInGroup_groupname=(list of fully qualified Github team names).
+     * Initially only an admin group is defined, additional groups can
+     * be defined by simply setting additional environment variables. 
+     * 
+     * Example env. var. for admin group: teamsInGroup_admin="all-ibmers@IBM,Security SSO@OpenLiberty"
+     * 
+     * Any group name in the JWT can be used in the rolesallowed annotation to 
+     * secure other REST operations. 
+     * 
+     * @param creds - github user id and pat or password
+     * @return a jwt if one can be successfully constructed
+     * 
+     * @throws KabaneroSecurityException if creds aren't valid, 
+     * account requires PAT but password was supplied, user is not a member of any team, or any other error
+     */
     String getJwt(UserCredentials creds) throws KabaneroSecurityException {
         JsonObject userData = getUserDataFromGitHub(creds.getId(), creds.getPasswordOrPat());
         String id = userData.getString("id");
@@ -131,7 +174,7 @@ public class Authentication {
      * teamsInGroup_(groupname) where the value of the variable is a comma
      * separated list of fully qualified team names.
      * 
-     * example for admin group: teamsForGroup_admin="all-ibmers@IBM,Security SSO@OpenLiberty"
+     * example for admin group: teamsInGroup_admin="all-ibmers@IBM,Security SSO@OpenLiberty"
      * 
      * @param teamName
      * @return group names if any were found
