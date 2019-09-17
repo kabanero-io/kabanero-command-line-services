@@ -1,7 +1,6 @@
 # The Docker image in format repository:tag. Repository may contain a remote reference.
 # Override in order to customize
 IMAGE ?= kabanero-command-line-services:latest
-FORK = davco01a
 
 # Computed repository name (no tag) including repository host/path reference
 REPOSITORY=$(firstword $(subst :, ,${IMAGE}))
@@ -15,10 +14,7 @@ build-image:
 push-image:
 #ifneq "$(IMAGE)" "kabanero-command-line-services:latest"
 	# Default push
-	@echo $(DOCKER_USERNAME)
-	@echo $(DOCKER_PASSWORD)
-	@echo $(FORK)
-	docker push $(FORK)/$(IMAGE)
+	docker push $(IMAGE)
 
 ifdef TRAVIS_TAG
 	# This is a Travis tag build. Pushing using Docker tag TRAVIS_TAG
