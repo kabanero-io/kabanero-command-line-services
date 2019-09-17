@@ -24,6 +24,8 @@ deploy:
 - provider: script
   script: make push-image
   on:
+     echo $DOCKER_USERNAME
+     echo $DOCKER_PASSWORD
 #    branch: master
      condition: ${DOCKER_USERNAME} && ${DOCKER_PASSWORD}
 
