@@ -27,7 +27,6 @@ ifdef TRAVIS_BRANCH
 	docker tag $(IMAGE) $(REPOSITORY):$(TRAVIS_BRANCH)
 	docker push $(REPOSITORY):$(TRAVIS_BRANCH)
 endif
-endif
 
 
 # Requires https://github.com/pmezard/licenses
