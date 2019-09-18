@@ -15,6 +15,7 @@ before_install:
 script:
 - make build-image
 
+# push for git tagged release
 deploy:
 - provider: script
   script: make push-image
@@ -24,7 +25,8 @@ deploy:
 - provider: script
   script: make push-image
   on:
-     branch: buildAutomation2
+# latest branch in my private fork
+     branch: latest
      condition: ${DOCKER_USERNAME} && ${DOCKER_PASSWORD}
 
 
