@@ -61,9 +61,11 @@ public class CollectionsAccess {
 	private static String version = "v1alpha1";
 
 	private static Map envMap = System.getenv();
+	// should be array
 	private static String organization = ((String) envMap.get("KABANERO_CLI_GROUP") != null)
 			? (String) envMap.get("KABANERO_CLI_GROUP")
 			: "kabanero.io";
+	// should be array
 	private static String namespace = (String) envMap.get("KABANERO_CLI_NAMESPACE");
 
 	@GET
@@ -85,8 +87,15 @@ public class CollectionsAccess {
 			String user = getUser(request);
 			System.out.println("user=" + user);
 
+			String PAT = getPAT();
+			if (PAT==null) {
+				System.out.println("login token has expired, please login again");
+				JSONObject resp = new JSONObject();
+				msg.put("message", "your login token has expired, please login again");
+				return Response.status(401).entity(resp).build();
+			}
 			ArrayList<Map> masterCollections = (ArrayList<Map>) CollectionsUtils
-					.getMasterCollectionWithREST(getUser(request), getPAT(), namespace);
+					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
 			JSONArray ja = convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections));
 			System.out.println("master collectionfor namespace: "+namespace+" organization: " + organization +"="+ ja);
 			msg.put("master collections", ja);
@@ -194,8 +203,16 @@ public class CollectionsAccess {
 			System.out.println(" ");
 			System.out.println("List of active kab collections= "+kabList);
 			
+			String PAT = getPAT();
+			if (PAT==null) {
+				System.out.println("login token has expired, please login again");
+				JSONObject resp = new JSONObject();
+				msg.put("message", "your login token has expired, please login again");
+				return Response.status(401).entity(resp).build();
+			}
+			
 			List<Map> masterCollections = (ArrayList<Map>) CollectionsUtils
-					.getMasterCollectionWithREST(getUser(request), getPAT(), namespace);
+					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
 			System.out.println(" ");
 			System.out.println("List of active master collections= "+masterCollections);
 			
@@ -367,11 +384,10 @@ public class CollectionsAccess {
 		try {
 			PAT = (new PATHelper()).extractGithubAccessTokenFromSubject();
 		} catch (Exception e) {
-			e.printStackTrace();
-			JSONObject msg = new JSONObject();
-			msg.put("message", "your login token has expired, please login again");
-			Response.status(401).entity(msg).build();
+			System.out.println("login token has expired, please login again");
+			return null;
 		}
+		
 
 		return PAT;
 	}
