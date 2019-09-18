@@ -24,7 +24,7 @@ deploy:
 - provider: script
   script: make push-image
   on:
-     branch: buildAutomation2
+#    branch: buildAutomation2
      condition: ${DOCKER_USERNAME} && ${DOCKER_PASSWORD}
 
 
