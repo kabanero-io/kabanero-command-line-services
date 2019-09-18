@@ -1,6 +1,6 @@
 # The Docker image in format repository:tag. Repository may contain a remote reference.
 # Override in order to customize
-IMAGE ?= kabanero-command-line-services:latest
+IMAGE ?= davco01a/kabanero-command-line-services:latest
 
 # Computed repository name (no tag) including repository host/path reference
 REPOSITORY=$(firstword $(subst :, ,${IMAGE}))
