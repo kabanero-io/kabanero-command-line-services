@@ -91,7 +91,7 @@ public class CollectionsAccess {
 			if (PAT==null) {
 				System.out.println("login token has expired, please login again");
 				JSONObject resp = new JSONObject();
-				msg.put("message", "your login token has expired, please login again");
+				resp.put("message", "your login token has expired, please login again");
 				return Response.status(401).entity(resp).build();
 			}
 			ArrayList<Map> masterCollections = (ArrayList<Map>) CollectionsUtils
@@ -207,7 +207,7 @@ public class CollectionsAccess {
 			if (PAT==null) {
 				System.out.println("login token has expired, please login again");
 				JSONObject resp = new JSONObject();
-				msg.put("message", "your login token has expired, please login again");
+				resp.put("message", "your login token has expired, please login again");
 				return Response.status(401).entity(resp).build();
 			}
 			
