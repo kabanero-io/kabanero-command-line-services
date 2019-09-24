@@ -62,9 +62,7 @@ public class CollectionsAccess {
 
 	private static Map envMap = System.getenv();
 	// should be array
-	private static String organization = ((String) envMap.get("KABANERO_CLI_GROUP") != null)
-			? (String) envMap.get("KABANERO_CLI_GROUP")
-			: "kabanero.io";
+	private static String group = "kabanero.io";
 	// should be array
 	private static String namespace = (String) envMap.get("KABANERO_CLI_NAMESPACE");
 
@@ -97,7 +95,7 @@ public class CollectionsAccess {
 			ArrayList<Map> masterCollections = (ArrayList<Map>) CollectionsUtils
 					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
 			JSONArray ja = convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections));
-			System.out.println("master collectionfor namespace: "+namespace+" organization: " + organization +"="+ ja);
+			System.out.println("master collectionfor namespace: "+namespace+" kab group: " + group +"="+ ja);
 			msg.put("master collections", ja);
 
 			// make call to kabanero to get current collection
@@ -105,13 +103,13 @@ public class CollectionsAccess {
 			ApiClient apiClient = KubeUtils.getApiClient();
 
 			String plural = "collections";
-			System.out.println("listing collections for namespace: "+namespace+" organization: " + organization);
+			System.out.println("listing collections for namespace: "+namespace+" kab group: " + group);
 
 			msg.put("active collections",
-					convertMapToJSON(KubeUtils.listResources(apiClient, organization, version, plural, namespace)));
+					convertMapToJSON(KubeUtils.listResources(apiClient, group, version, plural, namespace)));
 			Map fromKabanero = null;
 			try {
-				fromKabanero = KubeUtils.mapResources(apiClient, organization, version, plural, namespace);
+				fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
 			} catch (ApiException e) {
 				e.printStackTrace();
 			}
@@ -188,7 +186,7 @@ public class CollectionsAccess {
 
 		Map fromKabanero = null;
 		try {
-			fromKabanero = KubeUtils.mapResources(apiClient, organization, version, plural, namespace);
+			fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
 		} catch (ApiException e) {
 			e.printStackTrace();
 		}
@@ -242,13 +240,13 @@ public class CollectionsAccess {
 				try {
 					JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for activate: " + jo);
-					KubeUtils.createResource(apiClient, organization, version, plural, namespace, jo);
-					System.out.println("*** collection " + m.get("name") + " activated, organization "+organization);
+					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
+					System.out.println("*** collection " + m.get("name") + " activated, organization "+group);
 					m.put("status", m.get("name") + " activated");
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** collection " + m.get("name") + " failed to activate, organization "+organization);
+					System.out.println("*** collection " + m.get("name") + " failed to activate, organization "+group);
 					e.printStackTrace();
 					m.put("status", m.get("name") + " activation failed");
 					m.put("exception", e.getMessage());
@@ -266,15 +264,15 @@ public class CollectionsAccess {
 				try {
 					JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for version change: " + jo);
-					KubeUtils.updateResource(apiClient, organization, version, plural, namespace, m.get("name").toString(),
+					KubeUtils.updateResource(apiClient, group, version, plural, namespace, m.get("name").toString(),
 							jo);
 					System.out.println(
-							"*** " + m.get("name") + "version change completed, new version number: " + version+", organization "+organization);
+							"*** " + m.get("name") + "version change completed, new version number: " + version+", organization "+group);
 					m.put("status", m.get("name") + "version change completed, new version number: " + version);
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** " + m.get("name") + "version change failed organization "+organization);
+					System.out.println("*** " + m.get("name") + "version change failed organization "+group);
 					e.printStackTrace();
 					m.put("status", m.get("name") + "version change failed");
 					m.put("exception", e.getMessage());
@@ -323,7 +321,7 @@ public class CollectionsAccess {
 		JSONObject msg = new JSONObject();
 
 		try {
-			int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, organization, version, plural);
+			int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, plural);
 			if (rc == 0) {
 				System.out.println("*** " + "Collection name: " + name + " deactivated");
 				msg.put("status", "Collection name: " + name + " deactivated");
