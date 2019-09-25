@@ -71,7 +71,7 @@ public class CollectionsAccess {
 	@Path("/version")
 	public Response versionlist(@Context final HttpServletRequest request) {
 		JSONObject msg = new JSONObject();
-		msg.put("version", "0.1");
+		msg.put("version", "0.2.0");
 		return Response.ok(msg).build();
 	}
 
