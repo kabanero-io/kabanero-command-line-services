@@ -54,7 +54,7 @@ public class CollectionsAccess {
 	private static String version = "v1alpha1";
 
 	private static Map envMap = System.getenv();
-	// should be array
+	
 	private static String group = "kabanero.io";
 	// should be array
 	private static String namespace = (String) envMap.get("KABANERO_CLI_NAMESPACE");
