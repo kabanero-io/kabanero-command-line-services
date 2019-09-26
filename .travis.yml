@@ -25,7 +25,7 @@ deploy:
 - provider: script
   script: make push-image
   on:
-# latest branch in my private fork
+# branch named "latest" in my private fork
      branch: latest
      condition: ${DOCKER_USERNAME} && ${DOCKER_PASSWORD}
 
