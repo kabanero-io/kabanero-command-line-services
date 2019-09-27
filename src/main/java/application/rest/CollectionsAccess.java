@@ -89,7 +89,7 @@ public class CollectionsAccess {
 					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
 			String firstElem = masterCollections.get(0).toString();
 			if (firstElem!=null) {
-				if (firstElem.contains("GIT retry Limited Exceeded, please try again in 2 minutes")) {
+				if (firstElem.contains("http code 429:")) {
 					JSONObject resp = new JSONObject();
 					resp.put("message", firstElem);
 					return Response.status(401).entity(resp).build();
@@ -219,7 +219,7 @@ public class CollectionsAccess {
 					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
 			String firstElem = masterCollections.get(0).toString();
 			if (firstElem!=null) {
-				if (firstElem.contains("GIT retry Limited Exceeded, please try again in 2 minutes")) {
+				if (firstElem.contains("http code 429:")) {
 					JSONObject resp = new JSONObject();
 					resp.put("message", firstElem);
 					return Response.status(401).entity(resp).build();

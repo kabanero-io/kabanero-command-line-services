@@ -65,11 +65,11 @@ public class CollectionsUtils {
 
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 		if (response.getStatusLine().getStatusCode()==429) {
-			return "GIT retry Limited Exceeded, please try again in 2 minutes";
+			return "http code 429: GIT retry Limited Exceeded, please try again in 2 minutes";
 		}
 		
 		if (true) {
-			return "GIT retry Limited Exceeded, please try again in 2 minutes";
+			return "http code 429: GIT retry Limited Exceeded, please try again in 2 minutes";
 		}
 		
 		BufferedReader rd = null;
