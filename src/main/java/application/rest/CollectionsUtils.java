@@ -65,11 +65,11 @@ public class CollectionsUtils {
 
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 		if (response.getStatusLine().getStatusCode()==429) {
-			throw new WebApplicationException("rc=429: Retry Limited Exceeded, please try again in 2 minutes");
+			return "rc=429: Retry Limited Exceeded, please try again in 2 minutes";
 		}
 		
 		if (true) {
-			throw new WebApplicationException("rc=429: Retry Limited Exceeded, please try again in 2 minutes");
+			return "rc=429: Retry Limited Exceeded, please try again in 2 minutes";
 		}
 
 		BufferedReader rd = null;
@@ -121,6 +121,12 @@ public class CollectionsUtils {
 		String response = null;
 		try {
 			response = getFromGit(url, user, pw);
+			if (response!=null) {
+				if (response.contains("rc=429")) {
+					ArrayList<String> list= new ArrayList();
+					list.add(response);
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;

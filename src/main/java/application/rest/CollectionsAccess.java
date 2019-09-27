@@ -85,8 +85,14 @@ public class CollectionsAccess {
 				resp.put("message", "your login token has expired, please login again");
 				return Response.status(401).entity(resp).build();
 			}
-			ArrayList<Map> masterCollections = (ArrayList<Map>) CollectionsUtils
+			ArrayList masterCollections = (ArrayList) CollectionsUtils
 					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
+			String firstElem = masterCollections.get(0).toString();
+			if (firstElem!=null) {
+				if (firstElem.contains("rc=429")) {
+					return Response.status(501).entity(firstElem).build();
+				}
+			}
 			JSONArray ja = convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections));
 			System.out.println("master collectionfor namespace: "+namespace+" kab group: " + group +"="+ ja);
 			msg.put("master collections", ja);
@@ -209,6 +215,12 @@ public class CollectionsAccess {
 			
 			List<Map> masterCollections = (ArrayList<Map>) CollectionsUtils
 					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
+			String firstElem = masterCollections.get(0).toString();
+			if (firstElem!=null) {
+				if (firstElem.contains("rc=429")) {
+					return Response.status(501).entity(firstElem).build();
+				}
+			}
 			System.out.println(" ");
 			System.out.println("List of active master collections= "+masterCollections);
 			
