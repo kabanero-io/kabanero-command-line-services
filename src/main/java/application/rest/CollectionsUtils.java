@@ -125,6 +125,7 @@ public class CollectionsUtils {
 				if (response.contains("rc=429")) {
 					ArrayList<String> list= new ArrayList();
 					list.add(response);
+					return list;
 				}
 			}
 		} catch (Exception e) {
