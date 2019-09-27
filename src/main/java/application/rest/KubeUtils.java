@@ -388,6 +388,9 @@ public class KubeUtils {
     		}
     		logger.error("Unable to delete resource", ex);
     		throw ex;
+    	} catch(Exception ex) {
+    		logger.error("Unable to delete resource", ex);
+    		throw ex;
     	}
     	return 0;
     }
