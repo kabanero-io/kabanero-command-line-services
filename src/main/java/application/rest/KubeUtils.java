@@ -379,7 +379,8 @@ public class KubeUtils {
     	try {
     		CustomObjectsApi customApi = new CustomObjectsApi(client);
     		V1DeleteOptions body = new V1DeleteOptions();
-    		customApi.deleteNamespacedCustomObject(group, version, namespace, plural, name, body, null, null, null);
+    		Object resp = customApi.deleteNamespacedCustomObject(group, version, namespace, plural, name, body, null, null, null);
+    		System.out.println("response from delete: "+resp);
     	} catch(ApiException ex) {
     		int code = ex.getCode();
     		if ( code == 404) {
