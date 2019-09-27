@@ -92,7 +92,7 @@ public class CollectionsAccess {
 				if (firstElem.contains("http code 429:")) {
 					JSONObject resp = new JSONObject();
 					resp.put("message", firstElem);
-					return Response.status(401).entity(resp).build();
+					return Response.status(503).entity(resp).build();
 				}
 			}
 			JSONArray ja = convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections));
@@ -222,7 +222,7 @@ public class CollectionsAccess {
 				if (firstElem.contains("http code 429:")) {
 					JSONObject resp = new JSONObject();
 					resp.put("message", firstElem);
-					return Response.status(401).entity(resp).build();
+					return Response.status(503).entity(resp).build();
 				}
 			}
 			System.out.println(" ");
