@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -27,7 +25,6 @@ import org.yaml.snakeyaml.Yaml;
 import com.google.gson.internal.LinkedTreeMap;
 
 import io.kubernetes.client.ApiClient;
-import io.kubernetes.client.ApiException;
 
 public class CollectionsUtils {
 
