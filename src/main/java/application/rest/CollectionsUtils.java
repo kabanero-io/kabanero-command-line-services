@@ -122,7 +122,7 @@ public class CollectionsUtils {
 		try {
 			response = getFromGit(url, user, pw);
 			if (response!=null) {
-				if (response.contains("rc=429")) {
+				if (response.contains("GIT retry Limited Exceeded, please try again in 2 minutes")) {
 					ArrayList<String> list= new ArrayList();
 					list.add(response);
 					return list;
