@@ -68,10 +68,6 @@ public class CollectionsUtils {
 			return "rc=429: Retry Limited Exceeded, please try again in 2 minutes";
 		}
 		
-		if (true) {
-			return "rc=429: Retry Limited Exceeded, please try again in 2 minutes";
-		}
-
 		BufferedReader rd = null;
 		try {
 			rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));

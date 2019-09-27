@@ -90,7 +90,7 @@ public class CollectionsAccess {
 			String firstElem = masterCollections.get(0).toString();
 			if (firstElem!=null) {
 				if (firstElem.contains("rc=429")) {
-					return Response.status(501).entity(firstElem).build();
+					return Response.status(401).entity(firstElem).build();
 				}
 			}
 			JSONArray ja = convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections));
@@ -218,7 +218,7 @@ public class CollectionsAccess {
 			String firstElem = masterCollections.get(0).toString();
 			if (firstElem!=null) {
 				if (firstElem.contains("rc=429")) {
-					return Response.status(501).entity(firstElem).build();
+					return Response.status(401).entity(firstElem).build();
 				}
 			}
 			System.out.println(" ");
