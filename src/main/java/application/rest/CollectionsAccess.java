@@ -138,6 +138,11 @@ public class CollectionsAccess {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			if (e.getMessage().contains("rc=429")) {
+				JSONObject resp = new JSONObject();
+				resp.put("message", "Retry Limited Exceeded, please try again in 2 minutes");
+				Response.status(501).entity(resp).build();
+			}
 		}
 		return Response.ok(msg).build();
 	}
@@ -224,6 +229,12 @@ public class CollectionsAccess {
 			System.out.println("exception cause: " + e.getCause());
 			System.out.println("exception message: " + e.getMessage());
 			e.printStackTrace();
+			e.printStackTrace();
+			if (e.getMessage().contains("rc=429")) {
+				JSONObject resp = new JSONObject();
+				resp.put("message", "Retry Limited Exceeded, please try again in 2 minutes");
+				Response.status(501).entity(resp).build();
+			}
 		}
 		System.out.println("starting refresh");
 

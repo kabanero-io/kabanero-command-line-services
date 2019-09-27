@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -25,6 +27,7 @@ import org.yaml.snakeyaml.Yaml;
 import com.google.gson.internal.LinkedTreeMap;
 
 import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.ApiException;
 
 public class CollectionsUtils {
 
@@ -61,6 +64,9 @@ public class CollectionsUtils {
 		}
 
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
+		if (response.getStatusLine().getStatusCode()==429) {
+			throw new WebApplicationException("rc=429: Retry Limited Exceeded, please try again in 2 minutes");
+		}
 
 		BufferedReader rd = null;
 		try {
@@ -113,6 +119,7 @@ public class CollectionsUtils {
 			response = getFromGit(url, user, pw);
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw e;
 		}
 		System.out.println("response = " + response);
 		ArrayList<Map> list = null;
