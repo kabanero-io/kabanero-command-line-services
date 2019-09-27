@@ -215,7 +215,7 @@ public class CollectionsAccess {
 				return Response.status(401).entity(resp).build();
 			}
 			
-			List<Map> masterCollections = (ArrayList<Map>) CollectionsUtils
+			ArrayList masterCollections = (ArrayList) CollectionsUtils
 					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
 			String firstElem = masterCollections.get(0).toString();
 			if (firstElem!=null) {
