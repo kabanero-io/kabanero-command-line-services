@@ -67,6 +67,10 @@ public class CollectionsUtils {
 		if (response.getStatusLine().getStatusCode()==429) {
 			throw new WebApplicationException("rc=429: Retry Limited Exceeded, please try again in 2 minutes");
 		}
+		
+		if (true) {
+			throw new WebApplicationException("rc=429: Retry Limited Exceeded, please try again in 2 minutes");
+		}
 
 		BufferedReader rd = null;
 		try {
