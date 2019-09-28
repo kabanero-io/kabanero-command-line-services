@@ -61,7 +61,10 @@ public class CollectionsUtils {
 		}
 
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
-
+		if (response.getStatusLine().getStatusCode()==429) {
+			return "http code 429: GIT retry Limited Exceeded, please try again in 2 minutes";
+		}
+		
 		BufferedReader rd = null;
 		try {
 			rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
@@ -111,8 +114,16 @@ public class CollectionsUtils {
 		String response = null;
 		try {
 			response = getFromGit(url, user, pw);
+			if (response!=null) {
+				if (response.contains("http code 429:")) {
+					ArrayList<String> list= new ArrayList();
+					list.add(response);
+					return list;
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw e;
 		}
 		System.out.println("response = " + response);
 		ArrayList<Map> list = null;

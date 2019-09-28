@@ -54,7 +54,7 @@ public class CollectionsAccess {
 	private static String version = "v1alpha1";
 
 	private static Map envMap = System.getenv();
-	// should be array
+	
 	private static String group = "kabanero.io";
 	// should be array
 	private static String namespace = (String) envMap.get("KABANERO_CLI_NAMESPACE");
@@ -85,8 +85,16 @@ public class CollectionsAccess {
 				resp.put("message", "your login token has expired, please login again");
 				return Response.status(401).entity(resp).build();
 			}
-			ArrayList<Map> masterCollections = (ArrayList<Map>) CollectionsUtils
+			ArrayList masterCollections = (ArrayList) CollectionsUtils
 					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
+			String firstElem = masterCollections.get(0).toString();
+			if (firstElem!=null) {
+				if (firstElem.contains("http code 429:")) {
+					JSONObject resp = new JSONObject();
+					resp.put("message", firstElem);
+					return Response.status(503).entity(resp).build();
+				}
+			}
 			JSONArray ja = convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections));
 			System.out.println("master collectionfor namespace: "+namespace+" kab group: " + group +"="+ ja);
 			msg.put("master collections", ja);
@@ -138,6 +146,9 @@ public class CollectionsAccess {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			JSONObject resp = new JSONObject();
+			resp.put("message", e.getMessage());
+			return Response.status(500).entity(resp).build();
 		}
 		return Response.ok(msg).build();
 	}
@@ -202,8 +213,16 @@ public class CollectionsAccess {
 				return Response.status(401).entity(resp).build();
 			}
 			
-			List<Map> masterCollections = (ArrayList<Map>) CollectionsUtils
+			ArrayList masterCollections = (ArrayList) CollectionsUtils
 					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
+			String firstElem = masterCollections.get(0).toString();
+			if (firstElem!=null) {
+				if (firstElem.contains("http code 429:")) {
+					JSONObject resp = new JSONObject();
+					resp.put("message", firstElem);
+					return Response.status(503).entity(resp).build();
+				}
+			}
 			System.out.println(" ");
 			System.out.println("List of active master collections= "+masterCollections);
 			
@@ -224,6 +243,9 @@ public class CollectionsAccess {
 			System.out.println("exception cause: " + e.getCause());
 			System.out.println("exception message: " + e.getMessage());
 			e.printStackTrace();
+			JSONObject resp = new JSONObject();
+			resp.put("message", e.getMessage());
+			return Response.status(500).entity(resp).build();
 		}
 		System.out.println("starting refresh");
 
