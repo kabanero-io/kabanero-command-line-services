@@ -15,6 +15,7 @@ push-image:
 ifneq "$(IMAGE)" "kabanero-command-line-services:latest"
 	# Default push
 	docker push $(IMAGE)
+endif
 
 # tag and push if tagged for release in git
 ifdef TRAVIS_TAG
