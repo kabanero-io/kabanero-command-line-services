@@ -12,7 +12,7 @@ build-image:
 	docker build -t ${IMAGE} --build-arg IMAGE=${IMAGE} .
 
 push-image:
-ifneq "$(IMAGE)" "kabanero-command-line-services:latest"
+ifneq "$(IMAGE)" "kabanero/kabanero-command-line-services:latest"
 	# Default push
 	docker push $(IMAGE)
 endif
