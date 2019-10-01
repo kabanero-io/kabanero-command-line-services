@@ -1,3 +1,4 @@
+# Docker build for Kabanero CLI Microservice
 FROM openliberty/open-liberty:webProfile7-ubi-min
 # The following labels are required for Redhat container certification
 LABEL vendor="Kabanero" \
