@@ -1,5 +1,5 @@
 ## Microservice
-IBM Cloud Microservice Starter for Java - MicroProfile / Java EE
+Kabanero CLI Microservice 
 
 [![](https://img.shields.io/badge/IBM%20Cloud-powered-blue.svg)](https://bluemix.net)
 [![Platform](https://img.shields.io/badge/platform-java-lightgrey.svg?style=flat)](https://www.ibm.com/developerworks/learn/java/)
@@ -13,7 +13,7 @@ IBM Cloud Microservice Starter for Java - MicroProfile / Java EE
 
 ### Summary
 
-The IBM Cloud Microservice Starter for Java - MicroProfile / Java EE provides a starting point for creating Java microservice applications running on [WebSphere Liberty](https://developer.ibm.com/wasdev/).
+The Kabanero CLI Microservice provides the service endpoints in support of all of the functions of the Kabanero command line functional keywords (login, logout, list, refresh, onboard and version)
 
 
 ### Requirements
@@ -37,8 +37,8 @@ Credentials are either taken from the VCAP_SERVICES environment variable that IB
 ### Run
 
 To build and run the application:
-1. `mvn install`
-2. `mvn liberty:run-server`
+1. to build please see: `build-help.md`
+2. to run see README at: `https://github.com/kabanero-io/kabanero-command-line`
 
 
 To run the application in Docker use the Docker file called `Dockerfile`. If you do not want to install Maven locally you can use `Dockerfile-tools` to build a container with Maven installed.
@@ -48,7 +48,6 @@ To run the application in Docker use the Docker file called `Dockerfile`. If you
 The application exposes the following endpoints:
 * Health endpoint: `<host>:<port>/<contextRoot>/health`
 
-The context root is set in the `src/main/webapp/WEB-INF/ibm-web-ext.xml` file. The ports are set in the pom.xml file and exposed to the CLI in the cli-config.yml file.
 
 ### Notices
 
