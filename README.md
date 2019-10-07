@@ -45,5 +45,6 @@ To run the application in Docker use the Docker file called `Dockerfile`. If you
 The application exposes the following endpoints:
 * CLI endpoint: `<cli-route>`
 * Health endpoint: `<cli-route>/health`
+
 ( `<cli-route>` can be obtained by running the `oc get routes` command )
 
