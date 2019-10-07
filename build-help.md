@@ -13,3 +13,7 @@ in: https://github.com/kabanero-io/kabanero-command-line-services
 ### Verify Docker image in docker hub
 * Verify that the release (semver specified above) tagged image is listed at: https://hub.docker.com/r/kabanero/kabanero-command-line-services/tags
 
+## To build manually
+* git clone https://github.com/kabanero-io/kabanero-command-line-services
+* issue `mvn package` from local root of `kabanero-command-line-services` repository
+

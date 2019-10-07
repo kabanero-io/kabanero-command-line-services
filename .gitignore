@@ -1,6 +1,9 @@
 /target
+/chart
 /.m2
 /.classpath
+/.factorypath
+/Jenkinsfile
 /.project
 /.settings
 /caches
