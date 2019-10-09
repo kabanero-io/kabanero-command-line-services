@@ -7,6 +7,9 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.ibm.json.java.JSONArray;
+import com.ibm.json.java.JSONObject;
+
 import application.rest.CollectionsUtils;
 
 @Path("health")
@@ -21,12 +24,21 @@ public class HealthEndpoint {
     	} else {
     		healthy=false;
     	}
+    	
+      JSONObject msg = new JSONObject();
       
+      JSONArray checks = new JSONArray();
+  	  checks.add("GIT");
+  	  msg.put("checks", checks);
+  	  
       if (!healthy) {
-        return Response.status(503).entity("{\"status\":\"DOWN\"}").build();
+    	msg.put("status", "DOWN");
+        return Response.status(503).entity(msg).build();
+      } else {
+    	  msg.put("status", "UP");
+    	  return Response.ok("{\"status\":\"UP\"}").build();
       }
      
-      return Response.ok("{\"status\":\"UP\"}").build();
     }
 
 }
