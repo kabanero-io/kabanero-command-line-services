@@ -11,6 +11,7 @@ import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
 
 import application.rest.CollectionsUtils;
+import kabasec.HttpUtils;
 
 @Path("health")
 public class HealthEndpoint {
@@ -19,7 +20,7 @@ public class HealthEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response healthcheck() {
     	boolean healthy=true;
-    	if (CollectionsUtils.readGitSuccess && true) {
+    	if (CollectionsUtils.readGitSuccess && HttpUtils.accessGitSuccess) {
     		healthy=true;
     	} else {
     		healthy=false;
