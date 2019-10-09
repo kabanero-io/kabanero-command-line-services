@@ -7,17 +7,25 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import application.rest.CollectionsUtils;
+
 @Path("health")
 public class HealthEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response healthcheck() {
-      /*
+    	boolean healthy=true;
+    	if (CollectionsUtils.readGitSuccess && true) {
+    		healthy=true;
+    	} else {
+    		healthy=false;
+    	}
+      
       if (!healthy) {
         return Response.status(503).entity("{\"status\":\"DOWN\"}").build();
       }
-      */
+     
       return Response.ok("{\"status\":\"UP\"}").build();
     }
 
