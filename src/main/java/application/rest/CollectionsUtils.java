@@ -58,12 +58,12 @@ public class CollectionsUtils {
 		;
 		try {
 			response = client.execute(request);
+			readGitSuccess=true;
 		} catch (IOException e) {
 			e.printStackTrace();
 			readGitSuccess=false;
 			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url,e);
 		}
-		readGitSuccess=true;
 
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 		if (response.getStatusLine().getStatusCode()==429) {
