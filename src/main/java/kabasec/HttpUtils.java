@@ -18,9 +18,12 @@ import javax.ws.rs.container.ContainerRequestContext;
 import com.ibm.websphere.ssl.JSSEHelper;
 
 public class HttpUtils {
+    
+    public static boolean accessGitSuccess = true;
 
     public String callApi(String requestMethod, String apiUrl, String userName, String passwordOrPat) throws KabaneroSecurityException {
         try {
+            accessGitSuccess = true;
             HttpURLConnection connection = createConnection(requestMethod, apiUrl, userName, passwordOrPat);
             String response = readConnectionResponse(connection);
             int responseCode = connection.getResponseCode();
@@ -33,6 +36,7 @@ public class HttpUtils {
             }
             return response;
         } catch (IOException e) {
+            accessGitSuccess = false;
             throw new KabaneroSecurityException("Connection to GitHub API [" + apiUrl + "] failed. Ensure SSL settings are correct and that the SSL certificate for the API is included in the truststore configured for the server. " + e, e);
         }
     }
