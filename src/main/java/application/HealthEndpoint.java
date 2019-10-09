@@ -12,11 +12,12 @@ import com.ibm.json.java.JSONObject;
 import application.rest.CollectionsUtils;
 import kabasec.HttpUtils;
 
-@Path("health")
+
 public class HealthEndpoint {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/health")
 	public Response healthcheck() {
 		boolean healthy = true;
 		if (CollectionsUtils.readGitSuccess && HttpUtils.accessGitSuccess) {
