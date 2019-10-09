@@ -12,7 +12,7 @@ import com.ibm.json.java.JSONObject;
 import application.rest.CollectionsUtils;
 import kabasec.HttpUtils;
 
-
+@Path("/v1")
 public class Liveliness {
 
 	@GET
