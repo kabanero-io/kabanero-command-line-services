@@ -13,18 +13,6 @@
   -->
   <httpEndpoint httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint" host="*" />
   
-  <webAppSecurity ssoRequiresSSL="true" httpOnlyCookies="true" /> 
-  
-  <httpSession cookieHttpOnly="true" allowOverflow="false" maxInMemorySessionCount="1000" alwaysEncodeUrl="true" cookieSecure="true"  />
-  
-  <applicationMonitor updateTrigger="mbean" dropinsEnabled="false" />
-  
-  <httpDispatcher enableWelcomePage="false" />
-  
-  <httpOptions removeServerHeader="true" />
-  
-  <webContainer disableXPoweredBy="true" />
-  
       
    <!-- The issuer specified here must match the issuer configured in the jwtBuilder -->
     <mpJwt id="kabmpjwt" issuer="${jwt.issuer}" keyName="default" signatureAlgorithm="HS256" 
@@ -56,7 +44,6 @@
 
   <applicationMonitor pollingRate="1000ms"/>
   
-  <webApplication id="kabanero-cli-service" location="kabanero-cli-service-1.0-SNAPSHOT.war" name="kabanero-cli-service"/>
   
 
 </server>

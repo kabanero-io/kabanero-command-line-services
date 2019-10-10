@@ -18,7 +18,7 @@ public class Liveliness {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/liveliness")
-	public Response healthcheck() {
+	public Response liveliness() {
 		boolean healthy = true;
 		if (CollectionsUtils.readGitSuccess && HttpUtils.accessGitSuccess) {
 			healthy = true;
