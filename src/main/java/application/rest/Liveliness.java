@@ -29,9 +29,17 @@ public class Liveliness {
 		JSONObject msg = new JSONObject();
 
 		JSONArray checks = new JSONArray();
-		checks.add("GIT");
-		checks.add("readGitSuccess: "+CollectionsUtils.readGitSuccess);
-		checks.add("accessGitSuccess: "+HttpUtils.accessGitSuccess);
+		JSONObject jo = new JSONObject();
+		JSONObject jo1 = new JSONObject();
+		
+		checks.add(jo);
+		
+		jo1.put("readGitSuccess",CollectionsUtils.readGitSuccess);
+		jo1.put("accessGitSuccess",HttpUtils.accessGitSuccess);
+		jo.put("GIT", jo1);
+		
+		checks.add(jo);
+		
 		msg.put("checks", checks);
 
 		if (!healthy) {
