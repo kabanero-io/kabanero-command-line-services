@@ -23,7 +23,7 @@ public class HttpUtils {
 
     public String callApi(String requestMethod, String apiUrl, String userName, String passwordOrPat) throws KabaneroSecurityException {
         try {
-            accessGitSuccess = false;
+            accessGitSuccess = true;
             HttpURLConnection connection = createConnection(requestMethod, apiUrl, userName, passwordOrPat);
             String response = readConnectionResponse(connection);
             int responseCode = connection.getResponseCode();
