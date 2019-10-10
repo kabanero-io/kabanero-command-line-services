@@ -44,6 +44,8 @@
 
   <applicationMonitor pollingRate="1000ms"/>
   
+  <webApplication id="kabanero-cli-service" location="kabanero-cli-service-1.0-SNAPSHOT.war" name="kabanero-cli-service"/>
+  
   
 
 </server>
