@@ -30,6 +30,8 @@ public class Liveliness {
 
 		JSONArray checks = new JSONArray();
 		checks.add("GIT");
+		checks.add("readGitSuccess: "+CollectionsUtils.readGitSuccess);
+		checks.add("accessGitSuccess: "+HttpUtils.accessGitSuccess);
 		msg.put("checks", checks);
 
 		if (!healthy) {
