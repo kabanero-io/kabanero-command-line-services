@@ -11,7 +11,19 @@
         <feature>json-1.0</feature>
   </featureManager>
   -->
-  <httpEndpoint httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint" host="*" />
+  <httpEndpoint httpPort="-1" httpsPort="9443" id="defaultHttpEndpoint" host="*" />
+  
+  <webAppSecurity ssoRequiresSSL="true" httpOnlyCookies="true" /> 
+  
+  <httpSession cookieHttpOnly="true" allowOverflow="false" maxInMemorySessionCount="1000" alwaysEncodeUrl="true" cookieSecure="true"  />
+  
+  <applicationMonitor updateTrigger="mbean" dropinsEnabled="false" />
+  
+  <httpDispatcher enableWelcomePage="false" />
+  
+  <httpOptions removeServerHeader="true" />
+  
+  <webContainer disableXPoweredBy="true" />
   
       
    <!-- The issuer specified here must match the issuer configured in the jwtBuilder -->

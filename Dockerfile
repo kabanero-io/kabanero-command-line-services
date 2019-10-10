@@ -14,9 +14,22 @@ COPY --chown=1001:0 /target/kabanero-cli-service-1.0-SNAPSHOT.war /config/dropin
 COPY --chown=1001:0 /src/main/liberty/config/cacerts /config/resources/security/cacerts
 COPY --chown=1001:0 /src/main/liberty/config/keystore.xml /config/configDropins/defaults
 COPY --chown=1001:0 /target/liberty/wlp/usr/servers/defaultServer/server.xml /config
+COPY --chown=1001:0 /src/main/liberty/config/jvm.options /config
+
 RUN mkdir -p /opt/ol/wlp/output/defaultServer/resources/security
 RUN chown -R 1001:0 /opt/ol/wlp/output/defaultServer/resources/security
 RUN chmod -R g+rw /opt/ol/wlp/output/defaultServer/resources/security
+RUN chmod 444 /config/server.xml
+RUN chmod 444 /config/server.env
+RUN chmod 444 /config/jvm.options
+RUN chmod 444 /config/resources/security/cacerts
+RUN chmod -R 444 /config/configDropins
+
 COPY /src/main/liberty/config/cacerts /opt/ol/wlp/output/defaultServer/resources/security/cacerts
 COPY /target/liberty/wlp/usr/servers/defaultServer/server.xml /opt/ol/wlp/output/defaultServer/server.xml
+COPY --chown=1001:0 /src/main/liberty/config/jvm.options /opt/ol/wlp/output/defaultServer
+RUN chmod 444 /opt/ol/wlp/output/defaultServer/server.xml
+RUN chmod 444 /opt/ol/wlp/output/defaultServer/jvm.options
+RUN chmod 444 /opt/ol/wlp/output/defaultServer/resources/security/cacerts
+
 
