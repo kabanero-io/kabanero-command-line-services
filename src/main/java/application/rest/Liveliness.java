@@ -32,8 +32,6 @@ public class Liveliness {
 		JSONObject jo = new JSONObject();
 		JSONObject jo1 = new JSONObject();
 		
-		checks.add(jo);
-		
 		jo1.put("readGitSuccess",CollectionsUtils.readGitSuccess);
 		jo1.put("accessGitSuccess",HttpUtils.accessGitSuccess);
 		jo.put("GIT", jo1);
