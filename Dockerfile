@@ -23,8 +23,8 @@ RUN chmod 444 /config/server.xml
 RUN chmod 444 /config/server.env
 RUN chmod 444 /config/jvm.options
 RUN chmod 444 /config/resources/security/cacerts
-RUN chmod 444 /config/configDropins/keystore.xml
-RUN rm /config/configDropins/open-default-port.xml
+RUN chmod 444 /config/configDropins/defaults/keystore.xml
+RUN rm /config/configDropins/defaults/open-default-port.xml
 
 COPY /src/main/liberty/config/cacerts /opt/ol/wlp/output/defaultServer/resources/security/cacerts
 COPY /target/liberty/wlp/usr/servers/defaultServer/server.xml /opt/ol/wlp/output/defaultServer/server.xml
