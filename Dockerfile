@@ -14,7 +14,7 @@ COPY --chown=1001:0 /target/kabanero-cli-service-1.0-SNAPSHOT.war /config/apps
 COPY --chown=1001:0 /src/main/liberty/config/cacerts /config/resources/security/cacerts
 COPY --chown=1001:0 /src/main/liberty/config/keystore.xml /config/configDropins/defaults
 COPY --chown=1001:0 /target/liberty/wlp/usr/servers/defaultServer/server.xml /config
-COPY --chown=1001:0 /src/main/liberty/config/jvm.options /config
+#COPY --chown=1001:0 /src/main/liberty/config/jvm.options /config
 
 RUN mkdir -p /opt/ol/wlp/output/defaultServer/resources/security
 RUN chown -R 1001:0 /opt/ol/wlp/output/defaultServer/resources/security
