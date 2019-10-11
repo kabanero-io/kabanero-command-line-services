@@ -5,4 +5,5 @@
     xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee http://websphere.ibm.com/xml/ns/javaee/ibm-web-ext_1_0.xsd"
     version="1.0">
     <context-root uri="/"/>
+    <enable-directory-browsing value="false"/> 
 </web-ext>

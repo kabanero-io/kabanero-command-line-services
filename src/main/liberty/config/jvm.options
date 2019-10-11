@@ -1,1 +1,4 @@
--javaagent:resources/javametrics-agent.jar
+#-javaagent:resources/javametrics-agent.jar
+#-Dcom.ibm.jsse2.sp800-131=strict
+-Djdk.tls.client.protocols=TLSv1.2
+-Dhttps.protocols=TLSv1.2

@@ -11,7 +11,21 @@
         <feature>json-1.0</feature>
   </featureManager>
   -->
-  <httpEndpoint httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint" host="*" />
+  <httpEndpoint httpPort="-1" httpsPort="9443" id="defaultHttpEndpoint" host="*" />
+  
+  <webAppSecurity ssoRequiresSSL="true" httpOnlyCookies="true" /> 
+  
+  <httpSession cookieHttpOnly="true" allowOverflow="false" maxInMemorySessionCount="1000" alwaysEncodeUrl="true" cookieSecure="true"  />
+  
+  <applicationMonitor updateTrigger="mbean" dropinsEnabled="false" />
+  
+  <httpDispatcher enableWelcomePage="false" />
+  
+  <httpOptions removeServerHeader="true" />
+  
+  <webContainer disableXPoweredBy="true" />
+  
+  <config updateTrigger="mbean"/>
   
       
    <!-- The issuer specified here must match the issuer configured in the jwtBuilder -->
@@ -30,7 +44,7 @@
     <sslDefault sslRef="kabSSLConfig"/>
     <ssl id="kabSSLConfig" keyStoreRef="defaultKeyStore" trustStoreRef="validationKeystore"/>
     <keyStore id="defaultKeyStore" />
-    <keyStore id="validationKeystore" location="${server.config.dir}/resources/security/cacerts" type="jks" password="changeit"/>
+    <keyStore id="validationKeystore" location="${server.config.dir}/resources/security/cacerts" type="jks" />
     
     <!-- this will be the issuer of the jwts -->
     <variable name="jwt.issuer" defaultValue="https://kabasec.com" />
@@ -44,6 +58,7 @@
 
   <applicationMonitor pollingRate="1000ms"/>
   
+  <webApplication id="kabanero-cli-service" location="kabanero-cli-service-1.0-SNAPSHOT.war" name="kabanero-cli-service"/>
   
 
 </server>

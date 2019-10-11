@@ -27,6 +27,8 @@ import com.google.gson.internal.LinkedTreeMap;
 import io.kubernetes.client.ApiClient;
 
 public class CollectionsUtils {
+	
+	public static boolean readGitSuccess=true;
 
 	private static Map readYaml(String response) {
 		Yaml yaml = new Yaml();
@@ -56,8 +58,11 @@ public class CollectionsUtils {
 		;
 		try {
 			response = client.execute(request);
+			readGitSuccess=true;
 		} catch (IOException e) {
 			e.printStackTrace();
+			readGitSuccess=false;
+			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url,e);
 		}
 
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
