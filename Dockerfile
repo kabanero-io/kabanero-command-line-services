@@ -12,7 +12,6 @@ COPY LICENSE /licenses/
 #FROM open-liberty:webProfile7-java8-openj9
 COPY --chown=1001:0 /target/kabanero-cli-service-1.0-SNAPSHOT.war /config/apps
 COPY --chown=1001:0 /src/main/liberty/config/cacerts /config/resources/security/cacerts
-#COPY --chown=1001:0 /src/main/liberty/config/keystore.xml /config/configDropins/defaults
 COPY --chown=1001:0 /target/liberty/wlp/usr/servers/defaultServer/server.xml /config
 COPY --chown=1001:0 /src/main/liberty/config/jvm.options /config
 
@@ -23,7 +22,6 @@ RUN chmod 444 /config/server.xml
 RUN chmod 444 /config/server.env
 RUN chmod 444 /config/jvm.options
 RUN chmod 444 /config/resources/security/cacerts
-#RUN rm /config/configDropins/defaults/keystore.xml
 RUN rm /config/configDropins/defaults/open-default-port.xml
 
 
