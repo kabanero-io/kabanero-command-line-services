@@ -25,6 +25,8 @@
   
   <webContainer disableXPoweredBy="true" />
   
+  <config updateTrigger="mbean"/>
+  
       
    <!-- The issuer specified here must match the issuer configured in the jwtBuilder -->
     <mpJwt id="kabmpjwt" issuer="${jwt.issuer}" keyName="default" signatureAlgorithm="HS256" 
