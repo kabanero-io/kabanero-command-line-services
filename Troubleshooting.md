@@ -19,7 +19,7 @@
     	* Select the `kabanero-cli` pod, make sure it's in `Running` status
     	* Click on the logs tab, examine log for any exceptions
     	
-## Unexpected output or exceptions from LIST ore REFRESH commands
+## Unexpected output or exceptions from LIST or REFRESH commands
  
  1.  Check CLI Pod
    
