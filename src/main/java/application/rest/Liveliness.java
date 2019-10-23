@@ -19,8 +19,6 @@ public class Liveliness {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/liveliness")
 	public Response liveliness() {
-		System.out.println("entering liveness probe");
-		System.out.println("a '.' means it's healthy");
 		boolean healthy = true;
 		if (CollectionsUtils.readGitSuccess && HttpUtils.accessGitSuccess) {
 			healthy = true;
