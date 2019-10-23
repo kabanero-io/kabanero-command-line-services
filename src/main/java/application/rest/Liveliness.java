@@ -20,6 +20,7 @@ public class Liveliness {
 	@Path("/liveliness")
 	public Response liveliness() {
 		System.out.println("entering liveness probe");
+		System.out.println("a '.' means it's healthy");
 		boolean healthy = true;
 		if (CollectionsUtils.readGitSuccess && HttpUtils.accessGitSuccess) {
 			healthy = true;
@@ -34,9 +35,6 @@ public class Liveliness {
 		JSONObject jo1 = new JSONObject();
 		
 		
-		System.out.println("readGitSuccess: "+CollectionsUtils.readGitSuccess);
-		System.out.println("accessGitSuccess: "+HttpUtils.accessGitSuccess);
-		
 		jo1.put("readGitSuccess",CollectionsUtils.readGitSuccess);
 		jo1.put("accessGitSuccess",HttpUtils.accessGitSuccess);
 		jo.put("GIT", jo1);
@@ -49,6 +47,7 @@ public class Liveliness {
 			msg.put("status", "DOWN");
 			return Response.status(503).entity(msg).build();
 		} else {
+			System.out.print(".");
 			msg.put("status", "UP");
 			return Response.ok(msg).build();
 		}
