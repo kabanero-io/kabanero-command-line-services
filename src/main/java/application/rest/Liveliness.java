@@ -45,7 +45,6 @@ public class Liveliness {
 			msg.put("status", "DOWN");
 			return Response.status(503).entity(msg).build();
 		} else {
-			System.out.print(".");
 			msg.put("status", "UP");
 			return Response.ok(msg).build();
 		}
