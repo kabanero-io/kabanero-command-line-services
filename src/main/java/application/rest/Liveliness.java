@@ -19,6 +19,7 @@ public class Liveliness {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/liveliness")
 	public Response liveliness() {
+		System.out.println("entering liveness probe");
 		boolean healthy = true;
 		if (CollectionsUtils.readGitSuccess && HttpUtils.accessGitSuccess) {
 			healthy = true;
@@ -31,6 +32,10 @@ public class Liveliness {
 		JSONArray checks = new JSONArray();
 		JSONObject jo = new JSONObject();
 		JSONObject jo1 = new JSONObject();
+		
+		
+		System.out.println("readGitSuccess: "+CollectionsUtils.readGitSuccess);
+		System.out.println("accessGitSuccess: "+HttpUtils.accessGitSuccess);
 		
 		jo1.put("readGitSuccess",CollectionsUtils.readGitSuccess);
 		jo1.put("accessGitSuccess",HttpUtils.accessGitSuccess);

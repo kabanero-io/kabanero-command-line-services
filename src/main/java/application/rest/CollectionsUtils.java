@@ -41,6 +41,18 @@ public class CollectionsUtils {
 		}
 		return obj;
 	}
+	
+	private static boolean pause() {
+        // Sleep for half a second before next try
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            // Something woke us up, most probably process is exiting.
+            // Just break out of the loop to report the last DB exception.
+            return true;
+        }
+        return false;
+    }
 
 	private static String getFromGit(String url, String user, String pw) {
 
@@ -55,14 +67,25 @@ public class CollectionsUtils {
 		// add request header
 
 		HttpResponse response = null;
-		;
-		try {
-			response = client.execute(request);
-			readGitSuccess=true;
-		} catch (IOException e) {
-			e.printStackTrace();
+		IOException savedEx=null;
+		int retries = 0;
+		for (; retries < 10; retries++) {
+			try {
+				response = client.execute(request);
+				readGitSuccess=true;
+				break;
+			} catch (IOException e) {
+				e.printStackTrace();
+				savedEx=e;
+			}
+			if (pause()) {
+				break;
+			}
+		}
+		
+		if (retries >= 10) {
 			readGitSuccess=false;
-			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url,e);
+			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url, savedEx);
 		}
 
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
