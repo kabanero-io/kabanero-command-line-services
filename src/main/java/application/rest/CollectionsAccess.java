@@ -352,6 +352,7 @@ public class CollectionsAccess {
 			}
 			Map spec = (Map) fromKabanero.get("spec");
 			String collVersion = (String) spec.get("version");
+			collVersion="0.2.7";
 			Map m = new HashMap();
 			m.put("name", name);
 			m.put("version", collVersion);
