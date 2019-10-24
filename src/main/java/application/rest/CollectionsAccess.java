@@ -382,14 +382,11 @@ public class CollectionsAccess {
 				+ "        \"namespace\": \"{{__NAMESPACE__}}\","
 				+ "    \"spec\": {" + "\"version\": \"{{__VERSION__}}\"," + "        \"desiredState\": \"{{__DESIRED_STATE__}}\"" + "    }" + "}";
 		
-		String desiredState = (String) m.get("desiredState");
+		
 
-		String jsonBody = joString.replace("{{__NAME__}}", m.get("name").toString())
+		String jsonBody = joString.replace("{{__NAME__}}", m.get("name").toString()).replace("{{__DESIRED_STATE__}}", (String) m.get("desiredState"))
 				.replace("{{__NAMESPACE__}}", namespace).replace("{{__VERSION__}}", (String) m.get("version"));
 				
-		if (desiredState != null) {
-			jsonBody = joString.replace("{{__DESIRED_STATE__}}", desiredState);
-		}
 		
 		System.out.println("made JSONBody: " + jsonBody);
 
