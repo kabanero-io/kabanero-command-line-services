@@ -464,6 +464,15 @@ public class KubeUtils {
         return map;
      }
     
+    public static Map mapOneResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name) throws ApiException {
+        logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
+        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
+        Object obj = customApi.getNamespacedCustomObject(group, version, namespace, plural, name);
+        System.out.println("current kab collections="+obj.toString());
+        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) obj;
+        return map;
+     }
+    
 
 
 }

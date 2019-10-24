@@ -19,6 +19,7 @@
 package application.rest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -336,21 +337,27 @@ public class CollectionsAccess {
 		JSONObject msg = new JSONObject();
 
 		try {
-			int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, plural);
-			if (rc == 0) {
-				System.out.println("*** " + "Collection name: " + name + " deactivated");
-				msg.put("status", "Collection name: " + name + " deactivated");
-				return Response.ok(msg).build();
-			}
-			else if (rc == 404) {
+			// mapOneResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name)
+			Map fromKabanero = KubeUtils.mapOneResource(apiClient, group, version, plural, namespace, name);
+			if (fromKabanero==null) {
 				System.out.println("*** " + "Collection name: " + name + " 404 not found");
 				msg.put("status", "Collection name: " + name + " 404 not found");
 				return Response.status(400).entity(msg).build();
-			} else {
-				System.out.println("*** " + "Collection name: " + name + " was not deactivated, rc="+rc);
-				msg.put("status", "Collection name: " + name + " was not deactivated, rc="+rc);
-				return Response.status(400).entity(msg).build();
 			}
+			Map spec = (Map) fromKabanero.get("spec");
+			String collVersion = (String) spec.get("version");
+			Map m = new HashMap();
+			m.put("name", name);
+			m.put("version", collVersion);
+			m.put("originalName",name);
+			m.put("desiredState","inactive");
+			JsonObject jo = makeJSONBody(m, namespace);
+			System.out.println("json object for version change: " + jo);
+			KubeUtils.updateResource(apiClient, group, version, plural, namespace, name,
+					jo);
+			System.out.println("*** " + "Collection name: " + name + " deactivated");
+			msg.put("status", "Collection name: " + name + " deactivated");
+			return Response.ok(msg).build();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -369,11 +376,21 @@ public class CollectionsAccess {
 				+ "    \"metadata\": {" + "        \"name\": \"{{__NAME__}}\","
 				+ "        \"namespace\": \"{{__NAMESPACE__}}\"," + "        \"annotations\": {"
 				+ "              \"collexion_id\": \"{{__COLLEXION_ID__}}\"" + "        }" + "    },"
-				+ "    \"spec\": {" + "        \"version\": \"{{__VERSION__}}\"" + "    }" + "}";
+				+ "    \"spec\": {" + "\"version\": \"{{__VERSION__}}\"," + "        \"desiredState\": \"{{__DESIRED_STATE__}}\"" + "    }" + "}";
+		
+		String desiredState = (String) m.get("desiredState");
+		String originalName = (String) m.get("originalName");
 
 		String jsonBody = joString.replace("{{__NAME__}}", m.get("name").toString())
-				.replace("{{__NAMESPACE__}}", namespace).replace("{{__VERSION__}}", (String) m.get("version"))
-				.replace("{{__COLLEXION_ID__}}", (String) m.get("originalName"));
+				.replace("{{__NAMESPACE__}}", namespace).replace("{{__VERSION__}}", (String) m.get("version"));
+				
+		if (desiredState!=null) {
+			jsonBody = joString.replace("{{__DESIRED_STATE__}}", (String) m.get("desiredState"));
+		}
+		
+		if (originalName!=null) {
+			jsonBody = joString.replace("{{__COLLEXION_ID__}}", (String) m.get("originalName"));
+		}
 
 		JsonParser parser = new JsonParser();
 		JsonElement element = parser.parse(jsonBody);
@@ -381,6 +398,8 @@ public class CollectionsAccess {
 
 		return json;
 	}
+	
+
 
 	private String getUser(HttpServletRequest request) {
 		String user = null;

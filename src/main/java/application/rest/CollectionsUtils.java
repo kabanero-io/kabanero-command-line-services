@@ -202,6 +202,7 @@ public class CollectionsUtils {
 					gitMap.put("name", map.get("id"));
 					gitMap.put("originalName", map.get("name"));
 					gitMap.put("version", version);
+					gitMap.put("desiredState","inactive");
 					newCollections.add(gitMap);
 				}
 			}
@@ -235,6 +236,8 @@ public class CollectionsUtils {
 				if (!match) {
 					kabMap.put("name", name);
 					kabMap.put("version", version);
+					kabMap.put("originalName",name);
+					kabMap.put("desiredState","inactive");
 					collectionsToDelete.add(kabMap);
 				}
 			}
@@ -254,6 +257,7 @@ public class CollectionsUtils {
 				version = version.trim();
 				boolean match = true;
 				HashMap gitMap = new HashMap();
+				String desiredState=null;
 				for (Map map1 : fromKabanero) {
 					Map metadata = (Map) map1.get("metadata");
 					String name1 = (String) metadata.get("name");
@@ -264,6 +268,7 @@ public class CollectionsUtils {
 					if (name.contentEquals(name1)) {
 						if (!version1.contentEquals(version)) {
 							match = false;
+							desiredState=(String) spec.get("desiredState");
 						}
 					}
 				}
@@ -271,6 +276,7 @@ public class CollectionsUtils {
 					gitMap.put("name", map.get("id"));
 					gitMap.put("originalName", map.get("name"));
 					gitMap.put("version", version);
+					gitMap.put("desiredState", desiredState);
 					newCollections.add(gitMap);
 				}
 			}
