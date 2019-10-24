@@ -192,7 +192,7 @@ public class CollectionsUtils {
 					Map spec = (Map) map.get("spec");
 					String version = (String) spec.get("version");
 					Map status = (Map) map.get("status");
-					String statusStr = (String) spec.get("status");
+					String statusStr = (String) status.get("status");
 					if ("active".contentEquals(statusStr)) {
 						activeMap.put("name", name);
 						activeMap.put("version", version);
