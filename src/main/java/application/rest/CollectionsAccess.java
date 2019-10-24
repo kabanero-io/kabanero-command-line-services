@@ -375,7 +375,7 @@ public class CollectionsAccess {
 
 	private JsonObject makeJSONBody(Map m, String namespace) {
 
-		System.out.println("makingJSONBody: " + m.toString());
+		System.out.println("making JSONBody: " + m.toString());
 
 		String joString = "{" + "    \"apiVersion\": \"kabanero.io/" + version + "\"," + "    \"kind\": \"Collection\","
 				+ "    \"metadata\": {" + "        \"name\": \"{{__NAME__}}\","
@@ -390,6 +390,8 @@ public class CollectionsAccess {
 		if (desiredState != null) {
 			jsonBody = joString.replace("{{__DESIRED_STATE__}}", desiredState);
 		}
+		
+		System.out.println("made JSONBody: " + jsonBody);
 
 
 		JsonParser parser = new JsonParser();
