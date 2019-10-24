@@ -413,8 +413,11 @@ public class KubeUtils {
     
     public static void updateResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name, JsonObject jsonBody) throws Exception {
         logger.info("updating resource {}/{}/{} {}/{}:", group, version, plural, namespace, name);
+        JsonParser parser= new JsonParser();
+        JsonElement element= parser.parse(jsonBody.toString());
+        JsonObject json= element.getAsJsonObject();
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
-        customApi.patchNamespacedCustomObject(group, version, namespace, plural, name, jsonBody);
+        customApi.patchNamespacedCustomObjectStatus(group, version, namespace, plural, name, json);
      }
 
     /* Set status of resource
