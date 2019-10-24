@@ -106,11 +106,7 @@ public class CollectionsAccess {
 
 			String plural = "collections";
 			System.out.println("listing collections for namespace: "+namespace+" kab group: " + group);
-			
-			
-
-			
-			
+	
 			Map fromKabanero = null;
 			try {
 				fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
@@ -119,6 +115,8 @@ public class CollectionsAccess {
 			}
 
 			List<Map> kabList = (List) fromKabanero.get("items");
+			
+			System.out.println("all collections= " + kabList);
 			
 			List actives=CollectionsUtils.filterActiveCollections(kabList);
 			

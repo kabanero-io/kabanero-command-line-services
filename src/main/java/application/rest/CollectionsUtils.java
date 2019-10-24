@@ -185,6 +185,7 @@ public class CollectionsUtils {
 		try {
 			HashMap activeMap = new HashMap();
 				for (Map map : fromKabanero) {
+					System.out.println("working on one collection: " + map);
 					Map metadata = (Map) map.get("metadata");
 					String name = (String) metadata.get("name");
 					name = name.trim();
