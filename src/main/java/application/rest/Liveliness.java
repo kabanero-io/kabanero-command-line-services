@@ -16,7 +16,6 @@ import kabasec.HttpUtils;
 public class Liveliness {
 
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/liveliness")
 	public Response liveliness() {
 		boolean healthy = true;
@@ -26,7 +25,7 @@ public class Liveliness {
 			healthy = false;
 		}
 
-		JSONObject msg = new JSONObject();
+		//JSONObject msg = new JSONObject();
 
 		JSONArray checks = new JSONArray();
 		JSONObject jo = new JSONObject();
@@ -39,14 +38,14 @@ public class Liveliness {
 		
 		checks.add(jo);
 		
-		msg.put("checks", checks);
+		//msg.put("checks", checks);
 
 		if (!healthy) {
-			msg.put("status", "DOWN");
-			return Response.status(503).entity(msg).build();
+			//msg.put("status", "DOWN");
+			return Response.status(503).build();
 		} else {
-			msg.put("status", "UP");
-			return Response.ok(msg).build();
+			//msg.put("status", "UP");
+			return Response.ok().build();
 		}
 
 	}

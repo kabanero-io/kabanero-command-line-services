@@ -106,9 +106,11 @@ public class CollectionsAccess {
 
 			String plural = "collections";
 			System.out.println("listing collections for namespace: "+namespace+" kab group: " + group);
+			
+			List<Map> allCollections = KubeUtils.listResources(apiClient, group, version, plural, namespace);
 
-			msg.put("active collections",
-					convertMapToJSON(KubeUtils.listResources(apiClient, group, version, plural, namespace)));
+			msg.put("active collections", CollectionsUtils.filterActiveCollections(allCollections));
+			
 			Map fromKabanero = null;
 			try {
 				fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
@@ -256,7 +258,8 @@ public class CollectionsAccess {
 				try {
 					JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for activate: " + jo);
-					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
+					KubeUtils.updateResource(apiClient, group, version, plural, namespace, m.get("name").toString(),
+							jo);
 					System.out.println("*** collection " + m.get("name") + " activated, organization "+group);
 					m.put("status", m.get("name") + " activated");
 				} catch (Exception e) {
@@ -339,6 +342,7 @@ public class CollectionsAccess {
 		try {
 			// mapOneResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name)
 			Map fromKabanero = KubeUtils.mapOneResource(apiClient, group, version, plural, namespace, name);
+			System.out.println("reading collection object: "+fromKabanero);
 			if (fromKabanero==null) {
 				System.out.println("*** " + "Collection name: " + name + " 404 not found");
 				msg.put("status", "Collection name: " + name + " 404 not found");
@@ -349,7 +353,6 @@ public class CollectionsAccess {
 			Map m = new HashMap();
 			m.put("name", name);
 			m.put("version", collVersion);
-			m.put("originalName",name);
 			m.put("desiredState","inactive");
 			JsonObject jo = makeJSONBody(m, namespace);
 			System.out.println("json object for version change: " + jo);
@@ -374,23 +377,18 @@ public class CollectionsAccess {
 
 		String joString = "{" + "    \"apiVersion\": \"kabanero.io/" + version + "\"," + "    \"kind\": \"Collection\","
 				+ "    \"metadata\": {" + "        \"name\": \"{{__NAME__}}\","
-				+ "        \"namespace\": \"{{__NAMESPACE__}}\"," + "        \"annotations\": {"
-				+ "              \"collexion_id\": \"{{__COLLEXION_ID__}}\"" + "        }" + "    },"
+				+ "        \"namespace\": \"{{__NAMESPACE__}}\","
 				+ "    \"spec\": {" + "\"version\": \"{{__VERSION__}}\"," + "        \"desiredState\": \"{{__DESIRED_STATE__}}\"" + "    }" + "}";
 		
 		String desiredState = (String) m.get("desiredState");
-		String originalName = (String) m.get("originalName");
 
 		String jsonBody = joString.replace("{{__NAME__}}", m.get("name").toString())
 				.replace("{{__NAMESPACE__}}", namespace).replace("{{__VERSION__}}", (String) m.get("version"));
 				
-		if (desiredState!=null) {
-			jsonBody = joString.replace("{{__DESIRED_STATE__}}", (String) m.get("desiredState"));
+		if (desiredState != null) {
+			jsonBody = joString.replace("{{__DESIRED_STATE__}}", desiredState);
 		}
-		
-		if (originalName!=null) {
-			jsonBody = joString.replace("{{__COLLEXION_ID__}}", (String) m.get("originalName"));
-		}
+
 
 		JsonParser parser = new JsonParser();
 		JsonElement element = parser.parse(jsonBody);

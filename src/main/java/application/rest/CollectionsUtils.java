@@ -178,6 +178,34 @@ public class CollectionsUtils {
 		}
 		return aList;
 	}
+	
+	public static List filterActiveCollections(List<Map> fromKabanero) {
+		ArrayList<Map> activeCollections = new ArrayList<Map>();
+
+		try {
+			HashMap activeMap = new HashMap();
+				for (Map map : fromKabanero) {
+					Map metadata = (Map) map.get("metadata");
+					String name = (String) metadata.get("name");
+					name = name.trim();
+					Map spec = (Map) map.get("spec");
+					String version = (String) spec.get("version");
+					Map status = (Map) map.get("status");
+					String statusStr = (String) spec.get("status");
+					if ("active".contentEquals(statusStr)) {
+						activeMap.put("name", name);
+						activeMap.put("version", version);
+						activeMap.put("desiredState","active");
+						activeCollections.add(activeMap);
+					}
+				}
+				
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return activeCollections;
+	}
 
 	public static List filterNewCollections(List<Map> fromGit, List<Map> fromKabanero) {
 		ArrayList<Map> newCollections = new ArrayList<Map>();
@@ -200,9 +228,8 @@ public class CollectionsUtils {
 				}
 				if (!match) {
 					gitMap.put("name", map.get("id"));
-					gitMap.put("originalName", map.get("name"));
 					gitMap.put("version", version);
-					gitMap.put("desiredState","inactive");
+					gitMap.put("desiredState","active");
 					newCollections.add(gitMap);
 				}
 			}
@@ -236,7 +263,6 @@ public class CollectionsUtils {
 				if (!match) {
 					kabMap.put("name", name);
 					kabMap.put("version", version);
-					kabMap.put("originalName",name);
 					kabMap.put("desiredState","inactive");
 					collectionsToDelete.add(kabMap);
 				}
@@ -274,7 +300,6 @@ public class CollectionsUtils {
 				}
 				if (!match) {
 					gitMap.put("name", map.get("id"));
-					gitMap.put("originalName", map.get("name"));
 					gitMap.put("version", version);
 					gitMap.put("desiredState", desiredState);
 					newCollections.add(gitMap);
