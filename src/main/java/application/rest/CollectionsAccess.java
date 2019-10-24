@@ -363,6 +363,8 @@ public class CollectionsAccess {
 					jo);
 			System.out.println("*** " + "Collection name: " + name + " deactivated");
 			msg.put("status", "Collection name: " + name + " deactivated");
+			fromKabanero = KubeUtils.mapOneResource(apiClient, group, version, plural, namespace, name);
+			System.out.println("reading collection object after deactivate: "+fromKabanero);
 			return Response.ok(msg).build();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
