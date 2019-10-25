@@ -184,28 +184,51 @@ public class CollectionsUtils {
 
 		try {
 			HashMap activeMap = new HashMap();
-				for (Map map : fromKabanero) {
-					System.out.println("working on one collection: " + map);
-					Map metadata = (Map) map.get("metadata");
-					String name = (String) metadata.get("name");
-					name = name.trim();
-					Map spec = (Map) map.get("spec");
-					String version = (String) spec.get("version");
-					Map status = (Map) map.get("status");
-					String statusStr = (String) status.get("status");
-					if ("active".contentEquals(statusStr)) {
-						activeMap.put("name", name);
-						activeMap.put("version", version);
-						activeMap.put("desiredState","active");
-						activeCollections.add(activeMap);
-					}
+			for (Map map : fromKabanero) {
+				System.out.println("working on one collection: " + map);
+				Map metadata = (Map) map.get("metadata");
+				String name = (String) metadata.get("name");
+				name = name.trim();
+				Map spec = (Map) map.get("spec");
+				String version = (String) spec.get("version");
+				Map status = (Map) map.get("status");
+				String statusStr = (String) status.get("status");
+				if ("active".contentEquals(statusStr)) {
+					activeMap.put("name", name);
+					activeMap.put("version", version);
+					activeMap.put("desiredState","active");
+					activeCollections.add(activeMap);
 				}
-				
-			
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return activeCollections;
+	}
+	
+	public static List allCollections(List<Map> fromKabanero) {
+		ArrayList<Map> allCollections = new ArrayList<Map>();
+		try {
+			HashMap allMap = new HashMap();
+			for (Map map : fromKabanero) {
+				System.out.println("working on one collection: " + map);
+				Map metadata = (Map) map.get("metadata");
+				String name = (String) metadata.get("name");
+				name = name.trim();
+				Map spec = (Map) map.get("spec");
+				String version = (String) spec.get("version");
+				Map status = (Map) map.get("status");
+				String statusStr = (String) status.get("status");
+				allMap.put("name", name);
+				allMap.put("version", version);
+				allMap.put("desiredState",statusStr);
+				allCollections.add(allMap);
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return allCollections;
 	}
 	
 	public static List filterInActiveCollections(List<Map> fromKabanero) {
