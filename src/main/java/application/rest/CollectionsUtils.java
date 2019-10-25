@@ -355,6 +355,7 @@ public class CollectionsUtils {
 				if (!match) {
 					kabMap.put("name", name);
 					kabMap.put("version", version);
+					kabMap.put("desiredState", "inactive");
 					collectionsToDelete.add(kabMap);
 				}
 			}

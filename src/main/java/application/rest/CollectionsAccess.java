@@ -313,6 +313,31 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 
+		// iterate over collections to deactivate
+		try {
+			for (Map m : deleletedCollections) {
+				try {
+					JsonObject jo = makeJSONBody(m, namespace);
+					System.out.println("json object for deactivate: " + jo);
+					KubeUtils.updateResource(apiClient, group, version, plural, namespace, m.get("name").toString(),
+							jo);
+					System.out.println("*** collection " + m.get("name") + " deactivated, organization "+group);
+					m.put("status", m.get("name") + " deactivated");
+				} catch (Exception e) {
+					System.out.println("exception cause: " + e.getCause());
+					System.out.println("exception message: " + e.getMessage());
+					System.out.println("*** collection " + m.get("name") + " failed to deactivate, organization "+group);
+					e.printStackTrace();
+					m.put("status", m.get("name") + " deactivation failed");
+					m.put("exception", e.getMessage());
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("exception cause: " + e.getCause());
+			System.out.println("exception message: " + e.getMessage());
+			e.printStackTrace();
+		}
+
 		// iterate over version change collections and update
 		try {
 			for (Map m : versionChangeCollections) {
