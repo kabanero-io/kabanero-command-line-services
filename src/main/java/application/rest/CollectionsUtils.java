@@ -194,7 +194,7 @@ public class CollectionsUtils {
 				if ("active".contentEquals(statusStr)) {
 					activeMap.put("name", name);
 					activeMap.put("version", version);
-					activeMap.put("desiredState","active");
+					activeMap.put("status","active");
 					activeCollections.add(activeMap);
 				}
 			}
@@ -219,7 +219,7 @@ public class CollectionsUtils {
 				String statusStr = (String) status.get("status");
 				allMap.put("name", name);
 				allMap.put("version", version);
-				allMap.put("desiredState",statusStr);
+				allMap.put("status",statusStr);
 				System.out.println("all map: " + allMap);
 				allCollections.add(allMap);
 			}
@@ -246,7 +246,7 @@ public class CollectionsUtils {
 					if ("inactive".contentEquals(statusStr)) {
 						inActiveMap.put("name", name);
 						inActiveMap.put("version", version);
-						inActiveMap.put("desiredState","inactive");
+						inActiveMap.put("status","inactive");
 						inActiveCollections.add(inActiveMap);
 					}
 				}
@@ -280,7 +280,7 @@ public class CollectionsUtils {
 				if (!match) {
 					gitMap.put("name", map.get("id"));
 					gitMap.put("version", version);
-					gitMap.put("desiredState","active");
+					gitMap.put("status","active");
 					newCollections.add(gitMap);
 				}
 			}
@@ -314,7 +314,7 @@ public class CollectionsUtils {
 				if (!match) {
 					kabMap.put("name", name);
 					kabMap.put("version", version);
-					kabMap.put("desiredState","inactive");
+					kabMap.put("status","obsolete");
 					collectionsToDelete.add(kabMap);
 				}
 			}
@@ -334,25 +334,26 @@ public class CollectionsUtils {
 				version = version.trim();
 				boolean match = true;
 				HashMap gitMap = new HashMap();
-				String desiredState=null;
+				String status=null;
 				for (Map map1 : fromKabanero) {
 					Map metadata = (Map) map1.get("metadata");
 					String name1 = (String) metadata.get("name");
 					name1 = name1.trim();
 					Map spec = (Map) map1.get("spec");
 					String version1 = (String) spec.get("version");
+					Map statusMap = (Map) map1.get("status");
 					version1 = version1.trim();
 					if (name.contentEquals(name1)) {
 						if (!version1.contentEquals(version)) {
 							match = false;
-							desiredState=(String) spec.get("desiredState");
+							status = (String) statusMap.get("status");
 						}
 					}
 				}
 				if (!match) {
 					gitMap.put("name", map.get("id"));
 					gitMap.put("version", version);
-					gitMap.put("desiredState", desiredState);
+					gitMap.put("status", status);
 					versionChangeCollections.add(gitMap);
 				}
 			}

@@ -359,7 +359,7 @@ public class CollectionsAccess {
 			Map m = new HashMap();
 			m.put("name", name);
 			m.put("version", collVersion);
-			m.put("desiredState","inactive");
+			m.put("status","inactive");
 			JsonObject jo = makeJSONBody(m, namespace);
 			System.out.println("json object for version change: " + jo);
 			KubeUtils.updateResource(apiClient, group, version, plural, namespace, name,
@@ -386,11 +386,11 @@ public class CollectionsAccess {
 		String joString = "{" + "    \"apiVersion\": \"kabanero.io/" + version + "\"," + "    \"kind\": \"Collection\","
 				+ "    \"metadata\": {" + "        \"name\": \"{{__NAME__}}\","
 				+ "        \"namespace\": \"{{__NAMESPACE__}}\"},"
-				+ "    \"spec\": {" + "\"version\": \"{{__VERSION__}}\"," + "        \"desiredState\": \"{{__DESIRED_STATE__}}\"" + "    }" + "}";
+				+ "    \"spec\": {" + "\"version\": \"{{__VERSION__}}\"," + "        \"status\": \"{{__STATUS__}}\"" + "    }" + "}";
 		
 		
 
-		String jsonBody = joString.replace("{{__NAME__}}", m.get("name").toString()).replace("{{__DESIRED_STATE__}}", (String) m.get("desiredState"))
+		String jsonBody = joString.replace("{{__NAME__}}", m.get("name").toString()).replace("{{__STATUS__}}", (String) m.get("status"))
 				.replace("{{__NAMESPACE__}}", namespace).replace("{{__VERSION__}}", (String) m.get("version"));
 				
 		
