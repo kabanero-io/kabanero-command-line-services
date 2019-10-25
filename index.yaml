@@ -130,4 +130,4 @@ stacks:
   templates:
   - id: simple
     url: https://github.com/kabanero-io/collections/releases/download/0.2.0/incubator.nodejs.v0.2.5.templates.simple.tar.gz
-  version: 0.2.12
+  version: 0.2.14
