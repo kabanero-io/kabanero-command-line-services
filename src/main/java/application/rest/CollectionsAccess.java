@@ -105,9 +105,6 @@ public class CollectionsAccess {
 			ApiClient apiClient = KubeUtils.getApiClient();
 
 			String plural = "collections";
-			System.out.println("listing collections for namespace: "+namespace+" kab group: " + group);
-			
-			msg.put("active collections", convertMapToJSON(KubeUtils.listResources(apiClient, group, version, plural, namespace)));
 	
 			Map fromKabanero = null;
 			try {
@@ -118,10 +115,24 @@ public class CollectionsAccess {
 
 			List<Map> kabList = (List) fromKabanero.get("items");
 			
+			System.out.println("all collections= " + kabList);
 			
+			List actives=CollectionsUtils.filterActiveCollections(kabList);
+			
+			msg.put("active collections", convertMapToJSON(actives));
 			System.out.println(" ");
-			System.out.println("List of all kab collections= "+kabList);
+			System.out.println("List of active kab collections= "+actives);
 			System.out.println(" ");
+			
+			List inactives=CollectionsUtils.filterInActiveCollections(kabList);
+			
+			msg.put("inactive collections", convertMapToJSON(inactives));
+			System.out.println(" ");
+			System.out.println("List of inactive kab collections= "+inactives);
+			System.out.println(" ");
+			
+			
+			
 			
 			try {
 				List<Map> newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections,
