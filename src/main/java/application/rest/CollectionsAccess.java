@@ -383,8 +383,8 @@ public class CollectionsAccess {
 
 		String joString = "{" + "    \"apiVersion\": \"kabanero.io/" + version + "\"," + "    \"kind\": \"Collection\","
 				+ "    \"metadata\": {" + "        \"name\": \"{{__NAME__}}\","
-				+ "        \"namespace\": \"{{__NAMESPACE__}}\","
-				+ "    \"spec\": {" + "\"version\": \"{{__VERSION__}}\"," + "        \"desiredState\": \"{{__DESIRED_STATE__}}\"" + "    }" + "}}";
+				+ "        \"namespace\": \"{{__NAMESPACE__}}\"},"
+				+ "    \"spec\": {" + "\"version\": \"{{__VERSION__}}\"," + "        \"desiredState\": \"{{__DESIRED_STATE__}}\"" + "    }" + "}";
 		
 		
 
