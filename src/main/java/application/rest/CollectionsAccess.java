@@ -106,8 +106,6 @@ public class CollectionsAccess {
 
 			String plural = "collections";
 			
-			msg.put("active collections",
-					convertMapToJSON(KubeUtils.listResources(apiClient, group, version, plural, namespace)));
 	
 			Map fromKabanero = null;
 			try {

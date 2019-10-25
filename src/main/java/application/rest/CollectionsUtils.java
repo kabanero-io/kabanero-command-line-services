@@ -222,8 +222,8 @@ public class CollectionsUtils {
 				allMap.put("name", name);
 				allMap.put("version", version);
 				allMap.put("desiredState",statusStr);
+				System.out.println("all map: " + allMap);
 				allCollections.add(allMap);
-
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
