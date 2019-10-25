@@ -168,11 +168,9 @@ public class CollectionsUtils {
 		ArrayList aList = new ArrayList();
 		for (Map map : list) {
 			String name = (String) map.get("id");
-			String originalName = (String) map.get("name");
 			String version = (String) map.get("version");
 			HashMap outMap = new HashMap();
 			outMap.put("name", name);
-			outMap.put("originalName", originalName);
 			outMap.put("version", version);
 			aList.add(outMap);
 		}
