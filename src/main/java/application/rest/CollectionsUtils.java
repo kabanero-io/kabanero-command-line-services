@@ -207,6 +207,35 @@ public class CollectionsUtils {
 		}
 		return activeCollections;
 	}
+	
+	public static List filterInActiveCollections(List<Map> fromKabanero) {
+		ArrayList<Map> inActiveCollections = new ArrayList<Map>();
+
+		try {
+			HashMap inActiveMap = new HashMap();
+				for (Map map : fromKabanero) {
+					System.out.println("working on one collection: " + map);
+					Map metadata = (Map) map.get("metadata");
+					String name = (String) metadata.get("name");
+					name = name.trim();
+					Map spec = (Map) map.get("spec");
+					String version = (String) spec.get("version");
+					Map status = (Map) map.get("status");
+					String statusStr = (String) status.get("status");
+					if ("inactive".contentEquals(statusStr)) {
+						inActiveMap.put("name", name);
+						inActiveMap.put("version", version);
+						inActiveMap.put("desiredState","inactive");
+						inActiveCollections.add(inActiveMap);
+					}
+				}
+				
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return inActiveCollections;
+	}
 
 	public static List filterNewCollections(List<Map> fromGit, List<Map> fromKabanero) {
 		ArrayList<Map> newCollections = new ArrayList<Map>();

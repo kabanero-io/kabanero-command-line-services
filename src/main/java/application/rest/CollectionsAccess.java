@@ -120,7 +120,7 @@ public class CollectionsAccess {
 			
 			List actives=CollectionsUtils.filterActiveCollections(kabList);
 			
-			msg.put("active collections", convertMapToJSON(actives));
+			msg.put("active collections", convertMapToJSON(kabList));
 			System.out.println(" ");
 			System.out.println("List of active kab collections= "+actives);
 			System.out.println(" ");
