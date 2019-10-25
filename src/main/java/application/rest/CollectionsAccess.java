@@ -98,7 +98,7 @@ public class CollectionsAccess {
 			}
 			JSONArray ja = convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections));
 			System.out.println("master collectionfor namespace: "+namespace+" kab group: " + group +"="+ ja);
-			msg.put("master collections", ja);
+			msg.put("curated collections", ja);
 
 			// make call to kabanero to get current collection
 
@@ -135,15 +135,15 @@ public class CollectionsAccess {
 						.filterVersionChanges(masterCollections, kabList);
 
 				ja = convertMapToJSON(newCollections);
-				System.out.println("new collections= " + ja);
-				msg.put("new collections", ja);
+				System.out.println("new collections: " + ja);
+				msg.put("new curated collections", ja);
 
 				ja = convertMapToJSON(deleletedCollections);
-				System.out.println("obsolete collections= " + ja);
+				System.out.println("obsolete collections: " + ja);
 				msg.put("obsolete collections", ja);
 
 				ja = convertMapToJSON(versionChangeCollections);
-				System.out.println("version change collections= " + ja);
+				System.out.println("version change collections: " + ja);
 				msg.put("version change collections", ja);
 			} catch (Exception e) {
 				System.out.println("exception cause: " + e.getCause());
@@ -237,13 +237,13 @@ public class CollectionsAccess {
 			System.out.println(" ");
 			System.out.println(" ");
 			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
-			System.out.println("*** new collections=" + newCollections);
+			System.out.println("new curated collections=" + newCollections);
 			System.out.println(" ");
 			
 			System.out.println(" ");
 			System.out.println(" ");
 			activateCollections = (List<Map>) CollectionsUtils.filterCollectionsToActivate(masterCollections, kabList);;
-			System.out.println("*** new collections=" + newCollections);
+			System.out.println("activate collections=" + newCollections);
 			System.out.println(" ");
 
 			deleletedCollections = (List<Map>) CollectionsUtils.filterDeletedCollections(masterCollections, kabList);
@@ -263,7 +263,7 @@ public class CollectionsAccess {
 		}
 		System.out.println("starting refresh");
 
-		// iterate over new collections and create
+		// iterate over new collections and create them
 		try {
 			for (Map m : newCollections) {
 				try {
@@ -341,9 +341,9 @@ public class CollectionsAccess {
 
 		// log successful changes too!
 		try {
-			msg.put("new collections", convertMapToJSON(newCollections));
+			msg.put("new curated collections", convertMapToJSON(newCollections));
 			msg.put("activate collections", convertMapToJSON(activateCollections));
-			msg.put("collections to delete", convertMapToJSON(deleletedCollections));
+			msg.put("obsolete collections", convertMapToJSON(deleletedCollections));
 			msg.put("version change collections", convertMapToJSON(versionChangeCollections));
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
