@@ -305,7 +305,7 @@ public class CollectionsUtils {
 					Map metadata = (Map) map1.get("metadata");
 					String name1 = (String) metadata.get("name");
 					name1 = name1.trim();
-					Map status = (Map) map.get("status");
+					Map status = (Map) map1.get("status");
 					String statusStr = (String) status.get("status");
 					if (name1.contentEquals(name) && "inactive".contentEquals(statusStr)) {
 						activateMap.put("name", map.get("id"));
