@@ -356,7 +356,7 @@ public class CollectionsAccess {
 			collVersion="0.2.7";
 			Map m = new HashMap();
 			m.put("name", name);
-			m.put("name", name);
+			m.put("originalName", name);
 			m.put("version", collVersion);
 			m.put("desiredState","inactive");
 			JsonObject jo = makeJSONBody(m, namespace);
