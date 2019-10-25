@@ -411,13 +411,19 @@ public class KubeUtils {
        customApi.createNamespacedCustomObject(group, version, namespace, plural, jsonBody, "false");
     }
     
+//    public static void updateResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name, JsonObject jsonBody) throws Exception {
+//        logger.info("updating resource {}/{}/{} {}/{}:", group, version, plural, namespace, name);
+//        JsonParser parser= new JsonParser();
+//        JsonElement element= parser.parse(jsonBody.toString());
+//        JsonObject json= element.getAsJsonObject();
+//        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
+//        customApi.patchNamespacedCustomObjectStatus(group, version, namespace, plural, name, json);
+//     }
+    
     public static void updateResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name, JsonObject jsonBody) throws Exception {
         logger.info("updating resource {}/{}/{} {}/{}:", group, version, plural, namespace, name);
-        JsonParser parser= new JsonParser();
-        JsonElement element= parser.parse(jsonBody.toString());
-        JsonObject json= element.getAsJsonObject();
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
-        customApi.patchNamespacedCustomObjectStatus(group, version, namespace, plural, name, json);
+        customApi.patchNamespacedCustomObject(group, version, namespace, plural, name, jsonBody);
      }
 
     /* Set status of resource
