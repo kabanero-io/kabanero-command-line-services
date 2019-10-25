@@ -356,6 +356,7 @@ public class CollectionsAccess {
 			collVersion="0.2.7";
 			Map m = new HashMap();
 			m.put("name", name);
+			m.put("name", name);
 			m.put("version", collVersion);
 			m.put("desiredState","inactive");
 			JsonObject jo = makeJSONBody(m, namespace);
@@ -377,23 +378,44 @@ public class CollectionsAccess {
 
 	}
 
+//	private JsonObject makeJSONBody(Map m, String namespace) {
+//
+//		System.out.println("making JSONBody: " + m.toString());
+//
+//		String joString = "{" + "    \"apiVersion\": \"kabanero.io/" + version + "\"," + "    \"kind\": \"Collection\","
+//				+ "    \"metadata\": {" + "        \"name\": \"{{__NAME__}}\","
+//				+ "        \"namespace\": \"{{__NAMESPACE__}}\"},"
+//				+ "    \"spec\": {" + "\"version\": \"{{__VERSION__}}\"," + "        \"desiredState\": \"{{__DESIRED_STATE__}}\"" + "    }" + "}";
+//		
+//		
+//
+//		String jsonBody = joString.replace("{{__NAME__}}", m.get("name").toString()).replace("{{__DESIRED_STATE__}}", (String) m.get("desiredState"))
+//				.replace("{{__NAMESPACE__}}", namespace).replace("{{__VERSION__}}", (String) m.get("version"));
+//				
+//		
+//		System.out.println("made JSONBody: " + jsonBody);
+//
+//
+//		JsonParser parser = new JsonParser();
+//		JsonElement element = parser.parse(jsonBody);
+//		JsonObject json = element.getAsJsonObject();
+//
+//		return json;
+//	}
+	
 	private JsonObject makeJSONBody(Map m, String namespace) {
 
-		System.out.println("making JSONBody: " + m.toString());
+		System.out.println("makingJSONBody: " + m.toString());
 
 		String joString = "{" + "    \"apiVersion\": \"kabanero.io/" + version + "\"," + "    \"kind\": \"Collection\","
 				+ "    \"metadata\": {" + "        \"name\": \"{{__NAME__}}\","
-				+ "        \"namespace\": \"{{__NAMESPACE__}}\"},"
-				+ "    \"spec\": {" + "\"version\": \"{{__VERSION__}}\"," + "        \"desiredState\": \"{{__DESIRED_STATE__}}\"" + "    }" + "}";
-		
-		
+				+ "        \"namespace\": \"{{__NAMESPACE__}}\"," + "        \"annotations\": {"
+				+ "              \"collexion_id\": \"{{__COLLEXION_ID__}}\"" + "        }" + "    },"
+				+ "    \"spec\": {" + "        \"version\": \"{{__VERSION__}}\"" + "    }" + "}";
 
-		String jsonBody = joString.replace("{{__NAME__}}", m.get("name").toString()).replace("{{__DESIRED_STATE__}}", (String) m.get("desiredState"))
-				.replace("{{__NAMESPACE__}}", namespace).replace("{{__VERSION__}}", (String) m.get("version"));
-				
-		
-		System.out.println("made JSONBody: " + jsonBody);
-
+		String jsonBody = joString.replace("{{__NAME__}}", m.get("name").toString())
+				.replace("{{__NAMESPACE__}}", namespace).replace("{{__VERSION__}}", (String) m.get("version"))
+				.replace("{{__COLLEXION_ID__}}", (String) m.get("originalName"));
 
 		JsonParser parser = new JsonParser();
 		JsonElement element = parser.parse(jsonBody);
