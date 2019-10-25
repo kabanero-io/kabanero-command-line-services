@@ -329,43 +329,6 @@ public class CollectionsAccess {
 		return ja;
 	}
 	
-	@DELETE
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/collections1/{name}")
-	public Response deActivateCollection1(@Context final HttpServletRequest request,
-			@PathParam("name") final String name) throws Exception {
-		// make call to kabanero to delete collection
-		ApiClient apiClient = KubeUtils.getApiClient();
-
-		String plural = "collections";
-
-		JSONObject msg = new JSONObject();
-
-		try {
-			int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, plural);
-			if (rc == 0) {
-				System.out.println("*** " + "Collection name: " + name + " deactivated");
-				msg.put("status", "Collection name: " + name + " deactivated");
-				return Response.ok(msg).build();
-			}
-			else if (rc == 404) {
-				System.out.println("*** " + "Collection name: " + name + " 404 not found");
-				msg.put("status", "Collection name: " + name + " 404 not found");
-				return Response.status(400).entity(msg).build();
-			} else {
-				System.out.println("*** " + "Collection name: " + name + " was not deactivated, rc="+rc);
-				msg.put("status", "Collection name: " + name + " was not deactivated, rc="+rc);
-				return Response.status(400).entity(msg).build();
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			msg.put("status",
-					"Collection name: " + name + " failed to deactivate, exception message: " + e.getMessage());
-			return Response.status(400).entity(msg).build();
-		}
-
-	}
 
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
