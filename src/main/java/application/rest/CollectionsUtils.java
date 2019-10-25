@@ -314,7 +314,6 @@ public class CollectionsUtils {
 				if (!match) {
 					kabMap.put("name", name);
 					kabMap.put("version", version);
-					kabMap.put("status","obsolete");
 					collectionsToDelete.add(kabMap);
 				}
 			}
