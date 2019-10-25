@@ -216,7 +216,12 @@ public class CollectionsUtils {
 				Map spec = (Map) map.get("spec");
 				String version = (String) spec.get("version");
 				Map status = (Map) map.get("status");
-				String statusStr = (String) status.get("status");
+				String statusStr = null;
+				if (status==null) {
+					statusStr = (String) spec.get("desiredState");
+				} else {
+					statusStr = (String) status.get("status");
+				}
 				allMap.put("name", name);
 				allMap.put("version", version);
 				allMap.put("status",statusStr);
@@ -306,7 +311,12 @@ public class CollectionsUtils {
 					String name1 = (String) metadata.get("name");
 					name1 = name1.trim();
 					Map status = (Map) map1.get("status");
-					String statusStr = (String) status.get("status");
+					String statusStr = null;
+					if (status == null) {
+						statusStr = "inactive";
+					} else {
+						statusStr = (String) status.get("status");
+					}
 					if (name1.contentEquals(name) && "inactive".contentEquals(statusStr)) {
 						activateMap.put("name", map.get("id"));
 						activateMap.put("version", version);
