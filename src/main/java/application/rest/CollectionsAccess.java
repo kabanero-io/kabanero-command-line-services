@@ -203,6 +203,7 @@ public class CollectionsAccess {
 		}
 
 		List<Map> newCollections = null;
+		List<Map> activateCollections = null;
 		List<Map> deleletedCollections = null;
 		List<Map> versionChangeCollections = null;
 		JSONObject msg = new JSONObject();
@@ -238,6 +239,12 @@ public class CollectionsAccess {
 			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
 			System.out.println("*** new collections=" + newCollections);
 			System.out.println(" ");
+			
+			System.out.println(" ");
+			System.out.println(" ");
+			activateCollections = (List<Map>) CollectionsUtils.filterCollectionsToActivate(masterCollections, kabList);;
+			System.out.println("*** new collections=" + newCollections);
+			System.out.println(" ");
 
 			deleletedCollections = (List<Map>) CollectionsUtils.filterDeletedCollections(masterCollections, kabList);
 			System.out.println("*** collectionsto delete=" + deleletedCollections);
@@ -256,9 +263,34 @@ public class CollectionsAccess {
 		}
 		System.out.println("starting refresh");
 
-		// iterate over new collections and activate
+		// iterate over new collections and create
 		try {
 			for (Map m : newCollections) {
+				try {
+					JsonObject jo = makeJSONBody(m, namespace);
+					System.out.println("json object for create: " + jo);
+					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
+					System.out.println("*** collection " + m.get("name") + " activated, organization "+group);
+					m.put("status", m.get("name") + " activated");
+				} catch (Exception e) {
+					System.out.println("exception cause: " + e.getCause());
+					System.out.println("exception message: " + e.getMessage());
+					System.out.println("*** collection " + m.get("name") + " failed to activate, organization "+group);
+					e.printStackTrace();
+					m.put("status", m.get("name") + " activation failed");
+					m.put("exception", e.getMessage());
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("exception cause: " + e.getCause());
+			System.out.println("exception message: " + e.getMessage());
+			e.printStackTrace();
+		}
+
+
+		// iterate over collections to activate
+		try {
+			for (Map m : activateCollections) {
 				try {
 					JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for activate: " + jo);
@@ -310,6 +342,7 @@ public class CollectionsAccess {
 		// log successful changes too!
 		try {
 			msg.put("new collections", convertMapToJSON(newCollections));
+			msg.put("activate collections", convertMapToJSON(activateCollections));
 			msg.put("collections to delete", convertMapToJSON(deleletedCollections));
 			msg.put("version change collections", convertMapToJSON(versionChangeCollections));
 		} catch (Exception e) {

@@ -280,7 +280,7 @@ public class CollectionsUtils {
 				if (!match) {
 					gitMap.put("name", map.get("id"));
 					gitMap.put("version", version);
-					gitMap.put("status","active");
+					gitMap.put("desiredState", "active");
 					newCollections.add(gitMap);
 				}
 			}
@@ -288,6 +288,37 @@ public class CollectionsUtils {
 			e.printStackTrace();
 		}
 		return newCollections;
+	}
+	
+	public static List filterCollectionsToActivate(List<Map> fromGit, List<Map> fromKabanero) {
+		ArrayList<Map> activateCollections = new ArrayList<Map>();
+
+		try {
+			for (Map map : fromGit) {
+				String name = (String) map.get("id");
+				String version = (String) map.get("version");
+				name = name.trim();
+				version = version.trim();
+				boolean match = false;
+				HashMap activateMap = new HashMap();
+				for (Map map1 : fromKabanero) {
+					Map metadata = (Map) map1.get("metadata");
+					String name1 = (String) metadata.get("name");
+					name1 = name1.trim();
+					Map status = (Map) map.get("status");
+					String statusStr = (String) status.get("status");
+					if (name1.contentEquals(name) && "inactive".contentEquals(statusStr)) {
+						activateMap.put("name", map.get("id"));
+						activateMap.put("version", version);
+						activateMap.put("desiredState","active");
+						activateCollections.add(activateMap);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return activateCollections;
 	}
 
 	public static List filterDeletedCollections(List<Map> fromGit, List<Map> fromKabanero) {
