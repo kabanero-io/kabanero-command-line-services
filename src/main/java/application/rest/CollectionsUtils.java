@@ -304,7 +304,7 @@ public class CollectionsUtils {
 	}
 
 	public static List filterVersionChanges(List<Map> fromGit, List<Map> fromKabanero) {
-		ArrayList<Map> newCollections = new ArrayList<Map>();
+		ArrayList<Map> versionChangeCollections = new ArrayList<Map>();
 		try {
 			for (Map map : fromGit) {
 				String version = (String) map.get("version");
@@ -332,13 +332,13 @@ public class CollectionsUtils {
 					gitMap.put("name", map.get("id"));
 					gitMap.put("version", version);
 					gitMap.put("desiredState", desiredState);
-					newCollections.add(gitMap);
+					versionChangeCollections.add(gitMap);
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return newCollections;
+		return versionChangeCollections;
 	}
 
 }

@@ -106,6 +106,8 @@ public class CollectionsAccess {
 
 			String plural = "collections";
 			System.out.println("listing collections for namespace: "+namespace+" kab group: " + group);
+			
+			msg.put("active collections", convertMapToJSON(KubeUtils.listResources(apiClient, group, version, plural, namespace)));
 	
 			Map fromKabanero = null;
 			try {
@@ -116,14 +118,11 @@ public class CollectionsAccess {
 
 			List<Map> kabList = (List) fromKabanero.get("items");
 			
-			System.out.println("all collections= " + kabList);
 			
-			List actives=CollectionsUtils.filterActiveCollections(kabList);
+			System.out.println(" ");
+			System.out.println("List of all kab collections= "+kabList);
+			System.out.println(" ");
 			
-			msg.put("active collections", convertMapToJSON(kabList));
-			System.out.println(" ");
-			System.out.println("List of active kab collections= "+actives);
-			System.out.println(" ");
 			try {
 				List<Map> newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections,
 						kabList);
@@ -288,8 +287,8 @@ public class CollectionsAccess {
 					KubeUtils.updateResource(apiClient, group, version, plural, namespace, m.get("name").toString(),
 							jo);
 					System.out.println(
-							"*** " + m.get("name") + "version change completed, new version number: " + version+", organization "+group);
-					m.put("status", m.get("name") + "version change completed, new version number: " + version);
+							"*** " + m.get("name") + "version change completed, new version number: " + m.get("version")+", organization "+group);
+					m.put("status", m.get("name") + "version change completed, new version number: " + m.get("version"));
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
