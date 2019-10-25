@@ -183,8 +183,8 @@ public class CollectionsUtils {
 		ArrayList<Map> activeCollections = new ArrayList<Map>();
 
 		try {
-			HashMap activeMap = new HashMap();
 			for (Map map : fromKabanero) {
+				HashMap activeMap = new HashMap();
 				System.out.println("working on one collection: " + map);
 				Map metadata = (Map) map.get("metadata");
 				String name = (String) metadata.get("name");
@@ -209,8 +209,8 @@ public class CollectionsUtils {
 	public static List allCollections(List<Map> fromKabanero) {
 		ArrayList<Map> allCollections = new ArrayList<Map>();
 		try {
-			HashMap allMap = new HashMap();
 			for (Map map : fromKabanero) {
+				HashMap allMap = new HashMap();
 				System.out.println("working on one collection: " + map);
 				Map metadata = (Map) map.get("metadata");
 				String name = (String) metadata.get("name");
@@ -235,8 +235,8 @@ public class CollectionsUtils {
 		ArrayList<Map> inActiveCollections = new ArrayList<Map>();
 
 		try {
-			HashMap inActiveMap = new HashMap();
 				for (Map map : fromKabanero) {
+					HashMap inActiveMap = new HashMap();
 					System.out.println("working on one collection: " + map);
 					Map metadata = (Map) map.get("metadata");
 					String name = (String) metadata.get("name");
