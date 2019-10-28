@@ -394,7 +394,7 @@ public class CollectionsUtils {
 				if (!match) {
 					gitMap.put("name", map.get("id"));
 					gitMap.put("version", version);
-					gitMap.put("status", status);
+					gitMap.put("desiredState", status);
 					versionChangeCollections.add(gitMap);
 				}
 			}
