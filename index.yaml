@@ -82,26 +82,3 @@ stacks:
   - id: simple
     url: https://github.com/kabanero-io/collections/releases/download/0.2.0/incubator.nodejs-express.v0.2.7.templates.simple.tar.gz
   version: 0.2.7
-- default-image: nodejs-loopback
-  default-pipeline: default
-  default-template: scaffold
-  description: LoopBack 4 API Framework for Node.js
-  id: nodejs-loopback
-  images:
-  - id: nodejs-loopback
-    image: kabanero/nodejs-loopback:0.1
-  language: nodejs
-  license: Apache-2.0
-  maintainers:
-  - email: enjoyjava@gmail.com
-    github-id: raymondfeng
-    name: Raymond Feng
-  name: LoopBack 4
-  pipelines:
-  - id: default
-    sha256: 8586074aafa8a11c322b62a413137a36e33345f809d7fde1b01f8b4f28ddf30e
-    url: https://github.com/kabanero-io/collections/releases/download/0.2.0/incubator.common.pipeline.default.tar.gz
-  templates:
-  - id: scaffold
-    url: https://github.com/kabanero-io/collections/releases/download/0.2.0/incubator.nodejs-loopback.v0.1.5.templates.scaffold.tar.gz
-  version: 0.1.5
