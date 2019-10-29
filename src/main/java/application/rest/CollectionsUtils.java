@@ -41,6 +41,18 @@ public class CollectionsUtils {
 		}
 		return obj;
 	}
+	
+	private static boolean pause() {
+        // Sleep for half a second before next try
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            // Something woke us up, most probably process is exiting.
+            // Just break out of the loop to report the last DB exception.
+            return true;
+        }
+        return false;
+    }
 
 	private static String getFromGit(String url, String user, String pw) {
 
@@ -55,14 +67,25 @@ public class CollectionsUtils {
 		// add request header
 
 		HttpResponse response = null;
-		;
-		try {
-			response = client.execute(request);
-			readGitSuccess=true;
-		} catch (IOException e) {
-			e.printStackTrace();
+		IOException savedEx=null;
+		int retries = 0;
+		for (; retries < 10; retries++) {
+			try {
+				response = client.execute(request);
+				readGitSuccess=true;
+				break;
+			} catch (IOException e) {
+				e.printStackTrace();
+				savedEx=e;
+			}
+			if (pause()) {
+				break;
+			}
+		}
+		
+		if (retries >= 10) {
 			readGitSuccess=false;
-			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url,e);
+			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url, savedEx);
 		}
 
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
@@ -145,15 +168,99 @@ public class CollectionsUtils {
 		ArrayList aList = new ArrayList();
 		for (Map map : list) {
 			String name = (String) map.get("id");
-			String originalName = (String) map.get("name");
 			String version = (String) map.get("version");
 			HashMap outMap = new HashMap();
 			outMap.put("name", name);
-			outMap.put("originalName", originalName);
 			outMap.put("version", version);
 			aList.add(outMap);
 		}
 		return aList;
+	}
+	
+	public static List filterActiveCollections(List<Map> fromKabanero) {
+		ArrayList<Map> activeCollections = new ArrayList<Map>();
+
+		try {
+			for (Map map : fromKabanero) {
+				HashMap activeMap = new HashMap();
+				System.out.println("working on one collection: " + map);
+				Map metadata = (Map) map.get("metadata");
+				String name = (String) metadata.get("name");
+				name = name.trim();
+				Map spec = (Map) map.get("spec");
+				String version = (String) spec.get("version");
+				Map status = (Map) map.get("status");
+				String statusStr = (String) status.get("status");
+				if ("active".contentEquals(statusStr)) {
+					activeMap.put("name", name);
+					activeMap.put("version", version);
+					activeMap.put("status","active");
+					activeCollections.add(activeMap);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return activeCollections;
+	}
+	
+	public static List allCollections(List<Map> fromKabanero) {
+		ArrayList<Map> allCollections = new ArrayList<Map>();
+		try {
+			for (Map map : fromKabanero) {
+				HashMap allMap = new HashMap();
+				System.out.println("working on one collection: " + map);
+				Map metadata = (Map) map.get("metadata");
+				String name = (String) metadata.get("name");
+				name = name.trim();
+				Map spec = (Map) map.get("spec");
+				String version = (String) spec.get("version");
+				Map status = (Map) map.get("status");
+				String statusStr = null;
+				if (status==null) {
+					statusStr = (String) spec.get("desiredState");
+				} else {
+					statusStr = (String) status.get("status");
+				}
+				allMap.put("name", name);
+				allMap.put("version", version);
+				allMap.put("status",statusStr);
+				System.out.println("all map: " + allMap);
+				allCollections.add(allMap);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return allCollections;
+	}
+	
+	public static List filterInActiveCollections(List<Map> fromKabanero) {
+		ArrayList<Map> inActiveCollections = new ArrayList<Map>();
+
+		try {
+				for (Map map : fromKabanero) {
+					HashMap inActiveMap = new HashMap();
+					System.out.println("working on one collection: " + map);
+					Map metadata = (Map) map.get("metadata");
+					String name = (String) metadata.get("name");
+					name = name.trim();
+					Map spec = (Map) map.get("spec");
+					String version = (String) spec.get("version");
+					Map status = (Map) map.get("status");
+					String statusStr = (String) status.get("status");
+					if ("inactive".contentEquals(statusStr)) {
+						inActiveMap.put("name", name);
+						inActiveMap.put("version", version);
+						inActiveMap.put("status","inactive");
+						inActiveCollections.add(inActiveMap);
+					}
+				}
+				
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return inActiveCollections;
 	}
 
 	public static List filterNewCollections(List<Map> fromGit, List<Map> fromKabanero) {
@@ -177,8 +284,8 @@ public class CollectionsUtils {
 				}
 				if (!match) {
 					gitMap.put("name", map.get("id"));
-					gitMap.put("originalName", map.get("name"));
 					gitMap.put("version", version);
+					gitMap.put("desiredState", "active");
 					newCollections.add(gitMap);
 				}
 			}
@@ -186,6 +293,42 @@ public class CollectionsUtils {
 			e.printStackTrace();
 		}
 		return newCollections;
+	}
+	
+	public static List filterCollectionsToActivate(List<Map> fromGit, List<Map> fromKabanero) {
+		ArrayList<Map> activateCollections = new ArrayList<Map>();
+
+		try {
+			for (Map map : fromGit) {
+				String name = (String) map.get("id");
+				String version = (String) map.get("version");
+				name = name.trim();
+				version = version.trim();
+				boolean match = false;
+				HashMap activateMap = new HashMap();
+				for (Map map1 : fromKabanero) {
+					Map metadata = (Map) map1.get("metadata");
+					String name1 = (String) metadata.get("name");
+					name1 = name1.trim();
+					Map status = (Map) map1.get("status");
+					String statusStr = null;
+					if (status == null) {
+						statusStr = "inactive";
+					} else {
+						statusStr = (String) status.get("status");
+					}
+					if (name1.contentEquals(name) && "inactive".contentEquals(statusStr)) {
+						activateMap.put("name", map.get("id"));
+						activateMap.put("version", version);
+						activateMap.put("desiredState","active");
+						activateCollections.add(activateMap);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return activateCollections;
 	}
 
 	public static List filterDeletedCollections(List<Map> fromGit, List<Map> fromKabanero) {
@@ -212,6 +355,7 @@ public class CollectionsUtils {
 				if (!match) {
 					kabMap.put("name", name);
 					kabMap.put("version", version);
+					kabMap.put("desiredState", "inactive");
 					collectionsToDelete.add(kabMap);
 				}
 			}
@@ -222,7 +366,7 @@ public class CollectionsUtils {
 	}
 
 	public static List filterVersionChanges(List<Map> fromGit, List<Map> fromKabanero) {
-		ArrayList<Map> newCollections = new ArrayList<Map>();
+		ArrayList<Map> versionChangeCollections = new ArrayList<Map>();
 		try {
 			for (Map map : fromGit) {
 				String version = (String) map.get("version");
@@ -231,30 +375,33 @@ public class CollectionsUtils {
 				version = version.trim();
 				boolean match = true;
 				HashMap gitMap = new HashMap();
+				String status=null;
 				for (Map map1 : fromKabanero) {
 					Map metadata = (Map) map1.get("metadata");
 					String name1 = (String) metadata.get("name");
 					name1 = name1.trim();
 					Map spec = (Map) map1.get("spec");
 					String version1 = (String) spec.get("version");
+					Map statusMap = (Map) map1.get("status");
 					version1 = version1.trim();
 					if (name.contentEquals(name1)) {
 						if (!version1.contentEquals(version)) {
 							match = false;
+							status = (String) statusMap.get("status");
 						}
 					}
 				}
 				if (!match) {
 					gitMap.put("name", map.get("id"));
-					gitMap.put("originalName", map.get("name"));
 					gitMap.put("version", version);
-					newCollections.add(gitMap);
+					gitMap.put("desiredState", status);
+					versionChangeCollections.add(gitMap);
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return newCollections;
+		return versionChangeCollections;
 	}
 
 }

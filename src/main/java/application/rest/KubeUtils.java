@@ -440,15 +440,10 @@ public class KubeUtils {
         	Map metadata = (Map) m.get("metadata");
         	String name = (String) metadata.get("name");
         	Map annotations = (Map) metadata.get("annotations");
-        	String originalName = "not set";
-        	if (annotations!=null) {
-        		originalName = (String) annotations.get("collexion_id");
-        	}
         	Map spec = (Map) m.get("spec");
         	String collectionVersion = (String) spec.get("version");
         	HashMap outMap = new HashMap();
         	outMap.put("name",name);
-        	outMap.put("originalName",originalName);
         	outMap.put("version", collectionVersion);
         	aList.add(outMap);
         } 
@@ -459,6 +454,15 @@ public class KubeUtils {
         logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
         Object obj = customApi.listNamespacedCustomObject(group, version, namespace, plural, "true", "", "", 60, false);
+        System.out.println("current kab collections="+obj.toString());
+        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) obj;
+        return map;
+     }
+    
+    public static Map mapOneResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name) throws ApiException {
+        logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
+        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
+        Object obj = customApi.getNamespacedCustomObject(group, version, namespace, plural, name);
         System.out.println("current kab collections="+obj.toString());
         LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) obj;
         return map;

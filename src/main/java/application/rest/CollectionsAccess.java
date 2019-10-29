@@ -19,6 +19,7 @@
 package application.rest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,17 +98,15 @@ public class CollectionsAccess {
 			}
 			JSONArray ja = convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections));
 			System.out.println("master collectionfor namespace: "+namespace+" kab group: " + group +"="+ ja);
-			msg.put("master collections", ja);
+			msg.put("curated collections", ja);
 
 			// make call to kabanero to get current collection
 
 			ApiClient apiClient = KubeUtils.getApiClient();
 
 			String plural = "collections";
-			System.out.println("listing collections for namespace: "+namespace+" kab group: " + group);
-
-			msg.put("active collections",
-					convertMapToJSON(KubeUtils.listResources(apiClient, group, version, plural, namespace)));
+			
+	
 			Map fromKabanero = null;
 			try {
 				fromKabanero = KubeUtils.mapResources(apiClient, group, version, plural, namespace);
@@ -116,9 +115,16 @@ public class CollectionsAccess {
 			}
 
 			List<Map> kabList = (List) fromKabanero.get("items");
+			
+			
+			List allCollections=CollectionsUtils.allCollections(kabList);
+			
+			msg.put("kabanero collections", convertMapToJSON(allCollections));
 			System.out.println(" ");
-			System.out.println("List of active kab collections= "+kabList);
+			System.out.println("*** List of all kab collections= "+convertMapToJSON(allCollections));
 			System.out.println(" ");
+			
+			
 			try {
 				List<Map> newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections,
 						kabList);
@@ -128,15 +134,15 @@ public class CollectionsAccess {
 						.filterVersionChanges(masterCollections, kabList);
 
 				ja = convertMapToJSON(newCollections);
-				System.out.println("new collections= " + ja);
-				msg.put("new collections", ja);
+				System.out.println("*** new curated collections: " + ja);
+				msg.put("new curated collections", ja);
 
 				ja = convertMapToJSON(deleletedCollections);
-				System.out.println("obsolete collections= " + ja);
+				System.out.println("*** obsolete collections: " + ja);
 				msg.put("obsolete collections", ja);
 
 				ja = convertMapToJSON(versionChangeCollections);
-				System.out.println("version change collections= " + ja);
+				System.out.println("*** version change collections: " + ja);
 				msg.put("version change collections", ja);
 			} catch (Exception e) {
 				System.out.println("exception cause: " + e.getCause());
@@ -196,6 +202,7 @@ public class CollectionsAccess {
 		}
 
 		List<Map> newCollections = null;
+		List<Map> activateCollections = null;
 		List<Map> deleletedCollections = null;
 		List<Map> versionChangeCollections = null;
 		JSONObject msg = new JSONObject();
@@ -203,7 +210,7 @@ public class CollectionsAccess {
 			
 			List<Map> kabList = (List) fromKabanero.get("items");
 			System.out.println(" ");
-			System.out.println("List of active kab collections= "+kabList);
+			System.out.println("*** List of active kab collections= "+kabList);
 			
 			String PAT = getPAT();
 			if (PAT==null) {
@@ -224,12 +231,18 @@ public class CollectionsAccess {
 				}
 			}
 			System.out.println(" ");
-			System.out.println("List of active master collections= "+masterCollections);
+			System.out.println("*** List of active curated collections= "+masterCollections);
 			
 			System.out.println(" ");
 			System.out.println(" ");
 			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
-			System.out.println("*** new collections=" + newCollections);
+			System.out.println("*** new curated collections=" + newCollections);
+			System.out.println(" ");
+			
+			System.out.println(" ");
+			System.out.println(" ");
+			activateCollections = (List<Map>) CollectionsUtils.filterCollectionsToActivate(masterCollections, kabList);;
+			System.out.println("*** activate collections=" + newCollections);
 			System.out.println(" ");
 
 			deleletedCollections = (List<Map>) CollectionsUtils.filterDeletedCollections(masterCollections, kabList);
@@ -249,12 +262,12 @@ public class CollectionsAccess {
 		}
 		System.out.println("starting refresh");
 
-		// iterate over new collections and activate
+		// iterate over new collections and create them
 		try {
 			for (Map m : newCollections) {
 				try {
 					JsonObject jo = makeJSONBody(m, namespace);
-					System.out.println("json object for activate: " + jo);
+					System.out.println("json object for create: " + jo);
 					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
 					System.out.println("*** collection " + m.get("name") + " activated, organization "+group);
 					m.put("status", m.get("name") + " activated");
@@ -273,6 +286,57 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 
+
+		// iterate over collections to activate
+		try {
+			for (Map m : activateCollections) {
+				try {
+					JsonObject jo = makeJSONBody(m, namespace);
+					System.out.println("json object for activate: " + jo);
+					KubeUtils.updateResource(apiClient, group, version, plural, namespace, m.get("name").toString(),
+							jo);
+					System.out.println("*** collection " + m.get("name") + " activated, organization "+group);
+					m.put("status", m.get("name") + " activated");
+				} catch (Exception e) {
+					System.out.println("exception cause: " + e.getCause());
+					System.out.println("exception message: " + e.getMessage());
+					System.out.println("*** collection " + m.get("name") + " failed to activate, organization "+group);
+					e.printStackTrace();
+					m.put("status", m.get("name") + " activation failed");
+					m.put("exception", e.getMessage());
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("exception cause: " + e.getCause());
+			System.out.println("exception message: " + e.getMessage());
+			e.printStackTrace();
+		}
+
+		// iterate over collections to deactivate
+		try {
+			for (Map m : deleletedCollections) {
+				try {
+					JsonObject jo = makeJSONBody(m, namespace);
+					System.out.println("json object for deactivate: " + jo);
+					KubeUtils.updateResource(apiClient, group, version, plural, namespace, m.get("name").toString(),
+							jo);
+					System.out.println("*** collection " + m.get("name") + " deactivated, organization "+group);
+					m.put("status", m.get("name") + " deactivated");
+				} catch (Exception e) {
+					System.out.println("exception cause: " + e.getCause());
+					System.out.println("exception message: " + e.getMessage());
+					System.out.println("*** collection " + m.get("name") + " failed to deactivate, organization "+group);
+					e.printStackTrace();
+					m.put("status", m.get("name") + " deactivation failed");
+					m.put("exception", e.getMessage());
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("exception cause: " + e.getCause());
+			System.out.println("exception message: " + e.getMessage());
+			e.printStackTrace();
+		}
+
 		// iterate over version change collections and update
 		try {
 			for (Map m : versionChangeCollections) {
@@ -282,8 +346,8 @@ public class CollectionsAccess {
 					KubeUtils.updateResource(apiClient, group, version, plural, namespace, m.get("name").toString(),
 							jo);
 					System.out.println(
-							"*** " + m.get("name") + "version change completed, new version number: " + version+", organization "+group);
-					m.put("status", m.get("name") + "version change completed, new version number: " + version);
+							"*** " + m.get("name") + "version change completed, new version number: " + m.get("version")+", organization "+group);
+					m.put("status", m.get("name") + "version change completed, new version number: " + m.get("version"));
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
@@ -301,8 +365,9 @@ public class CollectionsAccess {
 
 		// log successful changes too!
 		try {
-			msg.put("new collections", convertMapToJSON(newCollections));
-			msg.put("collections to delete", convertMapToJSON(deleletedCollections));
+			msg.put("new curated collections", convertMapToJSON(newCollections));
+			msg.put("activate collections", convertMapToJSON(activateCollections));
+			msg.put("obsolete collections", convertMapToJSON(deleletedCollections));
 			msg.put("version change collections", convertMapToJSON(versionChangeCollections));
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
@@ -322,6 +387,7 @@ public class CollectionsAccess {
 		}
 		return ja;
 	}
+	
 
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
@@ -336,21 +402,30 @@ public class CollectionsAccess {
 		JSONObject msg = new JSONObject();
 
 		try {
-			int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, plural);
-			if (rc == 0) {
-				System.out.println("*** " + "Collection name: " + name + " deactivated");
-				msg.put("status", "Collection name: " + name + " deactivated");
-				return Response.ok(msg).build();
-			}
-			else if (rc == 404) {
+			// mapOneResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name)
+			Map fromKabanero = KubeUtils.mapOneResource(apiClient, group, version, plural, namespace, name);
+			System.out.println("*** reading collection object: "+fromKabanero);
+			if (fromKabanero==null) {
 				System.out.println("*** " + "Collection name: " + name + " 404 not found");
 				msg.put("status", "Collection name: " + name + " 404 not found");
 				return Response.status(400).entity(msg).build();
-			} else {
-				System.out.println("*** " + "Collection name: " + name + " was not deactivated, rc="+rc);
-				msg.put("status", "Collection name: " + name + " was not deactivated, rc="+rc);
-				return Response.status(400).entity(msg).build();
 			}
+			Map spec = (Map) fromKabanero.get("spec");
+			String collVersion = (String) spec.get("version");
+			collVersion="0.2.7";
+			Map m = new HashMap();
+			m.put("name", name);
+			m.put("version", collVersion);
+			m.put("desiredState","inactive");
+			JsonObject jo = makeJSONBody(m, namespace);
+			System.out.println("*** json object for deactivate: " + jo);
+			KubeUtils.updateResource(apiClient, group, version, plural, namespace, name,
+					jo);
+			System.out.println("*** " + "Collection name: " + name + " deactivated");
+			msg.put("status", "Collection name: " + name + " deactivated");
+			fromKabanero = KubeUtils.mapOneResource(apiClient, group, version, plural, namespace, name);
+			System.out.println("*** reading collection object after deactivate: "+fromKabanero);
+			return Response.ok(msg).build();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -363,17 +438,21 @@ public class CollectionsAccess {
 
 	private JsonObject makeJSONBody(Map m, String namespace) {
 
-		System.out.println("makingJSONBody: " + m.toString());
+		System.out.println("making JSONBody: " + m.toString());
 
 		String joString = "{" + "    \"apiVersion\": \"kabanero.io/" + version + "\"," + "    \"kind\": \"Collection\","
 				+ "    \"metadata\": {" + "        \"name\": \"{{__NAME__}}\","
-				+ "        \"namespace\": \"{{__NAMESPACE__}}\"," + "        \"annotations\": {"
-				+ "              \"collexion_id\": \"{{__COLLEXION_ID__}}\"" + "        }" + "    },"
-				+ "    \"spec\": {" + "        \"version\": \"{{__VERSION__}}\"" + "    }" + "}";
+				+ "        \"namespace\": \"{{__NAMESPACE__}}\"},"
+				+ "    \"spec\": {" + "\"version\": \"{{__VERSION__}}\"," + "        \"desiredState\": \"{{__DESIRED_STATE__}}\"" + "    }" + "}";
+		
+		
 
-		String jsonBody = joString.replace("{{__NAME__}}", m.get("name").toString())
-				.replace("{{__NAMESPACE__}}", namespace).replace("{{__VERSION__}}", (String) m.get("version"))
-				.replace("{{__COLLEXION_ID__}}", (String) m.get("originalName"));
+		String jsonBody = joString.replace("{{__NAME__}}", m.get("name").toString()).replace("{{__DESIRED_STATE__}}", (String) m.get("desiredState"))
+				.replace("{{__NAMESPACE__}}", namespace).replace("{{__VERSION__}}", (String) m.get("version"));
+				
+		
+		System.out.println("made JSONBody: " + jsonBody);
+
 
 		JsonParser parser = new JsonParser();
 		JsonElement element = parser.parse(jsonBody);
@@ -381,6 +460,9 @@ public class CollectionsAccess {
 
 		return json;
 	}
+	
+	
+
 
 	private String getUser(HttpServletRequest request) {
 		String user = null;
