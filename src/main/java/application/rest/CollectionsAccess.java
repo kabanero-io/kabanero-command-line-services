@@ -116,13 +116,12 @@ public class CollectionsAccess {
 
 			List<Map> kabList = (List) fromKabanero.get("items");
 			
-			System.out.println("all collections= " + kabList);
 			
 			List allCollections=CollectionsUtils.allCollections(kabList);
 			
 			msg.put("kabanero collections", convertMapToJSON(allCollections));
 			System.out.println(" ");
-			System.out.println("List of all kab collections= "+convertMapToJSON(allCollections));
+			System.out.println("*** List of all kab collections= "+convertMapToJSON(allCollections));
 			System.out.println(" ");
 			
 			
@@ -135,15 +134,15 @@ public class CollectionsAccess {
 						.filterVersionChanges(masterCollections, kabList);
 
 				ja = convertMapToJSON(newCollections);
-				System.out.println("new collections: " + ja);
+				System.out.println("*** new curated collections: " + ja);
 				msg.put("new curated collections", ja);
 
 				ja = convertMapToJSON(deleletedCollections);
-				System.out.println("obsolete collections: " + ja);
+				System.out.println("*** obsolete collections: " + ja);
 				msg.put("obsolete collections", ja);
 
 				ja = convertMapToJSON(versionChangeCollections);
-				System.out.println("version change collections: " + ja);
+				System.out.println("*** version change collections: " + ja);
 				msg.put("version change collections", ja);
 			} catch (Exception e) {
 				System.out.println("exception cause: " + e.getCause());
@@ -211,7 +210,7 @@ public class CollectionsAccess {
 			
 			List<Map> kabList = (List) fromKabanero.get("items");
 			System.out.println(" ");
-			System.out.println("List of active kab collections= "+kabList);
+			System.out.println("*** List of active kab collections= "+kabList);
 			
 			String PAT = getPAT();
 			if (PAT==null) {
@@ -232,18 +231,18 @@ public class CollectionsAccess {
 				}
 			}
 			System.out.println(" ");
-			System.out.println("List of active master collections= "+masterCollections);
+			System.out.println("*** List of active curated collections= "+masterCollections);
 			
 			System.out.println(" ");
 			System.out.println(" ");
 			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
-			System.out.println("new curated collections=" + newCollections);
+			System.out.println("*** new curated collections=" + newCollections);
 			System.out.println(" ");
 			
 			System.out.println(" ");
 			System.out.println(" ");
 			activateCollections = (List<Map>) CollectionsUtils.filterCollectionsToActivate(masterCollections, kabList);;
-			System.out.println("activate collections=" + newCollections);
+			System.out.println("*** activate collections=" + newCollections);
 			System.out.println(" ");
 
 			deleletedCollections = (List<Map>) CollectionsUtils.filterDeletedCollections(masterCollections, kabList);
@@ -405,7 +404,7 @@ public class CollectionsAccess {
 		try {
 			// mapOneResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name)
 			Map fromKabanero = KubeUtils.mapOneResource(apiClient, group, version, plural, namespace, name);
-			System.out.println("reading collection object: "+fromKabanero);
+			System.out.println("*** reading collection object: "+fromKabanero);
 			if (fromKabanero==null) {
 				System.out.println("*** " + "Collection name: " + name + " 404 not found");
 				msg.put("status", "Collection name: " + name + " 404 not found");
@@ -419,13 +418,13 @@ public class CollectionsAccess {
 			m.put("version", collVersion);
 			m.put("desiredState","inactive");
 			JsonObject jo = makeJSONBody(m, namespace);
-			System.out.println("json object for version change: " + jo);
+			System.out.println("*** json object for deactivate: " + jo);
 			KubeUtils.updateResource(apiClient, group, version, plural, namespace, name,
 					jo);
 			System.out.println("*** " + "Collection name: " + name + " deactivated");
 			msg.put("status", "Collection name: " + name + " deactivated");
 			fromKabanero = KubeUtils.mapOneResource(apiClient, group, version, plural, namespace, name);
-			System.out.println("reading collection object after deactivate: "+fromKabanero);
+			System.out.println("*** reading collection object after deactivate: "+fromKabanero);
 			return Response.ok(msg).build();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

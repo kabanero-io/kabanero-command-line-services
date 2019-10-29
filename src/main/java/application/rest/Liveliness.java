@@ -25,26 +25,9 @@ public class Liveliness {
 			healthy = false;
 		}
 
-		//JSONObject msg = new JSONObject();
-
-		JSONArray checks = new JSONArray();
-		JSONObject jo = new JSONObject();
-		JSONObject jo1 = new JSONObject();
-		
-		
-		jo1.put("readGitSuccess",CollectionsUtils.readGitSuccess);
-		jo1.put("accessGitSuccess",HttpUtils.accessGitSuccess);
-		jo.put("GIT", jo1);
-		
-		checks.add(jo);
-		
-		//msg.put("checks", checks);
-
 		if (!healthy) {
-			//msg.put("status", "DOWN");
 			return Response.status(503).build();
 		} else {
-			//msg.put("status", "UP");
 			return Response.ok().build();
 		}
 
