@@ -268,11 +268,11 @@ public class CollectionsAccess {
 		try {
 			for (Map m : newCollections) {
 				try {
-					JSONObject jo = new JSONObject();
-					jo.putAll(m);
+//					JSONObject jo = new JSONObject();
+//					jo.putAll(m);
 					//JsonObject jo = makeJSONBody(m, namespace);
-					System.out.println("json object for create: " + jo);
-					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
+					//System.out.println("json object for create: " + jo);
+					KubeUtils.createResource(apiClient, group, version, plural, namespace, m);
 					System.out.println("*** collection " + m.get("name") + " created, organization "+group);
 					m.put("status", m.get("name") + " created");
 				} catch (Exception e) {

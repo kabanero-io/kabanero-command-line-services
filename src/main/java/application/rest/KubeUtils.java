@@ -405,10 +405,10 @@ public class KubeUtils {
       jsonBody: body of resource
       name: name of resource
      */
-    public static void createResource(ApiClient apiClient, String group, String version, String plural, String namespace, JSONObject jsonBody) throws Exception {
+    public static void createResource(ApiClient apiClient, String group, String version, String plural, String namespace, Map map) throws Exception {
        logger.info("Creating resource {}/{}/{} {}/{}:", group, version, plural, namespace);
        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
-       customApi.createNamespacedCustomObject(group, version, namespace, plural, jsonBody, "false");
+       customApi.createNamespacedCustomObject(group, version, namespace, plural, map, "false");
     }
     
     public static void updateResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name, JsonObject jsonBody) throws Exception {
