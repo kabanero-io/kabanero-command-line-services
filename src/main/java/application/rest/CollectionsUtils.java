@@ -404,7 +404,7 @@ public class CollectionsUtils {
 				version = version.trim();
 				boolean match = true;
 				HashMap gitMap = new HashMap();
-				String status=null;
+				String status = null;
 				for (Map map1 : fromKabanero) {
 					Map metadata = (Map) map1.get("metadata");
 					String name1 = (String) metadata.get("name");
@@ -417,6 +417,10 @@ public class CollectionsUtils {
 						if (!version1.contentEquals(version)) {
 							match = false;
 							status = (String) statusMap.get("status");
+
+							if (status == null) {
+								status = (String) spec.get("desiredState");
+							}
 						}
 					}
 				}

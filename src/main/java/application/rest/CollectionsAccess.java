@@ -202,6 +202,7 @@ public class CollectionsAccess {
 		}
 
 		List<Map> newCollections = null;
+		List<Map> newCollectionsSimple = null;
 		List<Map> activateCollections = null;
 		List<Map> deleletedCollections = null;
 		List<Map> versionChangeCollections = null;
@@ -235,7 +236,8 @@ public class CollectionsAccess {
 			
 			System.out.println(" ");
 			System.out.println(" ");
-			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
+			newCollections = (List<Map>) CollectionsUtils.filterNewCollectionsForCreate(masterCollections, kabList);
+			newCollectionsSimple = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
 			System.out.println("*** new curated collections=" + newCollections);
 			System.out.println(" ");
 			
@@ -271,8 +273,8 @@ public class CollectionsAccess {
 					//JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for create: " + jo);
 					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
-					System.out.println("*** collection " + m.get("name") + " activated, organization "+group);
-					m.put("status", m.get("name") + " activated");
+					System.out.println("*** collection " + m.get("name") + " created, organization "+group);
+					m.put("status", m.get("name") + " created");
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
@@ -367,7 +369,7 @@ public class CollectionsAccess {
 
 		// log successful changes too!
 		try {
-			msg.put("new curated collections", convertMapToJSON(newCollections));
+			msg.put("new curated collections", convertMapToJSON(newCollectionsSimple));
 			msg.put("activate collections", convertMapToJSON(activateCollections));
 			msg.put("obsolete collections", convertMapToJSON(deleletedCollections));
 			msg.put("version change collections", convertMapToJSON(versionChangeCollections));
