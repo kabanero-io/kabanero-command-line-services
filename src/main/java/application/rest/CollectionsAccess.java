@@ -232,7 +232,7 @@ public class CollectionsAccess {
 				}
 			}
 			System.out.println(" ");
-			System.out.println("*** List of active curated collections= "+masterCollections);
+			System.out.println("*** List of curated collections= "+masterCollections);
 			
 			System.out.println(" ");
 			System.out.println(" ");
@@ -244,7 +244,7 @@ public class CollectionsAccess {
 			System.out.println(" ");
 			System.out.println(" ");
 			activateCollections = (List<Map>) CollectionsUtils.filterCollectionsToActivate(masterCollections, kabList);;
-			System.out.println("*** activate collections=" + newCollections);
+			System.out.println("*** activate collections=" + activateCollections);
 			System.out.println(" ");
 
 			deleletedCollections = (List<Map>) CollectionsUtils.filterDeletedCollections(masterCollections, kabList);

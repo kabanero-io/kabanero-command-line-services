@@ -300,12 +300,12 @@ public class CollectionsUtils {
 
 		try {
 			for (Map map : fromGit) {
+				System.out.println("one map in filterNewCollectionsForCreate: "+map);
 				String name = (String) map.get("id");
 				String version = (String) map.get("version");
 				name = name.trim();
 				version = version.trim();
 				boolean match = false;
-				HashMap gitMap = new HashMap();
 				for (Map map1 : fromKabanero) {
 					Map metadata = (Map) map1.get("metadata");
 					String name1 = (String) metadata.get("name");
