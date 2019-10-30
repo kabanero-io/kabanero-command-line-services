@@ -266,7 +266,9 @@ public class CollectionsAccess {
 		try {
 			for (Map m : newCollections) {
 				try {
-					JsonObject jo = makeJSONBody(m, namespace);
+					JSONObject jo = new JSONObject();
+					jo.putAll(m);
+					//JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for create: " + jo);
 					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
 					System.out.println("*** collection " + m.get("name") + " activated, organization "+group);

@@ -405,7 +405,7 @@ public class KubeUtils {
       jsonBody: body of resource
       name: name of resource
      */
-    public static void createResource(ApiClient apiClient, String group, String version, String plural, String namespace, JsonObject jsonBody) throws Exception {
+    public static void createResource(ApiClient apiClient, String group, String version, String plural, String namespace, JSONObject jsonBody) throws Exception {
        logger.info("Creating resource {}/{}/{} {}/{}:", group, version, plural, namespace);
        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
        customApi.createNamespacedCustomObject(group, version, namespace, plural, jsonBody, "false");
@@ -416,6 +416,8 @@ public class KubeUtils {
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
         customApi.patchNamespacedCustomObject(group, version, namespace, plural, name, jsonBody);
      }
+    
+   
 
     /* Set status of resource
        apiClient: client to Kubernetes

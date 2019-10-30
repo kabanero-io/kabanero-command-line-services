@@ -295,6 +295,35 @@ public class CollectionsUtils {
 		return newCollections;
 	}
 	
+	public static List filterNewCollectionsForCreate(List<Map> fromGit, List<Map> fromKabanero) {
+		ArrayList<Map> newCollections = new ArrayList<Map>();
+
+		try {
+			for (Map map : fromGit) {
+				String name = (String) map.get("id");
+				String version = (String) map.get("version");
+				name = name.trim();
+				version = version.trim();
+				boolean match = false;
+				HashMap gitMap = new HashMap();
+				for (Map map1 : fromKabanero) {
+					Map metadata = (Map) map1.get("metadata");
+					String name1 = (String) metadata.get("name");
+					name1 = name1.trim();
+					if (name1.contentEquals(name)) {
+						match = true;
+					}
+				}
+				if (!match) {
+					newCollections.add(map);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return newCollections;
+	}
+	
 	public static List filterCollectionsToActivate(List<Map> fromGit, List<Map> fromKabanero) {
 		ArrayList<Map> activateCollections = new ArrayList<Map>();
 
