@@ -278,7 +278,9 @@ public class CollectionsAccess {
 					Gson gson = new Gson();
 			        Type gsonType = new TypeToken<HashMap>(){}.getType();
 			        String gsonString = gson.toJson(m,gsonType);
+			        System.out.println("gsonString for create: " + gsonString);
 			        JsonObject jo = new Gson().fromJson(gsonString, JsonObject.class);
+			        System.out.println("json object for create: " + jo);
 					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
 					System.out.println("*** collection " + m.get("name") + " created, organization "+group);
 					m.put("status", m.get("name") + " created");
