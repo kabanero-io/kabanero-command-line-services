@@ -37,11 +37,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 
 //import io.kabanero.event.KubeUtils;
 import io.kubernetes.client.ApiClient;
@@ -272,7 +275,11 @@ public class CollectionsAccess {
 //					jo.putAll(m);
 					//JsonObject jo = makeJSONBody(m, namespace);
 					//System.out.println("json object for create: " + jo);
-					KubeUtils.createResource(apiClient, group, version, plural, namespace, m);
+					Gson gson = new Gson();
+			        Type gsonType = new TypeToken<HashMap>(){}.getType();
+			        String gsonString = gson.toJson(m,gsonType);
+			        JsonObject jo = new Gson().fromJson(gsonString, JsonObject.class);
+					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
 					System.out.println("*** collection " + m.get("name") + " created, organization "+group);
 					m.put("status", m.get("name") + " created");
 				} catch (Exception e) {
