@@ -43,8 +43,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
 
 //import io.kabanero.event.KubeUtils;
 import io.kubernetes.client.ApiClient;
@@ -205,7 +203,6 @@ public class CollectionsAccess {
 		}
 
 		List<Map> newCollections = null;
-		List<Map> newCollectionsSimple = null;
 		List<Map> activateCollections = null;
 		List<Map> deleletedCollections = null;
 		List<Map> versionChangeCollections = null;
@@ -239,9 +236,7 @@ public class CollectionsAccess {
 			
 			System.out.println(" ");
 			System.out.println(" ");
-//			ArrayList<JsonObject> masterCollectionsWithJSON = (ArrayList<JsonObject>) CollectionsUtils
-//					.getMasterCollectionWithRESTwJSON(getUser(request), PAT, namespace);
-			//newCollections = (ArrayList<JsonObject>) CollectionsUtils.filterNewCollectionsForCreate(masterCollectionsWithJSON, kabList);
+
 			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
 			System.out.println("*** new curated collections=" + newCollections);
 			System.out.println(" ");
@@ -271,18 +266,8 @@ public class CollectionsAccess {
 
 		// iterate over new collections and create them
 		try {
-			int index=0;
 			for (Map m : newCollections) {
 				try {
-//					JSONObject jo1 = new JSONObject();
-//					jo1.putAll(m);
-					//JsonObject jo = makeJSONBody(m, namespace);
-					//System.out.println("json object for create: " + jo);
-					//Gson gson = new Gson();
-			        //Type gsonType = new TypeToken<HashMap>(){}.getType();
-			        //String gsonString = gson.toJson(m,gsonType);
-//			        System.out.println("json String for create: " + m);
-//			        JsonObject jo = new Gson().fromJson(jo1.toString(), JsonObject.class);
 					JSONObject spec = new JSONObject();
 					JSONObject metadata = new JSONObject();
 					JSONObject json = new JSONObject();
@@ -312,7 +297,6 @@ public class CollectionsAccess {
 					m.put("status", m.get("name") + " activation failed");
 					m.put("exception", e.getMessage());
 				}
-				index++;
 			}
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());

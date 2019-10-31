@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -24,13 +22,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.yaml.snakeyaml.Yaml;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 
 import io.kubernetes.client.ApiClient;
@@ -39,20 +30,7 @@ public class CollectionsUtils {
 	
 	public static boolean readGitSuccess=true;
 	
-	static String convertYamlToJson(String yaml) throws JsonProcessingException {
-	    ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
-	    Object obj=null;
-		try {
-			obj = yamlReader.readValue(yaml, Object.class);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	    ObjectMapper jsonWriter = new ObjectMapper();
-			return jsonWriter.writeValueAsString(obj);
-		
-	}
+	
 
 	private static Map readYaml(String response) {
 		Yaml yaml = new Yaml();
@@ -126,25 +104,10 @@ public class CollectionsUtils {
 
 		StringBuffer result = new StringBuffer();
 		String line = "";
-//		String regex = "\u00AE";  // registered symbol
-//		Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-//		regex = "0\0xFFFD";  // special character
-//		Pattern pattern2 = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-//		regex = "\0xFFFD";  // special character
-//		Pattern pattern3 = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-		
-		
+
 		  
 		try {
 			while ((line = rd.readLine()) != null) {
-//				Matcher matcher = pattern.matcher(line);
-//				Matcher matcher1 = pattern2.matcher(line);
-//				Matcher matcher2 = pattern3.matcher(line);
-//				if (matcher.find() || matcher1.find() || matcher2.find()) {
-//					line=line.substring(0,line.length()-1);
-//				}
-				//replaceInvalidChar(line);
-				
 				result.append(line + "\n");
 			}
 		} catch (IOException e) {
@@ -154,16 +117,7 @@ public class CollectionsUtils {
 		return result.toString();
 	}
 	
-	private static String replaceInvalidChar(String str) {
-		char[] chars = str.toCharArray();
-		StringBuffer sb = new StringBuffer();
-		for (char ch : chars) {
-			if (ch != 0xfffd) {
-				sb.append(ch);
-			}
-		}
-		return sb.toString();
-	}
+	
 
 	public static List getMasterCollectionWithREST(String user, String pw, String namespace) {
 		String url = null;
@@ -217,67 +171,7 @@ public class CollectionsUtils {
 		return list;
 	}
 	
-	public static List getMasterCollectionWithRESTwJSON(String user, String pw, String namespace) {
-		String url = null;
-		try {
-			ApiClient apiClient = KubeUtils.getApiClient();
-			String group = "kabanero.io";
-			String version = "v1alpha1";
-			String plural = "kabaneros";
-			LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) KubeUtils.mapResources(apiClient, group, version, plural,
-					namespace);
-			List<Map> list = (List) map.get("items");
-			boolean first = true;
-			for (Map m : list) {
-				if (!first)
-					break;
-				Map spec = (Map) m.get("spec");
-				Map collections = (Map) spec.get("collections");
-				System.out.println("collections=" + collections);
-				List repos = (List) collections.get("repositories");
-				System.out.println("repos=" + repos);
-				Map repo = (Map) repos.get(0);
-				url = (String) repo.get("url");
-				first = false;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		String response = null;
-		try {
-			response = getFromGit(url, user, pw);
-			if (response!=null) {
-				if (response.contains("http code 429:")) {
-					ArrayList<String> list= new ArrayList();
-					list.add(response);
-					return list;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
-		System.out.println("response = " + response);
-		String json=null;
-		try {
-			json=convertYamlToJson(response);
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println(json);
-		JsonObject jo = new Gson().fromJson(json, JsonObject.class);
-		System.out.println(json);
-		JsonElement element = jo.get("stacks");
-		JsonArray array= element.getAsJsonArray();
-		ArrayList<JsonObject> list =  new ArrayList<JsonObject>();
-		for (JsonElement elem : array) {
-			JsonObject rootObject = elem.getAsJsonObject();
-			list.add(rootObject);
-		}
-		return list;
-	}
+	
 
 	public static List streamLineMasterMap(List<Map> list) {
 		ArrayList aList = new ArrayList();
@@ -410,32 +304,6 @@ public class CollectionsUtils {
 		return newCollections;
 	}
 	
-	
-	public static ArrayList<JsonObject> filterNewCollectionsForCreate(ArrayList<JsonObject> fromGit, List<Map> fromKabanero) {
-		ArrayList<JsonObject> newCollections = new ArrayList<JsonObject>();
-		try {
-			for (JsonObject elem : fromGit) {
-				JsonObject rootObject = elem.getAsJsonObject();
-				String name = rootObject.get("id").getAsString();
-				name = name.trim();
-				boolean match = false;
-				for (Map map1 : fromKabanero) {
-					Map metadata = (Map) map1.get("metadata");
-					String name1 = (String) metadata.get("name");
-					name1 = name1.trim();
-					if (name1.contentEquals(name)) {
-						match = true;
-					}
-				}
-				if (!match) {
-					newCollections.add(rootObject);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return newCollections;
-	}
 	
 	public static List filterCollectionsToActivate(List<Map> fromGit, List<Map> fromKabanero) {
 		ArrayList<Map> activateCollections = new ArrayList<Map>();
