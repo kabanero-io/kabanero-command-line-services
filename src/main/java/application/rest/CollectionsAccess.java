@@ -271,15 +271,15 @@ public class CollectionsAccess {
 		try {
 			for (Map m : newCollections) {
 				try {
-//					JSONObject jo = new JSONObject();
-//					jo.putAll(m);
+					JSONObject jo1 = new JSONObject();
+					jo1.putAll(m);
 					//JsonObject jo = makeJSONBody(m, namespace);
 					//System.out.println("json object for create: " + jo);
 					Gson gson = new Gson();
-			        Type gsonType = new TypeToken<HashMap>(){}.getType();
-			        String gsonString = gson.toJson(m,gsonType);
-			        System.out.println("gsonString for create: " + gsonString);
-			        JsonObject jo = new Gson().fromJson(gsonString, JsonObject.class);
+			        //Type gsonType = new TypeToken<HashMap>(){}.getType();
+			        //String gsonString = gson.toJson(m,gsonType);
+			        System.out.println("json String for create: " + jo1);
+			        JsonObject jo = new Gson().fromJson(jo1.toString(), JsonObject.class);
 			        System.out.println("json object for create: " + jo);
 					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
 					System.out.println("*** collection " + m.get("name") + " created, organization "+group);
