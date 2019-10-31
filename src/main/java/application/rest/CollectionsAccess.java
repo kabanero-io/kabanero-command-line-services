@@ -284,11 +284,21 @@ public class CollectionsAccess {
 //			        System.out.println("json String for create: " + m);
 //			        JsonObject jo = new Gson().fromJson(jo1.toString(), JsonObject.class);
 					JSONObject spec = new JSONObject();
+					JSONObject metadata = new JSONObject();
 					JSONObject json = new JSONObject();
+					
 					spec.put("desiredState", "active");
 					spec.put("name", m.get("name"));
 					spec.put("version", m.get("version"));
+					
+					metadata.put("name", m.get("name"));
+					metadata.put("namespace", namespace);
+					
 					json.put("spec", spec);
+					json.put("metadata", metadata);
+					json.put("apiVersion", version);
+					json.put("kind", plural);
+					
 					JsonObject jo = new Gson().fromJson(json.toString(), JsonObject.class);
 					System.out.println("json object for create: " + jo);
 					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
