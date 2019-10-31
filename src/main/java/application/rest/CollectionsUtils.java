@@ -132,7 +132,7 @@ public class CollectionsUtils {
 			e.printStackTrace();
 		}
 		String resultStr = result.toString();
-		resultStr = resultStr.replaceAll("??", "");
+		resultStr = resultStr.replaceAll("??", "  ");
 		return resultStr;
 	}
 
