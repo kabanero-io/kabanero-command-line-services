@@ -296,7 +296,7 @@ public class CollectionsAccess {
 					
 					json.put("spec", spec);
 					json.put("metadata", metadata);
-					json.put("apiVersion", version);
+					json.put("apiVersion", "kabanero.io/"+version);
 					json.put("kind", plural);
 					
 					JsonObject jo = new Gson().fromJson(json.toString(), JsonObject.class);
