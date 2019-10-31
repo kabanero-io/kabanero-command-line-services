@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -124,16 +126,22 @@ public class CollectionsUtils {
 
 		StringBuffer result = new StringBuffer();
 		String line = "";
+		String regex = "\u00AE";  // registered symbol
+		Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+		  
 		try {
 			while ((line = rd.readLine()) != null) {
+				Matcher matcher = pattern.matcher(line);
+				if (matcher.find()) {
+					line=line.substring(0,line.length()-1);
+				}
 				result.append(line + "\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		String resultStr = result.toString();
-		resultStr = resultStr.replaceAll("??", "  ");
-		return resultStr;
+		
+		return result.toString();
 	}
 
 	public static List getMasterCollectionWithREST(String user, String pw, String namespace) {
