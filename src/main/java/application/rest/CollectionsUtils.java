@@ -86,6 +86,7 @@ public class CollectionsUtils {
 		clientBuilder.setDefaultCredentialsProvider(credsProvider);
 		HttpClient client = clientBuilder.create().build();
 		HttpGet request = new HttpGet(url);
+		request.addHeader("accept", "charset/utf-8");
 		request.addHeader("accept", "application/yaml");
 
 		// add request header
@@ -126,15 +127,20 @@ public class CollectionsUtils {
 
 		StringBuffer result = new StringBuffer();
 		String line = "";
-		String regex = "\u00AE";  // registered symbol
-		Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+//		String regex = "\u00AE";  // registered symbol
+//		Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+//		regex = "\u00AE";  // registered symbol
+//		Pattern pattern2 = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+		
+		
 		  
 		try {
 			while ((line = rd.readLine()) != null) {
-				Matcher matcher = pattern.matcher(line);
-				if (matcher.find()) {
-					line=line.substring(0,line.length()-1);
-				}
+//				Matcher matcher = pattern.matcher(line);
+//				if (matcher.find()) {
+//					line=line.substring(0,line.length()-1);
+//				}
+				
 				result.append(line + "\n");
 			}
 		} catch (IOException e) {
