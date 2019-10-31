@@ -399,7 +399,7 @@ public class CollectionsAccess {
 
 		// log successful changes too!
 		try {
-			msg.put("new curated collections", convertMapToJSON(newCollectionsSimple));
+			msg.put("new curated collections", convertMapToJSON(newCollections));
 			msg.put("activate collections", convertMapToJSON(activateCollections));
 			msg.put("obsolete collections", convertMapToJSON(deleletedCollections));
 			msg.put("version change collections", convertMapToJSON(versionChangeCollections));
