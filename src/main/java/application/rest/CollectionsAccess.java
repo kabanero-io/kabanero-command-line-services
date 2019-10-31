@@ -239,8 +239,8 @@ public class CollectionsAccess {
 			
 			System.out.println(" ");
 			System.out.println(" ");
-			ArrayList<JsonObject> masterCollectionsWithJSON = (ArrayList<JsonObject>) CollectionsUtils
-					.getMasterCollectionWithRESTwJSON(getUser(request), PAT, namespace);
+//			ArrayList<JsonObject> masterCollectionsWithJSON = (ArrayList<JsonObject>) CollectionsUtils
+//					.getMasterCollectionWithRESTwJSON(getUser(request), PAT, namespace);
 			//newCollections = (ArrayList<JsonObject>) CollectionsUtils.filterNewCollectionsForCreate(masterCollectionsWithJSON, kabList);
 			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
 			System.out.println("*** new curated collections=" + newCollections);
