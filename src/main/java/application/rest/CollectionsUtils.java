@@ -131,7 +131,9 @@ public class CollectionsUtils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return result.toString();
+		String resultStr = result.toString();
+		resultStr = resultStr.replaceAll("??", "");
+		return resultStr;
 	}
 
 	public static List getMasterCollectionWithREST(String user, String pw, String namespace) {
