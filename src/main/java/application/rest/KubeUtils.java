@@ -416,8 +416,6 @@ public class KubeUtils {
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
         customApi.patchNamespacedCustomObject(group, version, namespace, plural, name, jsonBody);
      }
-    
-   
 
     /* Set status of resource
        apiClient: client to Kubernetes

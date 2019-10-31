@@ -64,7 +64,7 @@ public class CollectionsUtils {
 		clientBuilder.setDefaultCredentialsProvider(credsProvider);
 		HttpClient client = clientBuilder.create().build();
 		HttpGet request = new HttpGet(url);
-		request.addHeader("accept", "application/yaml;; charset=utf-8");
+		request.addHeader("accept", "application/yaml");
 
 		// add request header
 
@@ -104,8 +104,7 @@ public class CollectionsUtils {
 
 		StringBuffer result = new StringBuffer();
 		String line = "";
-
-		  
+  
 		try {
 			while ((line = rd.readLine()) != null) {
 				result.append(line + "\n");
