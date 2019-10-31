@@ -126,31 +126,44 @@ public class CollectionsUtils {
 
 		StringBuffer result = new StringBuffer();
 		String line = "";
-		String regex = "\u00AE";  // registered symbol
-		Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-		regex = "0\0xFFFD";  // special character
-		Pattern pattern2 = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-		regex = "\0xFFFD";  // special character
-		Pattern pattern3 = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+//		String regex = "\u00AE";  // registered symbol
+//		Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+//		regex = "0\0xFFFD";  // special character
+//		Pattern pattern2 = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+//		regex = "\0xFFFD";  // special character
+//		Pattern pattern3 = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 		
 		
 		  
 		try {
 			while ((line = rd.readLine()) != null) {
-				Matcher matcher = pattern.matcher(line);
-				Matcher matcher1 = pattern2.matcher(line);
-				Matcher matcher2 = pattern3.matcher(line);
-				if (matcher.find() || matcher1.find() || matcher2.find()) {
-					line=line.substring(0,line.length()-1);
-				}
+//				Matcher matcher = pattern.matcher(line);
+//				Matcher matcher1 = pattern2.matcher(line);
+//				Matcher matcher2 = pattern3.matcher(line);
+//				if (matcher.find() || matcher1.find() || matcher2.find()) {
+//					line=line.substring(0,line.length()-1);
+//				}
+				replaceInvalidChar(line);
 				
-				result.append(line + "\n");
+				result.append(replaceInvalidChar(line) + "\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		return result.toString();
+	}
+	
+	private static String replaceInvalidChar(String str) {
+		char[] chars = str.toCharArray();
+		StringBuffer sb = new StringBuffer();
+		for (char ch : chars) {
+			if (ch != 0xfffd) {
+				sb.append(ch);
+			}
+		}
+		System.out.println(chars.length + ":" + sb.toString());
+		return sb.toString();
 	}
 
 	public static List getMasterCollectionWithREST(String user, String pw, String namespace) {
