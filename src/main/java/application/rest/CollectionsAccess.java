@@ -204,7 +204,7 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 
-		List<Map> newCollections = null;
+		ArrayList<JsonObject> newCollections = null;
 		List<Map> newCollectionsSimple = null;
 		List<Map> activateCollections = null;
 		List<Map> deleletedCollections = null;
@@ -239,7 +239,9 @@ public class CollectionsAccess {
 			
 			System.out.println(" ");
 			System.out.println(" ");
-			newCollections = (List<Map>) CollectionsUtils.filterNewCollectionsForCreate(masterCollections, kabList);
+			ArrayList<JsonObject> masterCollectionsWithJSON = (ArrayList<JsonObject>) CollectionsUtils
+					.getMasterCollectionWithRESTwJSON(getUser(request), PAT, namespace);
+			newCollections = (ArrayList<JsonObject>) CollectionsUtils.filterNewCollectionsForCreate(masterCollectionsWithJSON, kabList);
 			newCollectionsSimple = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
 			System.out.println("*** new curated collections=" + newCollections);
 			System.out.println(" ");
@@ -269,29 +271,34 @@ public class CollectionsAccess {
 
 		// iterate over new collections and create them
 		try {
-			for (Map m : newCollections) {
+			int index=0;
+			for (JsonObject jo : newCollections) {
+				JsonObject rootObject = jo.getAsJsonObject();
+				String name = rootObject.get("id").getAsString();
 				try {
-					JSONObject jo1 = new JSONObject();
-					jo1.putAll(m);
+//					JSONObject jo1 = new JSONObject();
+//					jo1.putAll(m);
 					//JsonObject jo = makeJSONBody(m, namespace);
 					//System.out.println("json object for create: " + jo);
-					Gson gson = new Gson();
+					//Gson gson = new Gson();
 			        //Type gsonType = new TypeToken<HashMap>(){}.getType();
 			        //String gsonString = gson.toJson(m,gsonType);
-			        System.out.println("json String for create: " + jo1);
-			        JsonObject jo = new Gson().fromJson(jo1.toString(), JsonObject.class);
+//			        System.out.println("json String for create: " + m);
+//			        JsonObject jo = new Gson().fromJson(jo1.toString(), JsonObject.class);
 			        System.out.println("json object for create: " + jo);
 					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
-					System.out.println("*** collection " + m.get("name") + " created, organization "+group);
-					m.put("status", m.get("name") + " created");
+					System.out.println("*** collection " + name + " created, organization "+group);
+					newCollectionsSimple.get(index).put("status", name + " created");
+					
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** collection " + m.get("name") + " failed to activate, organization "+group);
+					System.out.println("*** collection " + name + " failed to activate, organization "+group);
 					e.printStackTrace();
-					m.put("status", m.get("name") + " activation failed");
-					m.put("exception", e.getMessage());
+					newCollectionsSimple.get(index).put("status", name + " activation failed");
+					newCollectionsSimple.get(index).put("exception", e.getMessage());
 				}
+				index++;
 			}
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());

@@ -22,6 +22,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.yaml.snakeyaml.Yaml;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 
 import io.kubernetes.client.ApiClient;
@@ -29,6 +36,21 @@ import io.kubernetes.client.ApiClient;
 public class CollectionsUtils {
 	
 	public static boolean readGitSuccess=true;
+	
+	static String convertYamlToJson(String yaml) throws JsonProcessingException {
+	    ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+	    Object obj=null;
+		try {
+			obj = yamlReader.readValue(yaml, Object.class);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	    ObjectMapper jsonWriter = new ObjectMapper();
+			return jsonWriter.writeValueAsString(obj);
+		
+	}
 
 	private static Map readYaml(String response) {
 		Yaml yaml = new Yaml();
@@ -54,7 +76,7 @@ public class CollectionsUtils {
         return false;
     }
 
-	private static String getFromGit(String url, String user, String pw) {
+	public static String getFromGit(String url, String user, String pw) {
 
 		HttpClientBuilder clientBuilder = HttpClients.custom();
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -160,6 +182,68 @@ public class CollectionsUtils {
 			list = (ArrayList<Map>) m.get("stacks");
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	public static List getMasterCollectionWithRESTwJSON(String user, String pw, String namespace) {
+		String url = null;
+		try {
+			ApiClient apiClient = KubeUtils.getApiClient();
+			String group = "kabanero.io";
+			String version = "v1alpha1";
+			String plural = "kabaneros";
+			LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) KubeUtils.mapResources(apiClient, group, version, plural,
+					namespace);
+			List<Map> list = (List) map.get("items");
+			boolean first = true;
+			for (Map m : list) {
+				if (!first)
+					break;
+				Map spec = (Map) m.get("spec");
+				Map collections = (Map) spec.get("collections");
+				System.out.println("collections=" + collections);
+				List repos = (List) collections.get("repositories");
+				System.out.println("repos=" + repos);
+				Map repo = (Map) repos.get(0);
+				url = (String) repo.get("url");
+				first = false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		String response = null;
+		try {
+			response = getFromGit(url, user, pw);
+			if (response!=null) {
+				if (response.contains("http code 429:")) {
+					ArrayList<String> list= new ArrayList();
+					list.add(response);
+					return list;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+		System.out.println("response = " + response);
+		String json=null;
+		try {
+			json=convertYamlToJson(response);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(json);
+		JsonObject jo = new Gson().fromJson(json, JsonObject.class);
+		System.out.println(json);
+		JsonElement element = jo.get("stacks");
+		JsonArray array= element.getAsJsonArray();
+		ArrayList<JsonObject> list =  new ArrayList<JsonObject>();
+		for (JsonElement elem : array) {
+			JsonObject rootObject = elem.getAsJsonObject();
+			list.add(rootObject);
 		}
 		return list;
 	}
@@ -295,16 +379,14 @@ public class CollectionsUtils {
 		return newCollections;
 	}
 	
-	public static List filterNewCollectionsForCreate(List<Map> fromGit, List<Map> fromKabanero) {
-		ArrayList<Map> newCollections = new ArrayList<Map>();
-
+	
+	public static ArrayList<JsonObject> filterNewCollectionsForCreate(ArrayList<JsonObject> fromGit, List<Map> fromKabanero) {
+		ArrayList<JsonObject> newCollections = new ArrayList<JsonObject>();
 		try {
-			for (Map map : fromGit) {
-				System.out.println("one map in filterNewCollectionsForCreate: "+map);
-				String name = (String) map.get("id");
-				String version = (String) map.get("version");
+			for (JsonObject elem : fromGit) {
+				JsonObject rootObject = elem.getAsJsonObject();
+				String name = rootObject.get("id").getAsString();
 				name = name.trim();
-				version = version.trim();
 				boolean match = false;
 				for (Map map1 : fromKabanero) {
 					Map metadata = (Map) map1.get("metadata");
@@ -315,7 +397,7 @@ public class CollectionsUtils {
 					}
 				}
 				if (!match) {
-					newCollections.add(map);
+					newCollections.add(rootObject);
 				}
 			}
 		} catch (Exception e) {

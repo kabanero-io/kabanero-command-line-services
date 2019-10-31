@@ -11,6 +11,7 @@
 .*.swp
 .DS_Store
 /src/main/liberty/config/server.env
+/src/main/java/application/rest/Test3.java
 /mc-target
 /.apt_generated/
 /.apt_generated_tests/
