@@ -143,9 +143,9 @@ public class CollectionsUtils {
 //				if (matcher.find() || matcher1.find() || matcher2.find()) {
 //					line=line.substring(0,line.length()-1);
 //				}
-				replaceInvalidChar(line);
+				//replaceInvalidChar(line);
 				
-				result.append(replaceInvalidChar(line) + "\n");
+				result.append(line + "\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -162,7 +162,6 @@ public class CollectionsUtils {
 				sb.append(ch);
 			}
 		}
-		System.out.println(chars.length + ":" + sb.toString());
 		return sb.toString();
 	}
 
