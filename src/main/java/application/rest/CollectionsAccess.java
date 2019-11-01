@@ -378,11 +378,18 @@ public class CollectionsAccess {
 
 		// iterate over version change collections and update
 		try {
+			
 			for (Object o : versionChangeCollections) {
 				Map m = (Map)o;
 				try {
+					
+					String state = getDesiredState(versionChangeCollections, activateCollections);
+					if (state!=null) {
+						m.put("desiredState", state);
+					}
 					JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for version change: " + jo);
+					
 					KubeUtils.updateResource(apiClient, group, version, plural, namespace, m.get("name").toString(),
 							jo);
 					System.out.println(
@@ -396,6 +403,7 @@ public class CollectionsAccess {
 					m.put("status", m.get("name") + "version change failed");
 					m.put("exception", e.getMessage());
 				}
+				
 			}
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
@@ -421,6 +429,26 @@ public class CollectionsAccess {
 		}
 		System.out.println("finishing refresh");
 		return Response.ok(msg).build();
+	}
+	
+	private String getDesiredState(List<Map> versionColls, List<Map> activateColls) {
+		String state=null;
+		if (activateColls!=null) {
+			for (Map map : versionColls) {
+				String name = (String) map.get("name");
+				name = name.trim();
+				boolean match = false;
+				for (Map map1 : activateColls) {
+					String name1 = (String) map1.get("name");
+					String desiredState = (String) map1.get("desiredState");
+					name1 = name1.trim();
+					if (name1.contentEquals(name)) {
+						state=desiredState;
+					}
+				}
+			}
+		}
+		return state;
 	}
 
 	private JSONArray convertMapToJSON(List<Map> list) {
