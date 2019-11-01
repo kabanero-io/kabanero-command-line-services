@@ -396,11 +396,7 @@ public class CollectionsUtils {
 					if (name.contentEquals(name1)) {
 						if (!version1.contentEquals(version)) {
 							match = false;
-							status = (String) statusMap.get("status");
-
-							if (status == null) {
-								status = (String) spec.get("desiredState");
-							}
+							status = (String) spec.get("desiredState");
 						}
 					}
 				}
