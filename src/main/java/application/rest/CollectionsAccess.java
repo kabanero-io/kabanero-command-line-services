@@ -84,7 +84,7 @@ public class CollectionsAccess {
 	public Response listCollections(@Context final HttpServletRequest request) {
 		JSONObject msg = new JSONObject();
 		try {
-
+			System.out.println("entering LIST function");
 			String user = getUser(request);
 			System.out.println("user=" + user);
 
@@ -519,13 +519,13 @@ public class CollectionsAccess {
 		return user;
 	}
 
-	private String getPAT() {
+	private String getPAT() throws ApiException {
 		String PAT = null;
 		try {
 			PAT = (new PATHelper()).extractGithubAccessTokenFromSubject();
 		} catch (Exception e) {
 			System.out.println("login token has expired, please login again");
-			return null;
+			throw new ApiException("login token has expired, please login again");
 		}
 		
 
