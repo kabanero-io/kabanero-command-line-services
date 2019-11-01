@@ -19,6 +19,8 @@
 package application.rest;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,13 +62,19 @@ public class CollectionsAccess {
 	private static String group = "kabanero.io";
 	// should be array
 	private static String namespace = (String) envMap.get("KABANERO_CLI_NAMESPACE");
-
+																	
+	public static Comparator<Map<String, String>> mapComparator = new Comparator<Map<String, String>>() {
+	    public int compare(Map<String, String> m1, Map<String, String> m2) {
+	        return m1.get("name").compareTo(m2.get("name"));
+	    }
+	};
+	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/version")
 	public Response versionlist(@Context final HttpServletRequest request) {
 		JSONObject msg = new JSONObject();
-		msg.put("version", "0.2.0");
+		msg.put("version", "0.3.0");
 		return Response.ok(msg).build();
 	}
 
@@ -76,7 +84,7 @@ public class CollectionsAccess {
 	public Response listCollections(@Context final HttpServletRequest request) {
 		JSONObject msg = new JSONObject();
 		try {
-
+			System.out.println("entering LIST function");
 			String user = getUser(request);
 			System.out.println("user=" + user);
 
@@ -97,8 +105,12 @@ public class CollectionsAccess {
 					return Response.status(503).entity(resp).build();
 				}
 			}
-			JSONArray ja = convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections));
-			System.out.println("master collectionfor namespace: "+namespace+" kab group: " + group +"="+ ja);
+			
+			List curatedCollections = CollectionsUtils.streamLineMasterMap(masterCollections);
+			Collections.sort(curatedCollections, mapComparator);
+			
+			JSONArray ja = convertMapToJSON(curatedCollections);
+			System.out.println("curated collectionfor namespace: "+namespace+" kab group: " + group +"="+ ja);
 			msg.put("curated collections", ja);
 
 			// make call to kabanero to get current collection
@@ -119,20 +131,26 @@ public class CollectionsAccess {
 			
 			
 			List allCollections=CollectionsUtils.allCollections(kabList);
-			
+			Collections.sort(allCollections, mapComparator);
 			msg.put("kabanero collections", convertMapToJSON(allCollections));
+			
 			System.out.println(" ");
 			System.out.println("*** List of all kab collections= "+convertMapToJSON(allCollections));
 			System.out.println(" ");
 			
 			
 			try {
-				List<Map> newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections,
+				List newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections,
 						kabList);
-				List<Map> deleletedCollections = (List<Map>) CollectionsUtils
+				Collections.sort(newCollections, mapComparator);
+				
+				List deleletedCollections = (List<Map>) CollectionsUtils
 						.filterDeletedCollections(masterCollections, kabList);
-				List<Map> versionChangeCollections = (List<Map>) CollectionsUtils
+				Collections.sort(deleletedCollections, mapComparator);
+				
+				List versionChangeCollections = (List<Map>) CollectionsUtils
 						.filterVersionChanges(masterCollections, kabList);
+				Collections.sort(versionChangeCollections, mapComparator);
 
 				ja = convertMapToJSON(newCollections);
 				System.out.println("*** new curated collections: " + ja);
@@ -202,10 +220,10 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 
-		List<Map> newCollections = null;
-		List<Map> activateCollections = null;
-		List<Map> deleletedCollections = null;
-		List<Map> versionChangeCollections = null;
+		List newCollections = null;
+		List activateCollections = null;
+		List deleletedCollections = null;
+		List versionChangeCollections = null;
 		JSONObject msg = new JSONObject();
 		try {
 			
@@ -266,7 +284,8 @@ public class CollectionsAccess {
 
 		// iterate over new collections and create them
 		try {
-			for (Map m : newCollections) {
+			for (Object o : newCollections) {
+				Map m = (Map)o;
 				try {
 					JSONObject spec = new JSONObject();
 					JSONObject metadata = new JSONObject();
@@ -307,7 +326,8 @@ public class CollectionsAccess {
 
 		// iterate over collections to activate
 		try {
-			for (Map m : activateCollections) {
+			for (Object o : activateCollections) {
+				Map m = (Map)o;
 				try {
 					JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for activate: " + jo);
@@ -332,7 +352,8 @@ public class CollectionsAccess {
 
 		// iterate over collections to deactivate
 		try {
-			for (Map m : deleletedCollections) {
+			for (Object o : deleletedCollections) {
+				Map m = (Map)o;
 				try {
 					JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for deactivate: " + jo);
@@ -357,7 +378,8 @@ public class CollectionsAccess {
 
 		// iterate over version change collections and update
 		try {
-			for (Map m : versionChangeCollections) {
+			for (Object o : versionChangeCollections) {
+				Map m = (Map)o;
 				try {
 					JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for version change: " + jo);
@@ -383,6 +405,11 @@ public class CollectionsAccess {
 
 		// log successful changes too!
 		try {
+			Collections.sort(newCollections, mapComparator);
+			Collections.sort(activateCollections, mapComparator);
+			Collections.sort(deleletedCollections, mapComparator);
+			Collections.sort(versionChangeCollections, mapComparator);
+			
 			msg.put("new curated collections", convertMapToJSON(newCollections));
 			msg.put("activate collections", convertMapToJSON(activateCollections));
 			msg.put("obsolete collections", convertMapToJSON(deleletedCollections));
@@ -492,13 +519,16 @@ public class CollectionsAccess {
 		return user;
 	}
 
-	private String getPAT() {
+	private String getPAT() throws ApiException {
 		String PAT = null;
 		try {
 			PAT = (new PATHelper()).extractGithubAccessTokenFromSubject();
+			if (PAT == null) {
+				throw new ApiException("login token has expired, please login again");
+			}
 		} catch (Exception e) {
 			System.out.println("login token has expired, please login again");
-			return null;
+			throw new ApiException("login token has expired, please login again");
 		}
 		
 

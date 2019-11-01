@@ -225,11 +225,11 @@ public class CollectionsUtils {
 				String version = (String) spec.get("version");
 				Map status = (Map) map.get("status");
 				String statusStr = null;
-				if (status==null) {
-					statusStr = (String) spec.get("desiredState");
-				} else {
-					statusStr = (String) status.get("status");
+				statusStr = (String) status.get("status");
+				if (statusStr==null) {
+					statusStr="initializing";
 				}
+				
 				allMap.put("name", name);
 				allMap.put("version", version);
 				allMap.put("status",statusStr);
