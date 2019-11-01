@@ -523,6 +523,9 @@ public class CollectionsAccess {
 		String PAT = null;
 		try {
 			PAT = (new PATHelper()).extractGithubAccessTokenFromSubject();
+			if (PAT == null) {
+				throw new ApiException("login token has expired, please login again");
+			}
 		} catch (Exception e) {
 			System.out.println("login token has expired, please login again");
 			throw new ApiException("login token has expired, please login again");
