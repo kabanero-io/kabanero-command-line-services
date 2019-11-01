@@ -101,8 +101,12 @@ public class CollectionsAccess {
 					return Response.status(503).entity(resp).build();
 				}
 			}
-			JSONArray ja = convertMapToJSON(CollectionsUtils.streamLineMasterMap(masterCollections));
-			System.out.println("master collectionfor namespace: "+namespace+" kab group: " + group +"="+ ja);
+			
+			List curatedCollections = CollectionsUtils.streamLineMasterMap(masterCollections);
+			Collections.sort(curatedCollections, mapComparator);
+			
+			JSONArray ja = convertMapToJSON(curatedCollections);
+			System.out.println("curated collectionfor namespace: "+namespace+" kab group: " + group +"="+ ja);
 			msg.put("curated collections", ja);
 
 			// make call to kabanero to get current collection
@@ -123,8 +127,9 @@ public class CollectionsAccess {
 			
 			
 			List allCollections=CollectionsUtils.allCollections(kabList);
-			
+			Collections.sort(allCollections, mapComparator);
 			msg.put("kabanero collections", convertMapToJSON(allCollections));
+			
 			System.out.println(" ");
 			System.out.println("*** List of all kab collections= "+convertMapToJSON(allCollections));
 			System.out.println(" ");
