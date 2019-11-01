@@ -37,6 +37,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -231,10 +232,11 @@ public class CollectionsAccess {
 				}
 			}
 			System.out.println(" ");
-			System.out.println("*** List of active curated collections= "+masterCollections);
+			System.out.println("*** List of curated collections= "+masterCollections);
 			
 			System.out.println(" ");
 			System.out.println(" ");
+
 			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, kabList);
 			System.out.println("*** new curated collections=" + newCollections);
 			System.out.println(" ");
@@ -242,7 +244,7 @@ public class CollectionsAccess {
 			System.out.println(" ");
 			System.out.println(" ");
 			activateCollections = (List<Map>) CollectionsUtils.filterCollectionsToActivate(masterCollections, kabList);;
-			System.out.println("*** activate collections=" + newCollections);
+			System.out.println("*** activate collections=" + activateCollections);
 			System.out.println(" ");
 
 			deleletedCollections = (List<Map>) CollectionsUtils.filterDeletedCollections(masterCollections, kabList);
@@ -266,11 +268,27 @@ public class CollectionsAccess {
 		try {
 			for (Map m : newCollections) {
 				try {
-					JsonObject jo = makeJSONBody(m, namespace);
+					JSONObject spec = new JSONObject();
+					JSONObject metadata = new JSONObject();
+					JSONObject json = new JSONObject();
+					
+					spec.put("desiredState", "active");
+					spec.put("name", m.get("name"));
+					spec.put("version", m.get("version"));
+					
+					metadata.put("name", m.get("name"));
+					metadata.put("namespace", namespace);
+					
+					json.put("spec", spec);
+					json.put("metadata", metadata);
+					json.put("apiVersion", "kabanero.io/"+version);
+					json.put("kind", "Collection");
+					
+					JsonObject jo = new Gson().fromJson(json.toString(), JsonObject.class);
 					System.out.println("json object for create: " + jo);
 					KubeUtils.createResource(apiClient, group, version, plural, namespace, jo);
-					System.out.println("*** collection " + m.get("name") + " activated, organization "+group);
-					m.put("status", m.get("name") + " activated");
+					System.out.println("*** collection " + m.get("name") + " created, organization "+group);
+					m.put("status", m.get("name") + " created");
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());

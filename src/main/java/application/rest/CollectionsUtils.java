@@ -29,6 +29,8 @@ import io.kubernetes.client.ApiClient;
 public class CollectionsUtils {
 	
 	public static boolean readGitSuccess=true;
+	
+	
 
 	private static Map readYaml(String response) {
 		Yaml yaml = new Yaml();
@@ -54,7 +56,7 @@ public class CollectionsUtils {
         return false;
     }
 
-	private static String getFromGit(String url, String user, String pw) {
+	public static String getFromGit(String url, String user, String pw) {
 
 		HttpClientBuilder clientBuilder = HttpClients.custom();
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -102,6 +104,7 @@ public class CollectionsUtils {
 
 		StringBuffer result = new StringBuffer();
 		String line = "";
+  
 		try {
 			while ((line = rd.readLine()) != null) {
 				result.append(line + "\n");
@@ -109,8 +112,11 @@ public class CollectionsUtils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 		return result.toString();
 	}
+	
+	
 
 	public static List getMasterCollectionWithREST(String user, String pw, String namespace) {
 		String url = null;
@@ -163,6 +169,8 @@ public class CollectionsUtils {
 		}
 		return list;
 	}
+	
+	
 
 	public static List streamLineMasterMap(List<Map> list) {
 		ArrayList aList = new ArrayList();
@@ -295,6 +303,7 @@ public class CollectionsUtils {
 		return newCollections;
 	}
 	
+	
 	public static List filterCollectionsToActivate(List<Map> fromGit, List<Map> fromKabanero) {
 		ArrayList<Map> activateCollections = new ArrayList<Map>();
 
@@ -375,7 +384,7 @@ public class CollectionsUtils {
 				version = version.trim();
 				boolean match = true;
 				HashMap gitMap = new HashMap();
-				String status=null;
+				String status = null;
 				for (Map map1 : fromKabanero) {
 					Map metadata = (Map) map1.get("metadata");
 					String name1 = (String) metadata.get("name");
@@ -388,6 +397,10 @@ public class CollectionsUtils {
 						if (!version1.contentEquals(version)) {
 							match = false;
 							status = (String) statusMap.get("status");
+
+							if (status == null) {
+								status = (String) spec.get("desiredState");
+							}
 						}
 					}
 				}
