@@ -22,23 +22,38 @@ public class HttpUtils {
     public static boolean accessGitSuccess = true;
 
     public String callApi(String requestMethod, String apiUrl, String userName, String passwordOrPat) throws KabaneroSecurityException {
-        try {
-            accessGitSuccess = true;
-            HttpURLConnection connection = createConnection(requestMethod, apiUrl, userName, passwordOrPat);
-            String response = readConnectionResponse(connection);
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpServletResponse.SC_NOT_FOUND) {
-                // Wraps 404s returned from GitHub as 400s instead. See https://developer.github.com/v3/#authentication for why GitHub returns 404s in some cases.
-                throw new KabaneroSecurityException(HttpServletResponse.SC_BAD_REQUEST, "An error occurred contacting GitHub API [" + apiUrl + "]. Verify that your personal access token was generated with at least the minimum required scopes.");
+        String response = null;
+        boolean retry = false;
+        int i = 0;
+        accessGitSuccess = true;
+        while( i++ < 2 ) {
+            try {
+                HttpURLConnection connection = createConnection(requestMethod, apiUrl, userName, passwordOrPat);
+                response = readConnectionResponse(connection);
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpServletResponse.SC_NOT_FOUND) {
+                    // Wraps 404s returned from GitHub as 400s instead. See https://developer.github.com/v3/#authentication for why GitHub returns 404s in some cases.
+                    throw new KabaneroSecurityException(HttpServletResponse.SC_BAD_REQUEST, "An error occurred contacting GitHub API [" + apiUrl + "]. Verify that your personal access token was generated with at least the minimum required scopes.");
+                }
+                if (responseCode != 200) {
+                    throw new GitHubApiErrorException(responseCode, response, "Received unexpected " + responseCode + " response from " + requestMethod + " request sent to " + apiUrl + ".");
+                }                
+                break;  //success
+            } catch (IOException e) { 
+                if(retry) {  // already retried once, give up.
+                    accessGitSuccess = false;
+                    throw new KabaneroSecurityException("Connection to GitHub API [" + apiUrl + "] failed. Ensure SSL settings are correct and that the SSL certificate for the API is included in the truststore configured for the server. " + e, e);
+                }
+                System.out.println("Received IO Exception [ "+ e + " ] during communication with GitHub API [" + apiUrl + "]. Will retry in 5 seconds");
+                //e.printStackTrace(System.out);
+                retry = true; //go try again
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e1) {
+                }
             }
-            if (responseCode != 200) {
-                throw new GitHubApiErrorException(responseCode, response, "Received unexpected " + responseCode + " response from " + requestMethod + " request sent to " + apiUrl + ".");
-            }
-            return response;
-        } catch (IOException e) {
-            accessGitSuccess = false;
-            throw new KabaneroSecurityException("Connection to GitHub API [" + apiUrl + "] failed. Ensure SSL settings are correct and that the SSL certificate for the API is included in the truststore configured for the server. " + e, e);
-        }
+        } // end while
+        return response;
     }
 
     public String getBearerTokenFromAuthzHeader(ContainerRequestContext context) {
