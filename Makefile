@@ -10,11 +10,6 @@ REPOSITORY=$(firstword $(subst :, ,${IMAGE}))
 
 build-image: 
 	docker build -t ${IMAGE} --build-arg IMAGE=${IMAGE} .
-	@echo "IMAGE VAR = \"$(IMAGE)\"" > imagefile.txt
-	git add -A .
-    git commit -m 'commit of image file'
-	
-
 
 push-image:
 ifneq "$(IMAGE)" "kabanero/kabanero-command-line-services:latest"
