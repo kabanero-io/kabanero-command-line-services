@@ -13,7 +13,7 @@ build-image:
 	@echo "IMAGE VAR = \"$(IMAGE)\"" > imagefile.txt
 	
 git:
-    git add imagefile.txt
+    git add .
 
 push-image:
 ifneq "$(IMAGE)" "kabanero/kabanero-command-line-services:latest"
