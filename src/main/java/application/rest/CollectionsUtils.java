@@ -25,6 +25,9 @@ import org.yaml.snakeyaml.Yaml;
 import com.google.gson.internal.LinkedTreeMap;
 
 import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.apis.CoreV1Api;
+import io.kubernetes.client.models.V1Pod;
+import io.kubernetes.client.models.V1PodList;
 
 public class CollectionsUtils {
 	
@@ -119,15 +122,12 @@ public class CollectionsUtils {
 	public static String getRelease(String namespace) throws Exception {
 		String release=null;
 		ApiClient apiClient = KubeUtils.getApiClient();
-		String group = "kabanero.io";
-		String version = "v1alpha1";
-		String plural = "collections";
-		LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) KubeUtils.mapResources(apiClient, group, version, plural,
-				namespace);
-		List<Map> list = (List) map.get("items");
-		for (Map m : list) {
-			System.out.println("map= "+m);
-		}
+		CoreV1Api api = new CoreV1Api();
+        V1PodList list = api.listNamespacedPod(namespace, false, null, null, "", "", 30, null, 60, false);
+        for (V1Pod item : list.getItems()) {
+            System.out.println(item.getMetadata().getName());
+        }
+		
 		return release;
 	}
 	
