@@ -121,11 +121,10 @@ public class CollectionsUtils {
 		ApiClient apiClient = KubeUtils.getApiClient();
 		String group = "kabanero.io";
 		String version = "v1alpha1";
-		String plural = "pods";
+		String plural = "collections";
 		LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) KubeUtils.mapResources(apiClient, group, version, plural,
 				namespace);
 		List<Map> list = (List) map.get("items");
-		boolean first = true;
 		for (Map m : list) {
 			System.out.println("map= "+m);
 		}
