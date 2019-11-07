@@ -125,7 +125,13 @@ public class CollectionsUtils {
 		CoreV1Api api = new CoreV1Api();
         V1PodList list = api.listNamespacedPod(namespace, false, null, null, "", "", 30, null, 60, false);
         for (V1Pod item : list.getItems()) {
-            System.out.println(item.getMetadata().getName());
+            if (item.getMetadata().getName().contains("kabanero-cli")) {
+            	Map status = (Map)item.getStatus();
+            	Map containerStatuses = (Map) status.get("containerStatuses");
+            	String image = (String) containerStatuses.get("image");
+            	System.out.println("image="+image);
+            	
+            }
         }
 		
 		return release;
