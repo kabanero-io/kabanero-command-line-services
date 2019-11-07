@@ -25,6 +25,12 @@ import org.yaml.snakeyaml.Yaml;
 import com.google.gson.internal.LinkedTreeMap;
 
 import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.apis.CoreV1Api;
+import io.kubernetes.client.models.V1Container;
+import io.kubernetes.client.models.V1ContainerStatus;
+import io.kubernetes.client.models.V1Pod;
+import io.kubernetes.client.models.V1PodList;
+import io.kubernetes.client.models.V1PodStatus;
 
 public class CollectionsUtils {
 	
@@ -114,6 +120,30 @@ public class CollectionsUtils {
 		}
 		
 		return result.toString();
+	}
+	
+	public static String getImage(String namespace) throws Exception {
+		String image=null;
+		ApiClient apiClient = KubeUtils.getApiClient();
+		CoreV1Api api = new CoreV1Api();
+		V1PodList list = api.listNamespacedPod(namespace, false, null, null, "", "", 30, null, 60, false);
+
+		for (V1Pod item : list.getItems()) {
+			if (item.getMetadata().getName().contains("kabanero-cli")) {
+				V1PodStatus status = (V1PodStatus)item.getStatus();
+				List<V1ContainerStatus> containerStatuses =  status.getContainerStatuses();
+
+				for (V1ContainerStatus containerStatus : containerStatuses) {
+					if ("kabanero-cli".contentEquals(containerStatus.getName())) {
+						image = containerStatus.getImage();
+					}
+				}
+
+
+			}
+		}
+		image = image.replace("docker.io/", "");
+		return image;
 	}
 	
 	
