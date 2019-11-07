@@ -73,6 +73,7 @@ public class CollectionsAccess {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/version")
 	public Response versionlist(@Context final HttpServletRequest request) {
+		System.out.println("env vars: "+envMap);
 		JSONObject msg = new JSONObject();
 		msg.put("version", "0.3.0");
 		return Response.ok(msg).build();
