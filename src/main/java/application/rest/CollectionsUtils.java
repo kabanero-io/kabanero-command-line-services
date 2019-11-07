@@ -122,13 +122,11 @@ public class CollectionsUtils {
 		return result.toString();
 	}
 	
-	public static String getRelease(String namespace) throws Exception {
-		String release=null;
+	public static String getImage(String namespace) throws Exception {
+		String image=null;
 		ApiClient apiClient = KubeUtils.getApiClient();
 		CoreV1Api api = new CoreV1Api();
 		V1PodList list = api.listNamespacedPod(namespace, false, null, null, "", "", 30, null, 60, false);
-
-		String image = null;
 
 		for (V1Pod item : list.getItems()) {
 			if (item.getMetadata().getName().contains("kabanero-cli")) {
@@ -144,10 +142,8 @@ public class CollectionsUtils {
 
 			}
 		}
-
-		System.out.println("image="+image);
-
-		return release;
+		image = image.replace("docker.io/", "");
+		return image;
 	}
 	
 	

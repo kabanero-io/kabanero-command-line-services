@@ -71,16 +71,17 @@ public class CollectionsAccess {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/version")
+	@Path("/image")
 	public Response versionlist(@Context final HttpServletRequest request) {
+		String image = null;
 		try {
-			CollectionsUtils.getRelease(namespace);
+			CollectionsUtils.getImage(namespace);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		JSONObject msg = new JSONObject();
-		msg.put("version", "0.3.0");
+		msg.put("image", image);
 		return Response.ok(msg).build();
 	}
 
