@@ -75,7 +75,7 @@ public class CollectionsAccess {
 	public Response versionlist(@Context final HttpServletRequest request) {
 		String image = null;
 		try {
-			CollectionsUtils.getImage(namespace);
+			image=CollectionsUtils.getImage(namespace);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
