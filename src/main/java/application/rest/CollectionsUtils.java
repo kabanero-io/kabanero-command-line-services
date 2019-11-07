@@ -116,6 +116,22 @@ public class CollectionsUtils {
 		return result.toString();
 	}
 	
+	public static String getRelease(String namespace) throws Exception {
+		String release=null;
+		ApiClient apiClient = KubeUtils.getApiClient();
+		String group = "kabanero.io";
+		String version = "v1alpha1";
+		String plural = "pods";
+		LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) KubeUtils.mapResources(apiClient, group, version, plural,
+				namespace);
+		List<Map> list = (List) map.get("items");
+		boolean first = true;
+		for (Map m : list) {
+			System.out.println("map= "+m);
+		}
+		return release;
+	}
+	
 	
 
 	public static List getMasterCollectionWithREST(String user, String pw, String namespace) {
