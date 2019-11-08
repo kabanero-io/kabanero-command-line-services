@@ -21,7 +21,7 @@
     	
 ## Unexpected output or exceptions from LIST or REFRESH commands
  
- 1.  Check CLI Pod
+1.  Check CLI Pod
    
     * Log into the OKD Console
     	* Select Application Console from the dropdown
