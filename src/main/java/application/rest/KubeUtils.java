@@ -478,7 +478,8 @@ public class KubeUtils {
             String version = "v1";
             String plural = "routes";
             String namespace = "tekton-pipelines";
-            mapResources(apiClient, group, version, plural, namespace);
+            Map resources = mapResources(apiClient, group, version, plural, namespace);
+            System.out.println("peeking=>"+resources.get("spec").toString());
 
             route += "foobar";
         } catch (Exception e) {
