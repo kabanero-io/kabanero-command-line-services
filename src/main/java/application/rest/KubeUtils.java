@@ -477,7 +477,7 @@ public class KubeUtils {
             String group = "route.openshift.io";
             String version = "v1";
             String plural = "routes";
-            String namespace = "tekton-dashboard";
+            String namespace = "tekton-pipelines";
             mapResources(apiClient, group, version, plural, namespace);
 
             route += "foobar";
