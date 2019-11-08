@@ -469,6 +469,16 @@ public class KubeUtils {
      }
     
 
+    public static String listRouteUrl(LinkedTreeMap<?, ?> map) {
+        String host = "":
+        List<Map> list=(List)map.get("items");
+        for (Map m:list) {
+            Map spec = (Map) m.get("spec");
+            host = (String) spec.get("host");
+            break;
+        }
+        return host;
+    }
 
     public static String experimental() {
         String route = "https://";
@@ -479,9 +489,8 @@ public class KubeUtils {
             String plural = "routes";
             String namespace = "tekton-pipelines";
             Map resources = mapResources(apiClient, group, version, plural, namespace);
-            System.out.println("peeking=>"+resources.get("spec").toString());
-
-            route += "foobar";
+            
+            route += listRouteUrl(resources);
         } catch (Exception e) {
             System.out.println("exception cause: " + e.getCause());
             System.out.println("exception message: " + e.getMessage());
