@@ -470,7 +470,7 @@ public class KubeUtils {
     
 
     public static String listRouteUrl(Map map) {
-        String host = "":
+        String host = "";
         List<Map> list=(List)map.get("items");
         for (Map m:list) {
             Map spec = (Map) m.get("spec");
