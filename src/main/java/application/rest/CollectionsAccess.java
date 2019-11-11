@@ -195,13 +195,13 @@ public class CollectionsAccess {
 		System.out.println("gituser: \"" + gituser + "\"");
 		String repoName = (String) jsonInput.get("repoName");
 		System.out.println("repoName: \"" + repoName + "\"");
-		String workaround = "Please go to the tekton dashboard in your browser";
+		String workaround = "Please go to the tekton dashboard";
 		String route = KubeUtils.getTektonDashboardURL();
 		if (!"".equals(route)) {
 		    System.out.println(route);
 	            workaround += " at " + route;
 		}
-		workaround += " and manually configure the webhook";
+		workaround += " in your browser and manually configure the webhook";
 		if (gituser != null) {
 			workaround += " for gituser: " + gituser;
 		}
@@ -209,7 +209,7 @@ public class CollectionsAccess {
 		JSONObject msg = new JSONObject();
 		msg.put("message", workaround);
 
-		return Response.status(501).entity(msg).build();
+		return Response.ok(msg).build();
 	}
 
 	@PUT
