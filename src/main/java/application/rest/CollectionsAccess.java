@@ -197,12 +197,12 @@ public class CollectionsAccess {
 		System.out.println("repoName: \"" + repoName + "\"");
 		String workaround = "Command development in progress, please go to the tekton dashboard in your browser and manually configure the webhook";
 		if (gituser != null) {
-			workaround += "\n For gituser: " + gituser;
+			workaround += "\\n For gituser: " + gituser;
 		}
 		String route = KubeUtils.experimental();
 		if (route != null) {
 		    System.out.println(route);
-	            workaround += "\n at " + route;
+	            workaround += "\\n at " + route;
 		}
 
 		JSONObject msg = new JSONObject();
