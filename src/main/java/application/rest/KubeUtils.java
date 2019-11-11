@@ -480,8 +480,8 @@ public class KubeUtils {
         return host;
     }
 
-    public static String experimental() {
-        String route = "https://";
+    public static String getTektonDashboardURL() {
+        String route = "";
         try {
             ApiClient apiClient = getApiClient();
             String group = "route.openshift.io";
@@ -490,6 +490,7 @@ public class KubeUtils {
             String namespace = "tekton-pipelines";
             Map resources = mapResources(apiClient, group, version, plural, namespace);
             
+            route += "https://";
             route += listRouteUrl(resources);
         } catch (Exception e) {
             System.out.println("exception cause: " + e.getCause());
