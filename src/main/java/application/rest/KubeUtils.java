@@ -469,5 +469,33 @@ public class KubeUtils {
      }
     
 
+    public static String listRouteUrl(Map map) {
+        String host = "";
+        List<Map> list=(List)map.get("items");
+        for (Map m:list) {
+            Map spec = (Map) m.get("spec");
+            host = (String) spec.get("host");
+            break;
+        }
+        return host;
+    }
 
+    public static String getTektonDashboardURL() {
+        String route = "";
+        try {
+            ApiClient apiClient = getApiClient();
+            String group = "route.openshift.io";
+            String version = "v1";
+            String plural = "routes";
+            String namespace = "tekton-pipelines";
+            Map resources = mapResources(apiClient, group, version, plural, namespace);
+            
+            route += "https://";
+            route += listRouteUrl(resources);
+        } catch (Exception e) {
+            System.out.println("exception cause: " + e.getCause());
+            System.out.println("exception message: " + e.getMessage());
+        } 
+        return route;
+     }
 }
