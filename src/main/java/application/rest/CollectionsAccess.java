@@ -217,7 +217,7 @@ public class CollectionsAccess {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/collections")
 	public Response syncCollections(@Context final HttpServletRequest request) {
-		// kube call to refresh collection
+		// kube call to sync collection
 		ApiClient apiClient = null;
 		try {
 			apiClient = KubeUtils.getApiClient();
