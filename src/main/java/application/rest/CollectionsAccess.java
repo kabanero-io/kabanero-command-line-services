@@ -109,7 +109,7 @@ public class CollectionsAccess {
 				if (firstElem.contains("http code 429:")) {
 					JSONObject resp = new JSONObject();
 					resp.put("message", firstElem);
-					return Response.status(503).entity(resp).build();
+					return Response.status(429).entity(resp).build();
 				}
 			}
 			
@@ -216,7 +216,7 @@ public class CollectionsAccess {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/collections")
-	public Response refreshCollections(@Context final HttpServletRequest request) {
+	public Response syncCollections(@Context final HttpServletRequest request) {
 		// kube call to refresh collection
 		ApiClient apiClient = null;
 		try {
@@ -260,7 +260,7 @@ public class CollectionsAccess {
 				if (firstElem.contains("http code 429:")) {
 					JSONObject resp = new JSONObject();
 					resp.put("message", firstElem);
-					return Response.status(503).entity(resp).build();
+					return Response.status(429).entity(resp).build();
 				}
 			}
 			System.out.println(" ");
