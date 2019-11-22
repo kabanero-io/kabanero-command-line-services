@@ -48,7 +48,8 @@
     <variable name="jwt.issuer" defaultValue="https://kabasec.com" />
     
     <!-- this will be the default base url for github api calls -->
-    <variable defaultValue="https://api.github.com" name="github.api.url" />
+    <!-- removed so we can fail with meaningful message if it hasn't been set in the instance deployment -->
+    <!-- <variable defaultValue="https://api.github.com" name="github.api.url" /> --> 
 
 
   <!-- Automatically expand WAR files and EAR files -->

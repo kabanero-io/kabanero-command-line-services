@@ -149,6 +149,12 @@ public class Authentication {
     
     public boolean areGithubTeamsConfigured() {
         org.eclipse.microprofile.config.Config config = ConfigProvider.getConfig();
+        // just look for KABANERO_CLI_GROUP which in the container environment implies that teams have been set up.
+        boolean configured =   config.getValue("KABANERO_CLI_GROUP", String.class) != null;
+        if(!configured) {
+            System.out.println("areGithubTeamsConfigured returns false because environment variable KABANERO_CLI_GROUP is not defined");
+        }
+        /*
         Iterable<String> props = config.getPropertyNames();
         Iterator<String> it = props.iterator();
         while(it.hasNext()) {
@@ -158,12 +164,12 @@ public class Authentication {
             }
         }
         return false;
+        */
+        
     }
     
     public boolean isGithubURLConfigured() {
-        return true;
-        //todo: this one is trickier because server.xml defaults github.api.url  to https://api.github.com if not set.
-        // if login failed, we could say which github repo we were talking to, that might help
+        return (new Config()).getApiUrlBase() != null;
     }
     
     
