@@ -154,6 +154,7 @@ public class Authentication {
         if(!configured) {
             System.out.println("areGithubTeamsConfigured returns false because environment variable KABANERO_CLI_GROUP is not defined");
         }
+        return configured;
         /*
         Iterable<String> props = config.getPropertyNames();
         Iterator<String> it = props.iterator();
