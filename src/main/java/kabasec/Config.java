@@ -12,6 +12,10 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class Config {
     private String gitHubApiUrlBase = null;
     
+    public String getApiUrlBase() {
+        init();
+        return gitHubApiUrlBase;
+    }
     
     public String getUserInfoUrl() {
        init();
@@ -38,9 +42,11 @@ public class Config {
         } catch (NoSuchElementException e) {
             // it's not there
         }
+        /*
         if (key == null || key.isEmpty()) {            
             key = Constants.GITHUB_API_URL_BASE;
         }
+        */
         gitHubApiUrlBase = key;
     }
     

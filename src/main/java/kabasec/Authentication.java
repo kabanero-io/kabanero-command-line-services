@@ -147,6 +147,40 @@ public class Authentication {
         return convertedList;
     }
     
+    public boolean areGithubTeamsConfigured() {
+        org.eclipse.microprofile.config.Config config = ConfigProvider.getConfig();
+        // look for KABANERO_CLI_GROUP which in the container environment implies that teams have been set up.
+        boolean configured = false;
+        try{
+            configured =   config.getValue("KABANERO_CLI_GROUP", String.class) != null;
+        } catch (NoSuchElementException e) {
+            // not there
+        }
+        if(!configured) {
+            System.out.println("ERROR: areGithubTeamsConfigured returns false because environment variable KABANERO_CLI_GROUP is not defined");
+            return configured;
+        }
+        
+        // now to check the teams 
+        Iterable<String> props = ConfigProvider.getConfig().getPropertyNames();
+        Iterator<String> it = props.iterator();
+        while(it.hasNext()) {
+            String prop = it.next();
+            if (prop.startsWith(Constants.ROLESPREFIX) || prop.startsWith(Constants.ROLESPREFIXOLD)) {
+                return true;
+            }
+        }
+        System.out.println("ERROR: areGithubTeamsConfigured returns false because " + 
+                "no environment variables starting with "+ Constants.ROLESPREFIX + " or "+ Constants.ROLESPREFIXOLD + " are defined");
+        return false;
+    
+        
+    }
+    
+    public boolean isGithubURLConfigured() {
+        return (new Config()).getApiUrlBase() != null;
+    }
+    
     
     private List<String> addGroupNamesForTeamsFromEnvironment(JsonArray array,  List<String> groupsList) {
         for (int i = 0; i < array.size(); i++) {
