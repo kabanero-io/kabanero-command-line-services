@@ -86,7 +86,7 @@ public class Login {
         } catch (KabaneroSecurityException e) {
             return returnError(e.getStatusCode(), "An error occurred during authentication for user [" + creds.getId() + "].", e);
         } catch (Exception e) {
-            return returnError(401, "An error occurred during authentication for user [" + creds.getId() + "].", e);
+            return returnError(500, "An error occurred during authentication for user [" + creds.getId() + "].", e);
         }
         return returnSuccess(jwt);
     }
