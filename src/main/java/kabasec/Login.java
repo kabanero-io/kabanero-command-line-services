@@ -81,6 +81,7 @@ public class Login {
         String jwt = null;
         try {
             Authentication auth = new Authentication();
+            checkTeamsAndGithubURL(auth);
             jwt = auth.getJwt(creds);  // check id, password/PAT, and team membership here.
         } catch (KabaneroSecurityException e) {
             return returnError(e.getStatusCode(), "An error occurred during authentication for user [" + creds.getId() + "].", e);
@@ -88,6 +89,21 @@ public class Login {
             return returnError(500, "An error occurred during authentication for user [" + creds.getId() + "].", e);
         }
         return returnSuccess(jwt);
+    }
+    
+    private void checkTeamsAndGithubURL(Authentication auth) throws KabaneroSecurityException {
+        String errmsg = null;
+        String preamble = "The Github configuration is not complete: ";
+        if(! auth.areGithubTeamsConfigured()) {
+            errmsg = "No Github teams have been defined.";
+        }
+        if(! auth.isGithubURLConfigured()) {
+            errmsg += " Github API URL has not been defined.";
+        }
+        if(errmsg != null) {
+            //539 is agreed upon with cli.
+            throw new KabaneroSecurityException(539, preamble + errmsg);
+        }
     }
 
     private Properties returnError(int responseStatus, String errorMsg, Exception e) {
