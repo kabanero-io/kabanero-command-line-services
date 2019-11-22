@@ -162,7 +162,8 @@ public class Authentication {
     
     public boolean isGithubURLConfigured() {
         return true;
-        //todo: this one is trickier because kabanero apparently always sets something, default is probably github.com
+        //todo: this one is trickier because server.xml defaults github.api.url  to https://api.github.com if not set.
+        // if login failed, we could say which github repo we were talking to, that might help
     }
     
     
