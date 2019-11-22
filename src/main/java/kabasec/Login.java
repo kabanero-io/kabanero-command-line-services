@@ -93,15 +93,16 @@ public class Login {
     
     private void checkTeamsAndGithubURL(Authentication auth) throws KabaneroSecurityException {
         String errmsg = null;
+        String preamble = "The Github configuration is not complete: ";
         if(! auth.areGithubTeamsConfigured()) {
-            errmsg = "No Github teams have been defined. ";
+            errmsg = "No Github teams have been defined.";
         }
         if(! auth.isGithubURLConfigured()) {
-            errmsg += "Github API URL has not been defined. ";
+            errmsg += " Github API URL has not been defined.";
         }
         if(errmsg != null) {
             //539 is agreed upon with cli.
-            throw new KabaneroSecurityException(539, errmsg);
+            throw new KabaneroSecurityException(539, preamble + errmsg);
         }
     }
 

@@ -42,9 +42,11 @@ public class Config {
         } catch (NoSuchElementException e) {
             // it's not there
         }
+        /*
         if (key == null || key.isEmpty()) {            
             key = Constants.GITHUB_API_URL_BASE;
         }
+        */
         gitHubApiUrlBase = key;
     }
     
