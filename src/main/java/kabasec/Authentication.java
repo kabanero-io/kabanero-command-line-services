@@ -147,6 +147,24 @@ public class Authentication {
         return convertedList;
     }
     
+    public boolean areGithubTeamsConfigured() {
+        org.eclipse.microprofile.config.Config config = ConfigProvider.getConfig();
+        Iterable<String> props = config.getPropertyNames();
+        Iterator<String> it = props.iterator();
+        while(it.hasNext()) {
+            String prop = it.next();
+            if (prop.startsWith(Constants.ROLESPREFIX)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean isGithubURLConfigured() {
+        return true;
+        //todo: this one is trickier because kabanero apparently always sets something, default is probably github.com
+    }
+    
     
     private List<String> addGroupNamesForTeamsFromEnvironment(JsonArray array,  List<String> groupsList) {
         for (int i = 0; i < array.size(); i++) {

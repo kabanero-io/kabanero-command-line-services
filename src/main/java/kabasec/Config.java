@@ -12,6 +12,10 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class Config {
     private String gitHubApiUrlBase = null;
     
+    public String getApiUrlBase() {
+        init();
+        return gitHubApiUrlBase;
+    }
     
     public String getUserInfoUrl() {
        init();

@@ -81,6 +81,7 @@ public class Login {
         String jwt = null;
         try {
             Authentication auth = new Authentication();
+            checkGithubTeamsAreSetup(auth);
             jwt = auth.getJwt(creds);  // check id, password/PAT, and team membership here.
         } catch (KabaneroSecurityException e) {
             return returnError(e.getStatusCode(), "An error occurred during authentication for user [" + creds.getId() + "].", e);
@@ -88,6 +89,12 @@ public class Login {
             return returnError(500, "An error occurred during authentication for user [" + creds.getId() + "].", e);
         }
         return returnSuccess(jwt);
+    }
+    
+    private void checkGithubTeamsAreSetup(Authentication auth) throws KabaneroSecurityException {
+        if(! auth.areGithubTeamsConfigured()) {
+            throw new KabaneroSecurityException(500, "No Github teams have been defined.");
+        }
     }
 
     private Properties returnError(int responseStatus, String errorMsg, Exception e) {
