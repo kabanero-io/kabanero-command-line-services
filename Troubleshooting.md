@@ -4,7 +4,7 @@
 
 1. Validate endpoint
     
-    * Log into the OKD Console
+    * Log into the OpenShift Console
     	* Select Application Console from the dropdown
     	* Select `Kabanero` from the list of projects
     	* Go to Applications->Routes
@@ -12,7 +12,7 @@
    
 1.  Check CLI Pod
    
-    * Log into the OKD Console
+    * Log into the OpenShift Console
     	* Select Application Console from the dropdown
     	* Select `Kabanero` from the list of projects
     	* Go to Applications->Pods
@@ -23,7 +23,7 @@
  
 1.  Check CLI Pod
    
-    * Log into the OKD Console
+    * Log into the OpenShift Console
     	* Select Application Console from the dropdown
     	* Select `Kabanero` from the list of projects
     	* Go to Applications->Pods
