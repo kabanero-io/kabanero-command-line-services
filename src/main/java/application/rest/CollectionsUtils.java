@@ -154,28 +154,36 @@ public class CollectionsUtils {
 		return image;
 	}
 	
-	
-
-	public static List getMasterCollectionWithREST(String user, String pw, String namespace) {
-		String url = null;
+	public static Kabanero getKabaneroForNamespace(String namespace) {
 		try {
 			ApiClient apiClient = KubeUtils.getApiClient();
 			KabaneroApi api = new KabaneroApi(apiClient);
 			KabaneroList kabaneros = api.listKabaneros(namespace, null, null, null);
-			for (Kabanero k : kabaneros.getItems()) {
-				KabaneroSpecCollections collections = k.getSpec().getCollections();
-				System.out.println("collections=" + collections);
-				List<KabaneroSpecCollectionsRepositories> repos = collections.getRepositories();
-				System.out.println("repos=" + repos);
-				for (KabaneroSpecCollectionsRepositories repo : repos) {
-					url = repo.getUrl();
-					break;
-				}
+			List<Kabanero> kabaneroList = kabaneros.getItems();
+			if (kabaneroList.size() > 0) {
+				return kabaneroList.get(0);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		
+		return null;
+	}
+	
+	public static String getMasterCollectionUrl(Kabanero k) {
+		try {
+			List<KabaneroSpecCollectionsRepositories> collections = k.getSpec().getCollections().getRepositories();
+			if ((collections != null) && (collections.size() > 0)) {
+				return collections.get(0).getUrl();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public static List getMasterCollectionWithREST(String user, String pw, String url) {
 		String response = null;
 		try {
 			response = getFromGit(url, user, pw);

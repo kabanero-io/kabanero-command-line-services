@@ -10,6 +10,8 @@ import io.kubernetes.client.ApiResponse;
 import io.kubernetes.client.Configuration;
 import io.kubernetes.client.apis.CustomObjectsApi;
 import io.kubernetes.client.models.V1DeleteOptions;
+import io.kubernetes.client.models.V1ObjectMeta;
+import io.kubernetes.client.models.V1OwnerReference;
 import io.kubernetes.client.models.V1Status;
 
 import java.lang.reflect.Type;
@@ -182,5 +184,13 @@ public class KabaneroApi {
     	Type localVarReturnType = new TypeToken<Kabanero>(){}.getType();
     	ApiResponse<Kabanero> resp = apiClient.execute(call, localVarReturnType);
     	return resp.getData();
+    }
+    
+    /**
+     * Creates an OwnerReference that can be used in another object's metadata.
+     */
+    public V1OwnerReference createOwnerReference(Kabanero k) {
+    	V1ObjectMeta metadata = k.getMetadata();
+    	return new V1OwnerReference().apiVersion(GROUP + "/" + VERSION).kind(KABANERO_KIND).uid(metadata.getUid()).name(metadata.getName()).controller(true);
     }
 }

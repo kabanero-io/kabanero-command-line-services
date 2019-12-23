@@ -47,13 +47,16 @@ import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
 
 import io.kabanero.v1alpha1.client.apis.CollectionApi;
+import io.kabanero.v1alpha1.client.apis.KabaneroApi;
 import io.kabanero.v1alpha1.models.Collection;
 import io.kabanero.v1alpha1.models.CollectionList;
 import io.kabanero.v1alpha1.models.CollectionSpec;
+import io.kabanero.v1alpha1.models.Kabanero;
 //import io.kabanero.event.KubeUtils;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import io.kubernetes.client.models.V1ObjectMeta;
+import io.kubernetes.client.models.V1OwnerReference;
 import kabasec.PATHelper;
 
 @RolesAllowed("admin")
@@ -107,8 +110,11 @@ public class CollectionsAccess {
 				resp.put("message", "your login token has expired, please login again");
 				return Response.status(401).entity(resp).build();
 			}
+			
+			Kabanero k = CollectionsUtils.getKabaneroForNamespace(namespace);
+			String url = CollectionsUtils.getMasterCollectionUrl(k);
 			ArrayList masterCollections = (ArrayList) CollectionsUtils
-					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
+					.getMasterCollectionWithREST(getUser(request), PAT, url);
 			String firstElem = masterCollections.get(0).toString();
 			if (firstElem!=null) {
 				if (firstElem.contains("http code 429:")) {
@@ -236,6 +242,8 @@ public class CollectionsAccess {
 		List activateCollections = null;
 		List deleletedCollections = null;
 		List versionChangeCollections = null;
+		Kabanero k = null;
+		String collectionsUrl = null;
 		JSONObject msg = new JSONObject();
 		try {
 			
@@ -250,8 +258,10 @@ public class CollectionsAccess {
 				return Response.status(401).entity(resp).build();
 			}
 			
+			k = CollectionsUtils.getKabaneroForNamespace(namespace);
+			collectionsUrl = CollectionsUtils.getMasterCollectionUrl(k);
 			ArrayList masterCollections = (ArrayList) CollectionsUtils
-					.getMasterCollectionWithREST(getUser(request), PAT, namespace);
+					.getMasterCollectionWithREST(getUser(request), PAT, collectionsUrl);
 			String firstElem = masterCollections.get(0).toString();
 			if (firstElem!=null) {
 				if (firstElem.contains("http code 429:")) {
@@ -298,8 +308,10 @@ public class CollectionsAccess {
 			for (Object o : newCollections) {
 				Map m = (Map)o;
 				try {
-					CollectionSpec spec = new CollectionSpec().version((String)m.get("version")).name((String)m.get("name")).desiredState("active");
-					V1ObjectMeta metadata = new V1ObjectMeta().name((String)m.get("name")).namespace((String)m.get("namespace"));
+					KabaneroApi kApi = new KabaneroApi(apiClient);
+					V1OwnerReference owner = kApi.createOwnerReference(k);
+					CollectionSpec spec = new CollectionSpec().version((String)m.get("version")).name((String)m.get("name")).desiredState("active").repositoryUrl(collectionsUrl);
+					V1ObjectMeta metadata = new V1ObjectMeta().name((String)m.get("name")).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
 					Collection c = new Collection().spec(spec).metadata(metadata);
 					
 					System.out.println("json object for create: " + c.toString());
@@ -327,7 +339,7 @@ public class CollectionsAccess {
 			for (Object o : activateCollections) {
 				Map m = (Map)o;
 				try {
-					Collection c = makeCollection(m, namespace);
+					Collection c = makeCollection(m, namespace, collectionsUrl);
 							//JsonObject jo = makeJSONBody(m, namespace);
 					System.out.println("json object for activate: " + c.toString());
 					api.patchCollection(namespace, c.getMetadata().getName(), c);
@@ -353,7 +365,7 @@ public class CollectionsAccess {
 			for (Object o : deleletedCollections) {
 				Map m = (Map)o;
 				try {
-					Collection c = makeCollection(m, namespace);
+					Collection c = makeCollection(m, namespace, null);
 					System.out.println("json object for deactivate: " + c.toString());
 					api.patchCollection(namespace, c.getMetadata().getName(), c);
 					System.out.println("*** collection " + m.get("name") + " deactivated, organization "+group);
@@ -384,7 +396,7 @@ public class CollectionsAccess {
 					if (state!=null) {
 						m.put("desiredState", state);
 					}
-					Collection c = makeCollection(m, namespace);
+					Collection c = makeCollection(m, namespace, collectionsUrl);
 					System.out.println("json object for version change: " + c.toString());
 					api.patchCollection(namespace, c.getMetadata().getName(), c);
 					System.out.println(
@@ -483,7 +495,7 @@ public class CollectionsAccess {
 			m.put("name", name);
 			m.put("version", collVersion);
 			m.put("desiredState","inactive");
-			Collection c = makeCollection(m, namespace);
+			Collection c = makeCollection(m, namespace, null);
 			System.out.println("*** json object for deactivate: " + c.toString());
 			api.patchCollection(namespace, c.getMetadata().getName(), c);
 			System.out.println("*** " + "Collection name: " + name + " deactivated");
@@ -509,9 +521,9 @@ public class CollectionsAccess {
 
 	}
 
-	private Collection makeCollection(Map m, String namespace) {
+	private Collection makeCollection(Map m, String namespace, String url) {
 		System.out.println("making JSONBody: " + m.toString());
-		CollectionSpec spec = new CollectionSpec().version(m.get("version").toString()).name(m.get("name").toString()).desiredState(m.get("desiredState").toString());
+		CollectionSpec spec = new CollectionSpec().version(m.get("version").toString()).name(m.get("name").toString()).desiredState(m.get("desiredState").toString()).repositoryUrl(url);
 		V1ObjectMeta metadata = new V1ObjectMeta().name(m.get("name").toString()).namespace(namespace);
 		Collection c = new Collection().spec(spec).metadata(metadata);
 		System.out.println("made JSONBody: " + c);
