@@ -32,6 +32,15 @@ import io.kubernetes.client.models.V1Pod;
 import io.kubernetes.client.models.V1PodList;
 import io.kubernetes.client.models.V1PodStatus;
 
+import io.kabanero.v1alpha1.client.apis.KabaneroApi;
+import io.kabanero.v1alpha1.models.Collection;
+import io.kabanero.v1alpha1.models.CollectionList;
+import io.kabanero.v1alpha1.models.CollectionStatus;
+import io.kabanero.v1alpha1.models.Kabanero;
+import io.kabanero.v1alpha1.models.KabaneroList;
+import io.kabanero.v1alpha1.models.KabaneroSpecCollections;
+import io.kabanero.v1alpha1.models.KabaneroSpecCollectionsRepositories;
+
 public class CollectionsUtils {
 	
 	public static boolean readGitSuccess=true;
@@ -148,33 +157,38 @@ public class CollectionsUtils {
 	
 	
 
-	public static List getMasterCollectionWithREST(String user, String pw, String namespace) {
+	public static Kabanero getKabaneroForNamespace(String namespace) {
 		String url = null;
+		
 		try {
 			ApiClient apiClient = KubeUtils.getApiClient();
-			String group = "kabanero.io";
-			String version = "v1alpha1";
-			String plural = "kabaneros";
-			LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) KubeUtils.mapResources(apiClient, group, version, plural,
-					namespace);
-			List<Map> list = (List) map.get("items");
-			boolean first = true;
-			for (Map m : list) {
-				if (!first)
-					break;
-				Map spec = (Map) m.get("spec");
-				Map collections = (Map) spec.get("collections");
-				System.out.println("collections=" + collections);
-				List repos = (List) collections.get("repositories");
-				System.out.println("repos=" + repos);
-				Map repo = (Map) repos.get(0);
-				url = (String) repo.get("url");
-				first = false;
+			KabaneroApi api = new KabaneroApi(apiClient);
+			KabaneroList kabaneros = api.listKabaneros(namespace, null, null, null);
+			List<Kabanero> kabaneroList = kabaneros.getItems();
+			if (kabaneroList.size() > 0) {
+				return kabaneroList.get(0);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
+		return null;
+	}
+	
+	public static String getMasterCollectionUrl(Kabanero k) {
+		try {
+			List<KabaneroSpecCollectionsRepositories> collections = k.getSpec().getCollections().getRepositories();
+			if ((collections != null) && (collections.size() > 0)) {
+				return collections.get(0).getUrl();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	public static List getMasterCollectionWithREST(String user, String pw, String url) {
 		String response = null;
 		try {
 			response = getFromGit(url, user, pw);
@@ -199,6 +213,7 @@ public class CollectionsUtils {
 		}
 		return list;
 	}
+	
 	
 	
 
@@ -242,20 +257,16 @@ public class CollectionsUtils {
 		return activeCollections;
 	}
 	
-	public static List allCollections(List<Map> fromKabanero) {
+	public static List allCollections(CollectionList fromKabanero) {
 		ArrayList<Map> allCollections = new ArrayList<Map>();
 		try {
-			for (Map map : fromKabanero) {
+			for (Collection c : fromKabanero.getItems()) {
 				HashMap allMap = new HashMap();
-				System.out.println("working on one collection: " + map);
-				Map metadata = (Map) map.get("metadata");
-				String name = (String) metadata.get("name");
+				System.out.println("working on one collection: " + c);
+				String name = c.getMetadata().getName();
 				name = name.trim();
-				Map spec = (Map) map.get("spec");
-				String version = (String) spec.get("version");
-				Map status = (Map) map.get("status");
-				String statusStr = null;
-				statusStr = (String) status.get("status");
+				String version = c.getSpec().getVersion();
+				String statusStr = c.getStatus().getStatus();
 				if (statusStr==null) {
 					statusStr="initializing";
 				}
@@ -301,7 +312,7 @@ public class CollectionsUtils {
 		return inActiveCollections;
 	}
 
-	public static List filterNewCollections(List<Map> fromGit, List<Map> fromKabanero) {
+	public static List filterNewCollections(List<Map> fromGit, CollectionList fromKabanero) {
 		ArrayList<Map> newCollections = new ArrayList<Map>();
 
 		try {
@@ -312,9 +323,8 @@ public class CollectionsUtils {
 				version = version.trim();
 				boolean match = false;
 				HashMap gitMap = new HashMap();
-				for (Map map1 : fromKabanero) {
-					Map metadata = (Map) map1.get("metadata");
-					String name1 = (String) metadata.get("name");
+				for (Collection c : fromKabanero.getItems()) {
+					String name1 = c.getMetadata().getName();
 					name1 = name1.trim();
 					if (name1.contentEquals(name)) {
 						match = true;
@@ -334,7 +344,7 @@ public class CollectionsUtils {
 	}
 	
 	
-	public static List filterCollectionsToActivate(List<Map> fromGit, List<Map> fromKabanero) {
+	public static List filterCollectionsToActivate(List<Map> fromGit, CollectionList fromKabanero) {
 		ArrayList<Map> activateCollections = new ArrayList<Map>();
 
 		try {
@@ -345,16 +355,15 @@ public class CollectionsUtils {
 				version = version.trim();
 				boolean match = false;
 				HashMap activateMap = new HashMap();
-				for (Map map1 : fromKabanero) {
-					Map metadata = (Map) map1.get("metadata");
-					String name1 = (String) metadata.get("name");
+				for (Collection c : fromKabanero.getItems()) {
+					String name1 = c.getMetadata().getName();
 					name1 = name1.trim();
-					Map status = (Map) map1.get("status");
+					CollectionStatus status = c.getStatus();
 					String statusStr = null;
 					if (status == null) {
 						statusStr = "inactive";
 					} else {
-						statusStr = (String) status.get("status");
+						statusStr = status.getStatus();
 					}
 					if (name1.contentEquals(name) && "inactive".contentEquals(statusStr)) {
 						activateMap.put("name", map.get("id"));
@@ -370,17 +379,15 @@ public class CollectionsUtils {
 		return activateCollections;
 	}
 
-	public static List filterDeletedCollections(List<Map> fromGit, List<Map> fromKabanero) {
+	public static List filterDeletedCollections(List<Map> fromGit, CollectionList fromKabanero) {
 		ArrayList<Map> collectionsToDelete = new ArrayList<Map>();
 		String name = null;
 		String version = null;
 		try {
-			for (Map map : fromKabanero) {
-				System.out.println("kab map: " + map);
-				Map metadata = (Map) map.get("metadata");
-				name = (String) metadata.get("name");
-				Map spec = (Map) map.get("spec");
-				version = (String) spec.get("version");
+			for (Collection c : fromKabanero.getItems()) {
+				System.out.println("kab map: " + c);
+				name = c.getMetadata().getName();
+				version = c.getSpec().getVersion();
 				name = name.trim();
 				HashMap kabMap = new HashMap();
 				boolean match = false;
@@ -404,7 +411,7 @@ public class CollectionsUtils {
 		return collectionsToDelete;
 	}
 
-	public static List filterVersionChanges(List<Map> fromGit, List<Map> fromKabanero) {
+	public static List filterVersionChanges(List<Map> fromGit, CollectionList fromKabanero) {
 		ArrayList<Map> versionChangeCollections = new ArrayList<Map>();
 		try {
 			for (Map map : fromGit) {
@@ -415,18 +422,16 @@ public class CollectionsUtils {
 				boolean match = true;
 				HashMap gitMap = new HashMap();
 				String status = null;
-				for (Map map1 : fromKabanero) {
-					Map metadata = (Map) map1.get("metadata");
-					String name1 = (String) metadata.get("name");
+				for (Collection c : fromKabanero.getItems()) {
+					String name1 = c.getMetadata().getName();
 					name1 = name1.trim();
-					Map spec = (Map) map1.get("spec");
-					String version1 = (String) spec.get("version");
-					Map statusMap = (Map) map1.get("status");
+					String version1 = c.getSpec().getVersion();
+					CollectionStatus status1 = c.getStatus();
 					version1 = version1.trim();
 					if (name.contentEquals(name1)) {
 						if (!version1.contentEquals(version)) {
 							match = false;
-							status = (String) spec.get("desiredState");
+							status = (String) c.getSpec().getDesiredState();
 						}
 					}
 				}
