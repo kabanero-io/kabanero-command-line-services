@@ -51,18 +51,25 @@ import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import kabasec.PATHelper;
 
-import io.kabanero.v1alpha1.client.apis.CollectionApi;
-import io.kabanero.v1alpha1.client.apis.KabaneroApi;
-import io.kabanero.v1alpha1.models.Collection;
-import io.kabanero.v1alpha1.models.CollectionList;
-import io.kabanero.v1alpha1.models.CollectionSpec;
-import io.kabanero.v1alpha1.models.Kabanero;
+import io.kabanero.v1alpha2.client.apis.KabaneroApi;
+import io.kabanero.v1alpha2.client.apis.StackApi;
+import io.kabanero.v1alpha2.models.Stack;
+import io.kabanero.v1alpha2.models.StackList;
+import io.kabanero.v1alpha2.models.StackSpec;
+import io.kabanero.v1alpha2.models.StackSpecHttps;
+import io.kabanero.v1alpha2.models.StackSpecPipelines;
+import io.kabanero.v1alpha2.models.StackSpecVersions;
+import io.kabanero.v1alpha2.models.StackStatus;
+import io.kabanero.v1alpha2.models.Kabanero;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
 import io.kubernetes.client.models.V1ObjectMeta;
 import io.kubernetes.client.models.V1OwnerReference;
 
 @RolesAllowed("admin")
 @Path("/v1")
-public class CollectionsAccess {
+public class StacksAccess {
 
 	private static String version = "v1alpha1";
 
@@ -84,7 +91,7 @@ public class CollectionsAccess {
 	public Response versionlist(@Context final HttpServletRequest request) {
 		String image = null;
 		try {
-			image=CollectionsUtils.getImage(namespace);
+			image=StackUtils.getImage(namespace);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -96,12 +103,12 @@ public class CollectionsAccess {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/collections")
+	@Path("/stacks")
 	public Response listCollections(@Context final HttpServletRequest request) {
 		JSONObject msg = new JSONObject();
 		try {
-			Kabanero k = CollectionsUtils.getKabaneroForNamespace(namespace);
-			String url = CollectionsUtils.getMasterCollectionUrl(k);
+			Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
+			//List<KabaneroSpecStacksRepositories> stackRepos = StackUtils.getMasterStacks(k);
 			
 			
 			System.out.println("entering LIST function");
@@ -115,9 +122,14 @@ public class CollectionsAccess {
 				resp.put("message", "your login token has expired, please login again");
 				return Response.status(401).entity(resp).build();
 			}
-			ArrayList masterCollections = (ArrayList) CollectionsUtils
-					.getMasterCollectionWithREST(getUser(request), PAT, url);
-			String firstElem = masterCollections.get(0).toString();
+			
+			ArrayList stacks = new ArrayList();
+			
+			for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
+				stacks.addAll( (ArrayList) StackUtils
+						.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl()));
+			}
+			String firstElem = stacks.get(0).toString();
 			if (firstElem!=null) {
 				if (firstElem.contains("http code 429:")) {
 					JSONObject resp = new JSONObject();
@@ -126,59 +138,59 @@ public class CollectionsAccess {
 				}
 			}
 			
-			List curatedCollections = CollectionsUtils.streamLineMasterMap(masterCollections);
-			Collections.sort(curatedCollections, mapComparator);
+			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
+			Collections.sort(curatedStacks, mapComparator);
 			
-			JSONArray ja = convertMapToJSON(curatedCollections);
-			System.out.println("curated collectionfor namespace: "+namespace+" kab group: " + group +"="+ ja);
-			msg.put("curated collections", ja);
+			JSONArray ja = convertMapToJSON(curatedStacks);
+			System.out.println("curated stack for namespace: "+namespace+" kab group: " + group +"="+ ja);
+			msg.put("curated stacks", ja);
 
 			// make call to kabanero to get current collection
 
 			ApiClient apiClient = KubeUtils.getApiClient();
-			CollectionApi api = new CollectionApi(apiClient);
-			CollectionList fromKabanero = null;
+			StackApi api = new StackApi(apiClient);
+			StackList fromKabanero = null;
 
 			try {
-				fromKabanero = api.listCollections(namespace, null, null, null);
+				fromKabanero = api.listStacks(namespace, null, null, null);
 			} catch (ApiException e) {
 				e.printStackTrace();
 			}
 
-			List allCollections=CollectionsUtils.allCollections(fromKabanero);
+			List allStacks=StackUtils.allStacks(fromKabanero);
 			
-			Collections.sort(allCollections, mapComparator);
-			msg.put("kabanero collections", convertMapToJSON(allCollections));
+			Collections.sort(allStacks, mapComparator);
+			msg.put("kabanero collections", convertMapToJSON(allStacks));
 			
 			System.out.println(" ");
-			System.out.println("*** List of all kab collections= "+convertMapToJSON(allCollections));
+			System.out.println("*** List of all kab collections= "+convertMapToJSON(allStacks));
 			System.out.println(" ");
 			
 			
 			try {
-				List newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections,
+				List newStacks = (List<Map>) StackUtils.filterNewStacks(stacks,
 						fromKabanero);
-				Collections.sort(newCollections, mapComparator);
+				Collections.sort(newStacks, mapComparator);
 				
-				List deleletedCollections = (List<Map>) CollectionsUtils
-						.filterDeletedCollections(masterCollections, fromKabanero);
-				Collections.sort(deleletedCollections, mapComparator);
+				List deleletedStacks = (List<Map>) StackUtils
+						.filterDeletedStacks(stacks, fromKabanero);
+				Collections.sort(deleletedStacks, mapComparator);
 				
-				List versionChangeCollections = (List<Map>) CollectionsUtils
-						.filterVersionChanges(masterCollections, fromKabanero);
-				Collections.sort(versionChangeCollections, mapComparator);
+//				List versionChangeStacks = (List<Map>) StackUtils
+//						.filterVersionChanges(stacks, fromKabanero);
+//				Collections.sort(versionChangeStacks, mapComparator);
 
-				ja = convertMapToJSON(newCollections);
-				System.out.println("*** new curated collections: " + ja);
-				msg.put("new curated collections", ja);
+				ja = convertMapToJSON(newStacks);
+				System.out.println("*** new curated stacks: " + ja);
+				msg.put("new curated stacks", ja);
 
-				ja = convertMapToJSON(deleletedCollections);
-				System.out.println("*** obsolete collections: " + ja);
-				msg.put("obsolete collections", ja);
+				ja = convertMapToJSON(deleletedStacks);
+				System.out.println("*** obsolete stacks: " + ja);
+				msg.put("obsolete stacks", ja);
 
-				ja = convertMapToJSON(versionChangeCollections);
-				System.out.println("*** version change collections: " + ja);
-				msg.put("version change collections", ja);
+//				ja = convertMapToJSON(versionChangeStacks);
+//				System.out.println("*** version change stacks: " + ja);
+//				msg.put("version change stacks", ja);
 			} catch (Exception e) {
 				System.out.println("exception cause: " + e.getCause());
 				System.out.println("exception message: " + e.getMessage());
@@ -224,7 +236,7 @@ public class CollectionsAccess {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/collections")
+	@Path("/stacks")
 	public Response syncCollections(@Context final HttpServletRequest request) {
 		// kube call to sync collection
 		ApiClient apiClient = null;
@@ -234,18 +246,27 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 
-		CollectionApi api = new CollectionApi(apiClient);
-		CollectionList fromKabanero = null;
+		StackApi api = new StackApi(apiClient);
+		StackList fromKabanero = null;
 		try {
-			fromKabanero = api.listCollections(namespace, null, null, null);
+			fromKabanero = api.listStacks(namespace, null, null, null);
 		} catch (ApiException e) {
 			e.printStackTrace();
 		}
 
-		List newCollections = null;
-		List activateCollections = null;
-		List deleletedCollections = null;
+		List newStacks = null;
+		List activateStacks = null;
+		List deleletedStacks = null;
 		List versionChangeCollections = null;
+		
+		List<Stack> multiVersionNewStacks=null;
+		List<Stack> multiVersionActivateStacks=null;
+		List<Stack> multiVersionDeletedStacks=null;
+		
+		KabaneroSpecStacksPipelines defaultPipeline=null;
+		
+		List curatedStacks = null;
+		
 		Kabanero k = null;
 		String collectionsUrl = null;
 		JSONObject msg = new JSONObject();
@@ -262,11 +283,35 @@ public class CollectionsAccess {
 				return Response.status(401).entity(resp).build();
 			}
 			
-			k = CollectionsUtils.getKabaneroForNamespace(namespace);
-			collectionsUrl = CollectionsUtils.getMasterCollectionUrl(k);
-			ArrayList masterCollections = (ArrayList) CollectionsUtils
-					.getMasterCollectionWithREST(getUser(request), PAT, collectionsUrl);
-			String firstElem = masterCollections.get(0).toString();
+			k = StackUtils.getKabaneroForNamespace(namespace);
+			
+			defaultPipeline = k.getSpec().getStacks().getPipelines().get(0);
+			
+			StackSpecPipelines pipeline = new StackSpecPipelines();
+			StackSpecHttps https = new StackSpecHttps();
+			https.setUrl(defaultPipeline.getHttps().getUrl());
+			pipeline.setHttps(https);
+			pipeline.setSha256(defaultPipeline.getSha256());
+			pipeline.setId(defaultPipeline.getId());
+			ArrayList<StackSpecPipelines> pipelines = new ArrayList<StackSpecPipelines>();
+			
+			// multi custom pipelines per repository collection in 060 ?
+			List<KabaneroSpecStacksRepositories> stackRepos = k.getSpec().getStacks().getRepositories();
+			for(KabaneroSpecStacksRepositories repo: stackRepos) {
+				repo.getPipelines();
+			}
+			
+			
+			
+			ArrayList stacks = new ArrayList();
+			
+			
+			
+			for (KabaneroSpecStacksRepositories r : k.getSpec().getStacks().getRepositories()) {
+				stacks.addAll((ArrayList) StackUtils
+						.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl()));
+			}
+			String firstElem = stacks.get(0).toString();
 			if (firstElem!=null) {
 				if (firstElem.contains("http code 429:")) {
 					JSONObject resp = new JSONObject();
@@ -274,28 +319,48 @@ public class CollectionsAccess {
 					return Response.status(429).entity(resp).build();
 				}
 			}
+			
+			k.getKind();
+			k.getSpec().getVersion();
+			k.getMetadata().getName();
+			k.getMetadata().getUid();
+			k.getSpec().getStackController();
+			
+			
+			curatedStacks = StackUtils.streamLineMasterMap(stacks);
+			Collections.sort(curatedStacks, mapComparator); 
+			curatedStacks = StackUtils.packageStackMaps(curatedStacks);
+			
 			System.out.println(" ");
-			System.out.println("*** List of curated collections= "+masterCollections);
+			System.out.println("*** List of curated stacks= "+stacks);
 			
 			System.out.println(" ");
 			System.out.println(" ");
 
-			newCollections = (List<Map>) CollectionsUtils.filterNewCollections(masterCollections, fromKabanero);
-			System.out.println("*** new curated collections=" + newCollections);
+			newStacks = (List<Map>) StackUtils.filterNewStacks(stacks, fromKabanero);
+			Collections.sort(newStacks, mapComparator);
+			System.out.println("*** new curated stacks=" + newStacks);
 			System.out.println(" ");
+			newStacks = (List<Map>) StackUtils.packageStackMaps(newStacks);
+			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, pipelines);
 			
 			System.out.println(" ");
 			System.out.println(" ");
-			activateCollections = (List<Map>) CollectionsUtils.filterCollectionsToActivate(masterCollections, fromKabanero);
-			System.out.println("*** activate collections=" + activateCollections);
+			activateStacks = (List<Map>) StackUtils.filterStacksToActivate(stacks, fromKabanero);
+			System.out.println("*** activate stacks=" + activateStacks);
 			System.out.println(" ");
+			activateStacks = (List<Map>) StackUtils.packageStackMaps(activateStacks);
+			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, pipelines);
 
-			deleletedCollections = (List<Map>) CollectionsUtils.filterDeletedCollections(masterCollections, fromKabanero);
-			System.out.println("*** collectionsto delete=" + deleletedCollections);
+			deleletedStacks = (List<Map>) StackUtils.filterDeletedStacks(stacks, fromKabanero);
+			System.out.println("*** stacks to delete=" + deleletedStacks);
 			System.out.println(" ");
+			deleletedStacks = (List<Map>) StackUtils.packageStackMaps(deleletedStacks);
+			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, pipelines);
 
-			versionChangeCollections = (List<Map>) CollectionsUtils.filterVersionChanges(masterCollections, fromKabanero);
-			System.out.println("*** version Change Collections=" + versionChangeCollections);
+//			deleletedStacks = (List<Map>) StackUtils.countSingleVersionDeletedStacks(deleletedStacks);
+//			versionChangeCollections = (List<Map>) StackUtils.filterVersionChanges(masterCollections, fromKabanero);
+//			System.out.println("*** version Change Collections=" + versionChangeCollections);
 
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
@@ -309,19 +374,23 @@ public class CollectionsAccess {
 
 		// iterate over new collections and create them
 		try {
-			for (Object o : newCollections) {
-				Map m = (Map)o;
+			for (Stack s  : multiVersionNewStacks) {
+				int i=0;
+				Map m=(Map) newStacks.get(i);
 				try {
 					KabaneroApi kApi = new KabaneroApi(apiClient);
 					V1OwnerReference owner = kApi.createOwnerReference(k);
-					CollectionSpec spec = new CollectionSpec().version((String)m.get("version")).name((String)m.get("name")).desiredState("active").repositoryUrl(collectionsUrl);
-					V1ObjectMeta metadata = new V1ObjectMeta().name((String)m.get("name")).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
-					Collection c = new Collection().spec(spec).metadata(metadata);
-					
-					System.out.println("json object for create: " + c.toString());
-					api.createCollection(metadata.getNamespace(), c);
-					System.out.println("*** collection " + m.get("name") + " created, organization "+group);
-					m.put("status", m.get("name") + " created");
+//					k.getKind();
+//					k.getSpec().getVersion();
+//					k.getMetadata().getName();
+//					k.getMetadata().getUid();
+//					k.getSpec().getStackController();
+					V1ObjectMeta metadata = new V1ObjectMeta().name((String)k.getMetadata().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
+					System.out.println("Stack for create: " + s.toString());
+					s.setMetadata(metadata);
+					api.createStack(namespace, s);
+					System.out.println("*** collection " + s.getSpec().getName() + " created, organization "+group);
+					m.put("status", s.getSpec().getName() + " created");
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
@@ -330,6 +399,7 @@ public class CollectionsAccess {
 					m.put("status", m.get("name") + " activation failed");
 					m.put("exception", e.getMessage());
 				}
+				i++;
 			}
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
@@ -340,14 +410,13 @@ public class CollectionsAccess {
 
 		// iterate over collections to activate
 		try {
-			for (Object o : activateCollections) {
-				Map m = (Map)o;
+			for (Stack s : multiVersionActivateStacks) {
+				int i=0;
+				Map m=(Map) activateStacks.get(i);
 				try {
-					Collection c = makeCollection(m, namespace, collectionsUrl);
-					//JsonObject jo = makeJSONBody(m, namespace);
-					System.out.println("json object for activate: " + c.toString());
-					api.patchCollection(namespace, c.getMetadata().getName(), c);
-					System.out.println("*** collection " + m.get("name") + " activated, organization "+group);
+					System.out.println("json object for activate: " + s.toString());
+					api.patchStack(namespace, s.getMetadata().getName(), s);
+					System.out.println("*** stack " + m.get("name") + " activated, organization "+group);
 					m.put("status", m.get("name") + " activated");
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
@@ -364,14 +433,40 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 
-		// iterate over collections to deactivate
+		// iterate over collections to delete
 		try {
-			for (Object o : deleletedCollections) {
-				Map m = (Map)o;
+			
+			for (Stack s : multiVersionDeletedStacks) {
+				int i=0;
+				Map m=(Map) deleletedStacks.get(i);
 				try {
-					Collection c = makeCollection(m, namespace, null);
-					System.out.println("json object for deactivate: " + c.toString());
-					api.patchCollection(namespace, c.getMetadata().getName(), c);
+					System.out.println("object for delete: " + s.toString());
+					if (s.getSpec().getVersions().size()==1) {
+						api.deleteStack(namespace, s.getSpec().getName(), null, null, null, null);
+					} else {
+						List<StackSpecVersions> stackSpecVersions=new ArrayList<StackSpecVersions>();
+						Stack stack = new Stack();
+						StackSpec stackSpec = new StackSpec();
+						stackSpec.setVersions(stackSpecVersions);
+						stack.setSpec(stackSpec);
+						Map saveMap = null;
+						for (Object object : curatedStacks) {
+							Map map = (Map) object;
+							String name=(String) map.get("name");
+							if (name.contentEquals((String) m.get("name"))) {
+								saveMap=map;
+							}
+						}
+						List<String> versions = (List<String>) saveMap.get("versions");
+						for (String version:versions) {
+							StackSpecVersions specVersion = new StackSpecVersions();
+							specVersion.setDesiredState("active");
+							specVersion.setVersion(version);
+							stackSpecVersions.add(specVersion);
+						}
+						stack.setSpec(stackSpec);
+						api.patchStack(namespace, s.getSpec().getName(), stack);
+					}
 					System.out.println("*** collection " + m.get("name") + " deactivated, organization "+group);
 					m.put("status", m.get("name") + " deactivated");
 				} catch (Exception e) {
@@ -382,6 +477,7 @@ public class CollectionsAccess {
 					m.put("status", m.get("name") + " deactivation failed");
 					m.put("exception", e.getMessage());
 				}
+				i++;
 			}
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
@@ -389,49 +485,49 @@ public class CollectionsAccess {
 			e.printStackTrace();
 		}
 
-		// iterate over version change collections and update
-		try {
-			
-			for (Object o : versionChangeCollections) {
-				Map m = (Map)o;
-				try {
-					
-					String state = getDesiredState(versionChangeCollections, activateCollections);
-					if (state!=null) {
-						m.put("desiredState", state);
-					}
-					Collection c = makeCollection(m, namespace, collectionsUrl);
-					System.out.println("json object for version change: " + c.toString());
-					api.patchCollection(namespace, c.getMetadata().getName(), c);
-					System.out.println(
-							"*** " + m.get("name") + "version change completed, new version number: " + m.get("version")+", organization "+group);
-					m.put("status", m.get("name") + "version change completed, new version number: " + m.get("version"));
-				} catch (Exception e) {
-					System.out.println("exception cause: " + e.getCause());
-					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** " + m.get("name") + "version change failed organization "+group);
-					e.printStackTrace();
-					m.put("status", m.get("name") + "version change failed");
-					m.put("exception", e.getMessage());
-				}
-				
-			}
-		} catch (Exception e) {
-			System.out.println("exception cause: " + e.getCause());
-			System.out.println("exception message: " + e.getMessage());
-			e.printStackTrace();
-		}
+//		// iterate over version change collections and update
+//		try {
+//			
+//			for (Object o : versionChangeCollections) {
+//				Map m = (Map)o;
+//				try {
+//					
+//					String state = getDesiredState(versionChangeCollections, activateStacks);
+//					if (state!=null) {
+//						m.put("desiredState", state);
+//					}
+//					Collection c = makeStack(m, namespace, collectionsUrl);
+//					System.out.println("json object for version change: " + c.toString());
+//					api.patchCollection(namespace, c.getMetadata().getName(), c);
+//					System.out.println(
+//							"*** " + m.get("name") + "version change completed, new version number: " + m.get("version")+", organization "+group);
+//					m.put("status", m.get("name") + "version change completed, new version number: " + m.get("version"));
+//				} catch (Exception e) {
+//					System.out.println("exception cause: " + e.getCause());
+//					System.out.println("exception message: " + e.getMessage());
+//					System.out.println("*** " + m.get("name") + "version change failed organization "+group);
+//					e.printStackTrace();
+//					m.put("status", m.get("name") + "version change failed");
+//					m.put("exception", e.getMessage());
+//				}
+//				
+//			}
+//		} catch (Exception e) {
+//			System.out.println("exception cause: " + e.getCause());
+//			System.out.println("exception message: " + e.getMessage());
+//			e.printStackTrace();
+//		}
 
 		// log successful changes too!
 		try {
-			Collections.sort(newCollections, mapComparator);
-			Collections.sort(activateCollections, mapComparator);
-			Collections.sort(deleletedCollections, mapComparator);
-			Collections.sort(versionChangeCollections, mapComparator);
+//			Collections.sort(newStacks, mapComparator);
+//			Collections.sort(activateStacks, mapComparator);
+//			Collections.sort(deleletedStacks, mapComparator);
+//			Collections.sort(versionChangeCollections, mapComparator);
 			
-			msg.put("new curated collections", convertMapToJSON(newCollections));
-			msg.put("activate collections", convertMapToJSON(activateCollections));
-			msg.put("obsolete collections", convertMapToJSON(deleletedCollections));
+			msg.put("new curated collections", convertMapToJSON(newStacks));
+			msg.put("activate collections", convertMapToJSON(activateStacks));
+			msg.put("obsolete collections", convertMapToJSON(deleletedStacks));
 			msg.put("version change collections", convertMapToJSON(versionChangeCollections));
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
@@ -475,37 +571,36 @@ public class CollectionsAccess {
 
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/collections/{name}")
-	public Response deActivateCollection(@Context final HttpServletRequest request,
-			@PathParam("name") final String name) throws Exception {
+	@Path("/collections/{name}/versions/{version}")
+	public Response deActivateStack(@Context final HttpServletRequest request,
+			@PathParam("name") final String name, @PathParam("version") final String version) throws Exception {
 		// make call to kabanero to delete collection
 		ApiClient apiClient = KubeUtils.getApiClient();
-		CollectionApi api = new CollectionApi(apiClient);
-		String plural = "collections";
+		StackApi api = new StackApi(apiClient);
+		String plural = "stacks";
 
 		JSONObject msg = new JSONObject();
 
 		try {
 			// mapOneResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name)
-			Collection fromKabanero = api.getCollection(namespace, name);
+			Stack fromKabanero = api.getStack(namespace, name);
 			System.out.println("*** reading collection object: "+fromKabanero);
 			if (fromKabanero==null) {
 				System.out.println("*** " + "Collection name: " + name + " 404 not found");
 				msg.put("status", "Collection name: " + name + " 404 not found");
 				return Response.status(400).entity(msg).build();
 			}
-			String collVersion = fromKabanero.getSpec().getVersion();
-			collVersion="0.2.7";
+		
 			Map m = new HashMap();
 			m.put("name", name);
-			m.put("version", collVersion);
+			m.put("version", version);
 			m.put("desiredState","inactive");
-			Collection c = makeCollection(m, namespace, null);
-			System.out.println("*** json object for deactivate: " + c.toString());
-			api.patchCollection(namespace, c.getMetadata().getName(), c);
+			Stack s = makeStack(m, namespace, null);
+			System.out.println("*** object for deactivate: " + s.toString());
+			api.patchStack(namespace, s.getMetadata().getName(), s);
 			System.out.println("*** " + "Collection name: " + name + " deactivated");
-			msg.put("status", "Collection name: " + name + " deactivated");
-			fromKabanero = api.getCollection(namespace, name);
+			msg.put("status", "Stack name: " + name + "version: "+version+" deactivated");
+			fromKabanero = api.getStack(namespace, name);
 			System.out.println("*** reading collection object after deactivate: "+fromKabanero);
 			return Response.ok(msg).build();
 		} catch (ApiException apie) {
@@ -526,14 +621,21 @@ public class CollectionsAccess {
 
 	}
 
-	private Collection makeCollection(Map m, String namespace, String url) {
-		System.out.println("making JSONBody: " + m.toString());
-		CollectionSpec spec = new CollectionSpec().version(m.get("version").toString()).name(m.get("name").toString()).desiredState(m.get("desiredState").toString()).repositoryUrl(url);
-		V1ObjectMeta metadata = new V1ObjectMeta().name(m.get("name").toString()).namespace(namespace);
-		Collection c = new Collection().spec(spec).metadata(metadata);
-		System.out.println("made JSONBody: " + c);
-		return c;
+	private Stack makeStack(Map m, String namespace, String url) {
+		ArrayList<StackSpecVersions> versions = new ArrayList<StackSpecVersions>();
+		String name = (String) m.get("name");
+		StackSpecVersions specVersion = new StackSpecVersions();
+		specVersion.setDesiredState((String) m.get("desiredState"));
+		specVersion.setVersion((String) m.get("version"));
+		versions.add(specVersion);
+		StackSpec stackSpec = new StackSpec();
+		stackSpec.setVersions(versions);
+		stackSpec.setName(name);
+		Stack stackObj = new Stack();
+		stackObj.setSpec(stackSpec);
+		return stackObj;
 	}
+
 	
 	
 
@@ -563,5 +665,6 @@ public class CollectionsAccess {
 
 		return PAT;
 	}
+	
 
 }

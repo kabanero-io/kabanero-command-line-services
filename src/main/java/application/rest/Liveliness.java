@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
 
-import application.rest.CollectionsUtils;
+import application.rest.StackUtils;
 import kabasec.HttpUtils;
 
 @Path("/v1")
@@ -19,7 +19,7 @@ public class Liveliness {
 	@Path("/liveliness")
 	public Response liveliness() {
 		boolean healthy = true;
-		if (CollectionsUtils.readGitSuccess && HttpUtils.accessGitSuccess) {
+		if (StackUtils.readGitSuccess && HttpUtils.accessGitSuccess) {
 			healthy = true;
 		} else {
 			healthy = false;
