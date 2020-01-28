@@ -127,12 +127,6 @@ public class StacksAccess {
 			ArrayList stacks = new ArrayList();
 			
 			for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
-				
-				System.out.println("user="+getUser(request));
-				System.out.println("PAT="+PAT);
-				System.out.println("URL="+r.getHttps().getUrl());
-				System.out.println("stacks="+stacks);
-				
 				stacks.addAll( (ArrayList) StackUtils
 						.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl()));
 			}
@@ -145,9 +139,8 @@ public class StacksAccess {
 				}
 			}
 			
-			//List curatedStacks = StackUtils.streamLineMasterMap(stacks);
-			Collections.sort(stacks, mapComparator);
-			List curatedStacks = StackUtils.packageStackMaps(stacks);
+			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
+			Collections.sort(curatedStacks, mapComparator);
 			
 			JSONArray ja = convertMapToJSON(curatedStacks);
 			System.out.println("curated stack for namespace: "+namespace+" kab group: " + group +"="+ ja);
@@ -179,6 +172,9 @@ public class StacksAccess {
 				List newStacks = (List<Map>) StackUtils.filterNewStacks(stacks,
 						fromKabanero);
 				Collections.sort(newStacks, mapComparator);
+				
+				System.out.println("newStacks="+newStacks);
+				
 				newStacks = StackUtils.packageStackMaps(newStacks);
 				
 				List deleletedStacks = (List<Map>) StackUtils
