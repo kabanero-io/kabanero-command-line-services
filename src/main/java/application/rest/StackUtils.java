@@ -273,10 +273,15 @@ public class StackUtils {
 				//System.out.println("working on one collection: " + s);
 				String name = s.getMetadata().getName();
 				name = name.trim();
-				List<StackSpecVersions> versions = s.getSpec().getVersions();
-				StackStatus status = s.getStatus();
+				List<StackStatusVersions> versions = s.getStatus().getVersions();
+				HashMap versionMap = new HashMap();
+				List<Map> status = new ArrayList<Map>();
+				for (StackStatusVersions stackStatusVersion : versions) {
+					versionMap.put("status", stackStatusVersion.getStatus());
+					versionMap.put("version", stackStatusVersion.getVersion());
+					status.add(versionMap);
+				}
 				allMap.put("name", name);
-				allMap.put("version", versions);
 				allMap.put("status",status);
 				//System.out.println("all map: " + allMap);
 				allStacks.add(allMap);
