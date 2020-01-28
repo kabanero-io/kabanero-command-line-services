@@ -159,7 +159,9 @@ public class StacksAccess {
 			} catch (ApiException e) {
 				e.printStackTrace();
 			}
-
+			
+			System.out.println("kabanero instance stacks:"+fromKabanero);
+			
 			List allStacks=StackUtils.allStacks(fromKabanero);
 			
 			Collections.sort(allStacks, mapComparator);
