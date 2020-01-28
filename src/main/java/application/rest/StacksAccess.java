@@ -267,7 +267,7 @@ public class StacksAccess {
 		
 		List curatedStacks = null;
 		
-		Kabanero k = null;
+		Kabanero kab = null;
 		String collectionsUrl = null;
 		JSONObject msg = new JSONObject();
 		try {
@@ -283,31 +283,45 @@ public class StacksAccess {
 				return Response.status(401).entity(resp).build();
 			}
 			
-			k = StackUtils.getKabaneroForNamespace(namespace);
+			kab = StackUtils.getKabaneroForNamespace(namespace);
 			
-			defaultPipeline = k.getSpec().getStacks().getPipelines().get(0);
-			
-			StackSpecPipelines pipeline = new StackSpecPipelines();
-			StackSpecHttps https = new StackSpecHttps();
-			https.setUrl(defaultPipeline.getHttps().getUrl());
-			pipeline.setHttps(https);
-			pipeline.setSha256(defaultPipeline.getSha256());
-			pipeline.setId(defaultPipeline.getId());
+			List<KabaneroSpecStacksPipelines> defaultPipelines = kab.getSpec().getStacks().getPipelines();
 			ArrayList<StackSpecPipelines> pipelines = new ArrayList<StackSpecPipelines>();
 			
-			// multi custom pipelines per repository collection in 060 ?
-			List<KabaneroSpecStacksRepositories> stackRepos = k.getSpec().getStacks().getRepositories();
-			for(KabaneroSpecStacksRepositories repo: stackRepos) {
-				repo.getPipelines();
+			for (KabaneroSpecStacksPipelines defaultPipelineElement: defaultPipelines) {
+				StackSpecPipelines pipeline = new StackSpecPipelines();
+				StackSpecHttps https = new StackSpecHttps();
+				https.setUrl(defaultPipelineElement.getHttps().getUrl());
+				pipeline.setHttps(https);
+				pipeline.setSha256(defaultPipelineElement.getSha256());
+				pipeline.setId(defaultPipelineElement.getId());
+				pipelines.add(pipeline);
 			}
 			
 			
+			// multi custom pipelines per repository collection in 060, future, design not set on this yet
+			List<KabaneroSpecStacksRepositories> stackRepos = kab.getSpec().getStacks().getRepositories();
+			Map stackPipelineMap = new HashMap();
+			
+			for(KabaneroSpecStacksRepositories repo: stackRepos) {
+				ArrayList<StackSpecPipelines> stackPipelines = new ArrayList<StackSpecPipelines>();
+				for (KabaneroSpecStacksPipelines pipelineElement: repo.getPipelines()) {
+					StackSpecPipelines stackPipeline = new StackSpecPipelines();
+					StackSpecHttps https = new StackSpecHttps();
+					https.setUrl(pipelineElement.getHttps().getUrl());
+					stackPipeline.setHttps(https);
+					stackPipeline.setSha256(pipelineElement.getSha256());
+					stackPipeline.setId(pipelineElement.getId());
+					stackPipelines.add(stackPipeline);
+				}
+				if ( stackPipelines.size() > 0 ) {
+					stackPipelineMap.put(repo.getName(), stackPipelines);
+				}
+			}
 			
 			ArrayList stacks = new ArrayList();
 			
-			
-			
-			for (KabaneroSpecStacksRepositories r : k.getSpec().getStacks().getRepositories()) {
+			for (KabaneroSpecStacksRepositories r : kab.getSpec().getStacks().getRepositories()) {
 				stacks.addAll((ArrayList) StackUtils
 						.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl()));
 			}
@@ -320,11 +334,11 @@ public class StacksAccess {
 				}
 			}
 			
-			k.getKind();
-			k.getSpec().getVersion();
-			k.getMetadata().getName();
-			k.getMetadata().getUid();
-			k.getSpec().getStackController();
+			kab.getKind();
+			kab.getSpec().getVersion();
+			kab.getMetadata().getName();
+			kab.getMetadata().getUid();
+			kab.getSpec().getStackController();
 			
 			
 			curatedStacks = StackUtils.streamLineMasterMap(stacks);
@@ -342,7 +356,7 @@ public class StacksAccess {
 			System.out.println("*** new curated stacks=" + newStacks);
 			System.out.println(" ");
 			newStacks = (List<Map>) StackUtils.packageStackMaps(newStacks);
-			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, pipelines);
+			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, pipelines,stackPipelineMap); 
 			
 			System.out.println(" ");
 			System.out.println(" ");
@@ -350,13 +364,13 @@ public class StacksAccess {
 			System.out.println("*** activate stacks=" + activateStacks);
 			System.out.println(" ");
 			activateStacks = (List<Map>) StackUtils.packageStackMaps(activateStacks);
-			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, pipelines);
+			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, pipelines,stackPipelineMap);
 
 			deleletedStacks = (List<Map>) StackUtils.filterDeletedStacks(stacks, fromKabanero);
 			System.out.println("*** stacks to delete=" + deleletedStacks);
 			System.out.println(" ");
 			deleletedStacks = (List<Map>) StackUtils.packageStackMaps(deleletedStacks);
-			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, pipelines);
+			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, pipelines,stackPipelineMap);
 
 //			deleletedStacks = (List<Map>) StackUtils.countSingleVersionDeletedStacks(deleletedStacks);
 //			versionChangeCollections = (List<Map>) StackUtils.filterVersionChanges(masterCollections, fromKabanero);
@@ -379,13 +393,13 @@ public class StacksAccess {
 				Map m=(Map) newStacks.get(i);
 				try {
 					KabaneroApi kApi = new KabaneroApi(apiClient);
-					V1OwnerReference owner = kApi.createOwnerReference(k);
-//					k.getKind();
-//					k.getSpec().getVersion();
-//					k.getMetadata().getName();
-//					k.getMetadata().getUid();
-//					k.getSpec().getStackController();
-					V1ObjectMeta metadata = new V1ObjectMeta().name((String)k.getMetadata().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
+					V1OwnerReference owner = kApi.createOwnerReference(kab);
+					owner.setKind(kab.getKind());
+					owner.setApiVersion(kab.getApiVersion());
+					owner.setName(kab.getMetadata().getName());
+					owner.setController(true);
+					owner.setUid(kab.getMetadata().getUid());
+					V1ObjectMeta metadata = new V1ObjectMeta().name((String)kab.getMetadata().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
 					System.out.println("Stack for create: " + s.toString());
 					s.setMetadata(metadata);
 					api.createStack(namespace, s);

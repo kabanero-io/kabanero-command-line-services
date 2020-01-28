@@ -531,7 +531,7 @@ public class StackUtils {
 	}
 
 	
-	public static List<Stack> packageStackObjects(List<Map> stacks, List<StackSpecPipelines> pipelines) {
+	public static List<Stack> packageStackObjects(List<Map> stacks, List<StackSpecPipelines> pipelines, Map stackPipelineMap) {
 		ArrayList<Stack> newStacks = new ArrayList<Stack>();
 		ArrayList<StackSpecVersions> versions = null;
 		StackSpec stackSpec = null;
@@ -557,7 +557,11 @@ public class StackUtils {
 				StackSpecVersions specVersion = new StackSpecVersions();
 				specVersion.setDesiredState("active");
 				specVersion.setVersion((String) stack.get("version"));
-				specVersion.setPipelines(pipelines);
+				if (stackPipelineMap.containsKey(name)) {
+					specVersion.setPipelines((List<StackSpecPipelines>) stackPipelineMap.get("name"));
+				} else {
+					specVersion.setPipelines(pipelines);
+				}
 				versions.add(specVersion);
 				newStacks.add(stackObj);
 			}
