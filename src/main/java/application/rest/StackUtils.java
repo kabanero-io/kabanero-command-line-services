@@ -81,7 +81,7 @@ public class StackUtils {
     }
 
 	public static String getFromGit(String url, String user, String pw) {
-
+		System.out.println("getFromGit <1>, user="+user+", pw="+pw+", url="+url);
 		HttpClientBuilder clientBuilder = HttpClients.custom();
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
 		credsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(user, pw));
@@ -89,7 +89,7 @@ public class StackUtils {
 		HttpClient client = clientBuilder.create().build();
 		HttpGet request = new HttpGet(url);
 		request.addHeader("accept", "application/yaml");
-
+		System.out.println("getFromGit <2>");
 		// add request header
 
 		HttpResponse response = null;
@@ -108,24 +108,24 @@ public class StackUtils {
 				break;
 			}
 		}
-		
+		System.out.println("getFromGit <3>");
 		if (retries >= 10) {
 			readGitSuccess=false;
 			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url, savedEx);
 		}
-
+		System.out.println("getFromGit <4>");
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 		if (response.getStatusLine().getStatusCode()==429) {
 			return "http code 429: Github retry Limited Exceeded, please try again in 2 minutes";
 		}
-		
+		System.out.println("getFromGit <5>");
 		BufferedReader rd = null;
 		try {
 			rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 		} catch (IllegalStateException | IOException e) {
 			e.printStackTrace();
 		}
-
+		System.out.println("getFromGit <6>");
 		StringBuffer result = new StringBuffer();
 		String line = "";
   
@@ -212,8 +212,10 @@ public class StackUtils {
 	
 	public static List getStackFromGIT(String user, String pw, String url) {
 		String response = null;
+		System.out.println("getStackFromGIT <1>, user="+user+", pw="+pw+", url="+url);
 		try {
 			response = getFromGit(url, user, pw);
+			System.out.println("<1>");
 			if (response!=null) {
 				if (response.contains("http code 429:")) {
 					ArrayList<String> list= new ArrayList();
@@ -225,6 +227,7 @@ public class StackUtils {
 			e.printStackTrace();
 			throw e;
 		}
+		System.out.println("getStackFromGIT <2>");
 		System.out.println("response = " + response);
 		ArrayList<Map> list = null;
 		try {
