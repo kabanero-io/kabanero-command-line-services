@@ -104,12 +104,13 @@ public class StacksAccess {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/stacks")
-	public Response listCollections(@Context final HttpServletRequest request) {
+	public Response listStacks(@Context final HttpServletRequest request) {
 		JSONObject msg = new JSONObject();
 		try {
-			Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
-			//List<KabaneroSpecStacksRepositories> stackRepos = StackUtils.getMasterStacks(k);
 			
+			System.out.println("Entering listStacks, namespace =" + namespace);
+			
+			Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
 			
 			System.out.println("entering LIST function");
 			String user = getUser(request);
@@ -237,7 +238,10 @@ public class StacksAccess {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/stacks")
-	public Response syncCollections(@Context final HttpServletRequest request) {
+	public Response syncStacks(@Context final HttpServletRequest request) {
+		
+		System.out.println("Entering syncStacks, namespace =" + namespace);
+		
 		// kube call to sync collection
 		ApiClient apiClient = null;
 		try {
