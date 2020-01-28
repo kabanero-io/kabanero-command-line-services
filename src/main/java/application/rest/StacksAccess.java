@@ -167,7 +167,7 @@ public class StacksAccess {
 			List allStacks=StackUtils.allStacks(fromKabanero);
 			
 			Collections.sort(allStacks, mapComparator);
-			msg.put("kabanero collections", convertMapToJSON(allStacks));
+			msg.put("kabanero stacks", convertMapToJSON(allStacks));
 			
 			System.out.println(" ");
 			System.out.println("*** List of all kab collections= "+convertMapToJSON(allStacks));
@@ -178,10 +178,12 @@ public class StacksAccess {
 				List newStacks = (List<Map>) StackUtils.filterNewStacks(stacks,
 						fromKabanero);
 				Collections.sort(newStacks, mapComparator);
+				newStacks = StackUtils.packageStackMaps(newStacks);
 				
 				List deleletedStacks = (List<Map>) StackUtils
 						.filterDeletedStacks(stacks, fromKabanero);
 				Collections.sort(deleletedStacks, mapComparator);
+				deleletedStacks = StackUtils.packageStackMaps(deleletedStacks);
 				
 //				List versionChangeStacks = (List<Map>) StackUtils
 //						.filterVersionChanges(stacks, fromKabanero);
