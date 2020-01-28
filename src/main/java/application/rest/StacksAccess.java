@@ -301,11 +301,19 @@ public class StacksAccess {
 			
 			// multi custom pipelines per repository collection in 060, future, design not set on this yet
 			List<KabaneroSpecStacksRepositories> stackRepos = kab.getSpec().getStacks().getRepositories();
-			Map stackPipelineMap = new HashMap();
 			
-			for(KabaneroSpecStacksRepositories repo: stackRepos) {
+			Map versionedStackPipelineMap = new HashMap();
+			ArrayList stacks = new ArrayList();
+			
+			for (KabaneroSpecStacksRepositories r : kab.getSpec().getStacks().getRepositories()) {
+				
+				List stacksFromRest = (ArrayList) StackUtils.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl());
+				stacks.addAll(stacksFromRest);
+				
+				versionedStackPipelineMap.put(r.getName(),stacksFromRest);
+				
 				ArrayList<StackSpecPipelines> stackPipelines = new ArrayList<StackSpecPipelines>();
-				for (KabaneroSpecStacksPipelines pipelineElement: repo.getPipelines()) {
+				for (KabaneroSpecStacksPipelines pipelineElement: r.getPipelines()) {
 					StackSpecPipelines stackPipeline = new StackSpecPipelines();
 					StackSpecHttps https = new StackSpecHttps();
 					https.setUrl(pipelineElement.getHttps().getUrl());
@@ -315,16 +323,14 @@ public class StacksAccess {
 					stackPipelines.add(stackPipeline);
 				}
 				if ( stackPipelines.size() > 0 ) {
-					stackPipelineMap.put(repo.getName(), stackPipelines);
+					versionedStackPipelineMap.put(r.getName(), stackPipelines);
+				} else {
+					versionedStackPipelineMap.put(r.getName(), pipelines);
 				}
 			}
 			
-			ArrayList stacks = new ArrayList();
 			
-			for (KabaneroSpecStacksRepositories r : kab.getSpec().getStacks().getRepositories()) {
-				stacks.addAll((ArrayList) StackUtils
-						.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl()));
-			}
+			
 			String firstElem = stacks.get(0).toString();
 			if (firstElem!=null) {
 				if (firstElem.contains("http code 429:")) {
@@ -356,7 +362,7 @@ public class StacksAccess {
 			System.out.println("*** new curated stacks=" + newStacks);
 			System.out.println(" ");
 			newStacks = (List<Map>) StackUtils.packageStackMaps(newStacks);
-			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, pipelines,stackPipelineMap); 
+			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, versionedStackPipelineMap);   
 			
 			System.out.println(" ");
 			System.out.println(" ");
@@ -364,13 +370,13 @@ public class StacksAccess {
 			System.out.println("*** activate stacks=" + activateStacks);
 			System.out.println(" ");
 			activateStacks = (List<Map>) StackUtils.packageStackMaps(activateStacks);
-			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, pipelines,stackPipelineMap);
+			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, versionedStackPipelineMap);
 
 			deleletedStacks = (List<Map>) StackUtils.filterDeletedStacks(stacks, fromKabanero);
 			System.out.println("*** stacks to delete=" + deleletedStacks);
 			System.out.println(" ");
 			deleletedStacks = (List<Map>) StackUtils.packageStackMaps(deleletedStacks);
-			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, pipelines,stackPipelineMap);
+			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, versionedStackPipelineMap);
 
 //			deleletedStacks = (List<Map>) StackUtils.countSingleVersionDeletedStacks(deleletedStacks);
 //			versionChangeCollections = (List<Map>) StackUtils.filterVersionChanges(masterCollections, fromKabanero);

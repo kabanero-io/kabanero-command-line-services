@@ -529,9 +529,8 @@ public class StackUtils {
 		}
 		return newStacks;
 	}
-
 	
-	public static List<Stack> packageStackObjects(List<Map> stacks, List<StackSpecPipelines> pipelines, Map stackPipelineMap) {
+	public static List<Stack> packageStackObjects(List<Map> stacks, Map versionedStackMap) {
 		ArrayList<Stack> newStacks = new ArrayList<Stack>();
 		ArrayList<StackSpecVersions> versions = null;
 		StackSpec stackSpec = null;
@@ -557,17 +556,18 @@ public class StackUtils {
 				StackSpecVersions specVersion = new StackSpecVersions();
 				specVersion.setDesiredState("active");
 				specVersion.setVersion((String) stack.get("version"));
-				if (stackPipelineMap.containsKey(name)) {
-					specVersion.setPipelines((List<StackSpecPipelines>) stackPipelineMap.get("name"));
-				} else {
-					specVersion.setPipelines(pipelines);
-				}
+				
+				specVersion.setPipelines((List<StackSpecPipelines>) versionedStackMap.get(name));
+				
 				versions.add(specVersion);
 				newStacks.add(stackObj);
 			}
 		}
 		return newStacks;
 	}
+
+	
+	
 
 //	public static List filterVersionChanges(List<Map> fromGit, StackList fromKabanero) {
 //		ArrayList<Map> versionChangeCollections = new ArrayList<Map>();
