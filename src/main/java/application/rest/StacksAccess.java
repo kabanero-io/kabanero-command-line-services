@@ -139,6 +139,8 @@ public class StacksAccess {
 				}
 			}
 			
+			
+			System.out.println("stacks: "+stacks);
 			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
 			Collections.sort(curatedStacks, mapComparator);
 			
@@ -161,10 +163,11 @@ public class StacksAccess {
 			List allStacks=StackUtils.allStacks(fromKabanero);
 			
 			Collections.sort(allStacks, mapComparator);
-			msg.put("kabanero stacks", convertMapToJSON(allStacks));
+			JSONArray allStacksJSON = convertMapToJSON(allStacks);
+			msg.put("kabanero stacks", allStacksJSON);
 			
 			System.out.println(" ");
-			System.out.println("*** List of all kab collections= "+convertMapToJSON(allStacks));
+			System.out.println("*** List of all kab collections= "+allStacksJSON);
 			System.out.println(" ");
 			
 			
@@ -173,18 +176,12 @@ public class StacksAccess {
 						fromKabanero);
 				Collections.sort(newStacks, mapComparator);
 				
-				System.out.println("newStacks="+newStacks);
-				
 				newStacks = StackUtils.packageStackMaps(newStacks);
 				
 				List deleletedStacks = (List<Map>) StackUtils
 						.filterDeletedStacks(stacks, fromKabanero);
 				Collections.sort(deleletedStacks, mapComparator);
 				deleletedStacks = StackUtils.packageStackMaps(deleletedStacks);
-				
-//				List versionChangeStacks = (List<Map>) StackUtils
-//						.filterVersionChanges(stacks, fromKabanero);
-//				Collections.sort(versionChangeStacks, mapComparator);
 
 				ja = convertMapToJSON(newStacks);
 				System.out.println("*** new curated stacks: " + ja);
@@ -194,9 +191,6 @@ public class StacksAccess {
 				System.out.println("*** obsolete stacks: " + ja);
 				msg.put("obsolete stacks", ja);
 
-//				ja = convertMapToJSON(versionChangeStacks);
-//				System.out.println("*** version change stacks: " + ja);
-//				msg.put("version change stacks", ja);
 			} catch (Exception e) {
 				System.out.println("exception cause: " + e.getCause());
 				System.out.println("exception message: " + e.getMessage());

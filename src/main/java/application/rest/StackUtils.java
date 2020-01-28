@@ -81,7 +81,6 @@ public class StackUtils {
     }
 
 	public static String getFromGit(String url, String user, String pw) {
-		System.out.println("getFromGit <1>, user="+user+", pw="+pw+", url="+url);
 		HttpClientBuilder clientBuilder = HttpClients.custom();
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
 		credsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(user, pw));
@@ -89,7 +88,6 @@ public class StackUtils {
 		HttpClient client = clientBuilder.create().build();
 		HttpGet request = new HttpGet(url);
 		request.addHeader("accept", "application/yaml");
-		System.out.println("getFromGit <2>");
 		// add request header
 
 		HttpResponse response = null;
@@ -108,24 +106,20 @@ public class StackUtils {
 				break;
 			}
 		}
-		System.out.println("getFromGit <3>");
 		if (retries >= 10) {
 			readGitSuccess=false;
 			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url, savedEx);
 		}
-		System.out.println("getFromGit <4>");
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 		if (response.getStatusLine().getStatusCode()==429) {
 			return "http code 429: Github retry Limited Exceeded, please try again in 2 minutes";
 		}
-		System.out.println("getFromGit <5>");
 		BufferedReader rd = null;
 		try {
 			rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 		} catch (IllegalStateException | IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("getFromGit <6>");
 		StringBuffer result = new StringBuffer();
 		String line = "";
   
@@ -168,25 +162,17 @@ public class StackUtils {
 
 	public static Kabanero getKabaneroForNamespace(String namespace) {
 		String url = null;
-		
 		try {
-			System.out.println("<1>");
 			ApiClient apiClient = KubeUtils.getApiClient();
-			System.out.println("<2>");
 			KabaneroApi api = new KabaneroApi(apiClient);
-			System.out.println("<3>");
 			KabaneroList kabaneros = api.listKabaneros(namespace, null, null, null);
-			System.out.println("<4>");
 			List<Kabanero> kabaneroList = kabaneros.getItems();
-			System.out.println("<5>");
-			System.out.println(kabaneroList.size());
 			if (kabaneroList.size() > 0) {
 				return kabaneroList.get(0);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		return null;
 	}
 	
@@ -212,10 +198,8 @@ public class StackUtils {
 	
 	public static List getStackFromGIT(String user, String pw, String url) {
 		String response = null;
-		System.out.println("getStackFromGIT <1>, user="+user+", pw="+pw+", url="+url);
 		try {
 			response = getFromGit(url, user, pw);
-			System.out.println("<1>");
 			if (response!=null) {
 				if (response.contains("http code 429:")) {
 					ArrayList<String> list= new ArrayList();
@@ -227,8 +211,7 @@ public class StackUtils {
 			e.printStackTrace();
 			throw e;
 		}
-		System.out.println("getStackFromGIT <2>");
-		System.out.println("response = " + response);
+		//System.out.println("response = " + response);
 		ArrayList<Map> list = null;
 		try {
 			Map m = readYaml(response);
@@ -287,7 +270,7 @@ public class StackUtils {
 		try {
 			for (Stack s : fromKabanero.getItems()) {
 				HashMap allMap = new HashMap();
-				System.out.println("working on one collection: " + s);
+				//System.out.println("working on one collection: " + s);
 				String name = s.getMetadata().getName();
 				name = name.trim();
 				List<StackSpecVersions> versions = s.getSpec().getVersions();
@@ -295,7 +278,7 @@ public class StackUtils {
 				allMap.put("name", name);
 				allMap.put("version", versions);
 				allMap.put("status",status);
-				System.out.println("all map: " + allMap);
+				//System.out.println("all map: " + allMap);
 				allStacks.add(allMap);
 			}
 		} catch (Exception e) {
@@ -310,7 +293,7 @@ public class StackUtils {
 		try {
 				for (Map map : fromKabanero) {
 					HashMap inActiveMap = new HashMap();
-					System.out.println("working on one collection: " + map);
+					//System.out.println("working on one collection: " + map);
 					Map metadata = (Map) map.get("metadata");
 					String name = (String) metadata.get("name");
 					name = name.trim();
