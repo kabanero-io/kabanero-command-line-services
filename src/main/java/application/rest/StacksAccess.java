@@ -127,6 +127,12 @@ public class StacksAccess {
 			ArrayList stacks = new ArrayList();
 			
 			for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
+				
+				System.out.println("user="+getUser(request));
+				System.out.println("PAT="+PAT);
+				System.out.println("URL="+r.getHttps().getUrl());
+				System.out.println("stacks="+stacks);
+				
 				stacks.addAll( (ArrayList) StackUtils
 						.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl()));
 			}
