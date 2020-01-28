@@ -170,10 +170,16 @@ public class StackUtils {
 		String url = null;
 		
 		try {
+			System.out.println("<1>");
 			ApiClient apiClient = KubeUtils.getApiClient();
+			System.out.println("<2>");
 			KabaneroApi api = new KabaneroApi(apiClient);
+			System.out.println("<3>");
 			KabaneroList kabaneros = api.listKabaneros(namespace, null, null, null);
+			System.out.println("<4>");
 			List<Kabanero> kabaneroList = kabaneros.getItems();
+			System.out.println("<5>");
+			System.out.println(kabaneroList.size());
 			if (kabaneroList.size() > 0) {
 				return kabaneroList.get(0);
 			}
