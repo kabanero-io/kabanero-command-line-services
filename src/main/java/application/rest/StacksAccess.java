@@ -318,16 +318,16 @@ public class StacksAccess {
 				versionedStackPipelineMap.put(r.getName(),stacksFromRest);
 				
 				ArrayList<StackSpecPipelines> stackPipelines = new ArrayList<StackSpecPipelines>();
-				for (KabaneroSpecStacksPipelines pipelineElement: r.getPipelines()) {
-					StackSpecPipelines stackPipeline = new StackSpecPipelines();
-					StackSpecHttps https = new StackSpecHttps();
-					https.setUrl(pipelineElement.getHttps().getUrl());
-					stackPipeline.setHttps(https);
-					stackPipeline.setSha256(pipelineElement.getSha256());
-					stackPipeline.setId(pipelineElement.getId());
-					stackPipelines.add(stackPipeline);
-				}
-				if ( stackPipelines.size() > 0 ) {
+				if (r.getPipelines().size() > 0) {
+					for (KabaneroSpecStacksPipelines pipelineElement : r.getPipelines()) {
+						StackSpecPipelines stackPipeline = new StackSpecPipelines();
+						StackSpecHttps https = new StackSpecHttps();
+						https.setUrl(pipelineElement.getHttps().getUrl());
+						stackPipeline.setHttps(https);
+						stackPipeline.setSha256(pipelineElement.getSha256());
+						stackPipeline.setId(pipelineElement.getId());
+						stackPipelines.add(stackPipeline);
+					}
 					versionedStackPipelineMap.put(r.getName(), stackPipelines);
 				} else {
 					versionedStackPipelineMap.put(r.getName(), pipelines);
