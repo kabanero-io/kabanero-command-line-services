@@ -344,13 +344,7 @@ public class StacksAccess {
 					return Response.status(429).entity(resp).build();
 				}
 			}
-			
-//			kab.getKind();
-//			kab.getSpec().getVersion();
-//			kab.getMetadata().getName();
-//			kab.getMetadata().getUid();
-//			kab.getSpec().getStackController();
-			
+						
 			
 			List stackMaps = curatedStacks = StackUtils.streamLineMasterMap(stacks);
 			Collections.sort(curatedStacks, mapComparator); 
@@ -372,21 +366,19 @@ public class StacksAccess {
 			System.out.println(" ");
 			System.out.println(" ");
 			activateStacks = (List<Map>) StackUtils.filterStacksToActivate(stackMaps, fromKabanero);
+			Collections.sort(activateStacks, mapComparator);
 			System.out.println("*** activate stacks=" + activateStacks);
 			System.out.println(" ");
 			activateStacks = (List<Map>) StackUtils.packageStackMaps(activateStacks);
 			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, versionedStackPipelineMap);
 
 			deleletedStacks = (List<Map>) StackUtils.filterDeletedStacks(stackMaps, fromKabanero);
+			Collections.sort(deleletedStacks, mapComparator);
 			System.out.println("*** stacks to delete=" + deleletedStacks);
 			System.out.println(" ");
 			deleletedStacks = (List<Map>) StackUtils.packageStackMaps(deleletedStacks);
 			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, versionedStackPipelineMap);
-
-//			deleletedStacks = (List<Map>) StackUtils.countSingleVersionDeletedStacks(deleletedStacks);
-//			versionChangeCollections = (List<Map>) StackUtils.filterVersionChanges(masterCollections, fromKabanero);
-//			System.out.println("*** version Change Collections=" + versionChangeCollections);
-
+			
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
 			System.out.println("exception message: " + e.getMessage());
@@ -492,8 +484,12 @@ public class StacksAccess {
 						stack.setSpec(stackSpec);
 						api.patchStack(namespace, s.getSpec().getName(), stack);
 					}
-					System.out.println("*** collection " + m.get("name") + " deactivated, organization "+group);
-					m.put("status", m.get("name") + " deactivated");
+					String versionList="";
+					for (StackSpecVersions stackSpecVersion:s.getSpec().getVersions()) {
+						versionList=versionList+" "+stackSpecVersion;
+					}
+					System.out.println("*** stack " + m.get("name") + " versions: "+versionList+" deleted, organization "+group);
+					m.put("status", m.get("name") + " versions: "+versionList+" deleted");
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
@@ -510,50 +506,13 @@ public class StacksAccess {
 			e.printStackTrace();
 		}
 
-//		// iterate over version change collections and update
-//		try {
-//			
-//			for (Object o : versionChangeCollections) {
-//				Map m = (Map)o;
-//				try {
-//					
-//					String state = getDesiredState(versionChangeCollections, activateStacks);
-//					if (state!=null) {
-//						m.put("desiredState", state);
-//					}
-//					Collection c = makeStack(m, namespace, collectionsUrl);
-//					System.out.println("json object for version change: " + c.toString());
-//					api.patchCollection(namespace, c.getMetadata().getName(), c);
-//					System.out.println(
-//							"*** " + m.get("name") + "version change completed, new version number: " + m.get("version")+", organization "+group);
-//					m.put("status", m.get("name") + "version change completed, new version number: " + m.get("version"));
-//				} catch (Exception e) {
-//					System.out.println("exception cause: " + e.getCause());
-//					System.out.println("exception message: " + e.getMessage());
-//					System.out.println("*** " + m.get("name") + "version change failed organization "+group);
-//					e.printStackTrace();
-//					m.put("status", m.get("name") + "version change failed");
-//					m.put("exception", e.getMessage());
-//				}
-//				
-//			}
-//		} catch (Exception e) {
-//			System.out.println("exception cause: " + e.getCause());
-//			System.out.println("exception message: " + e.getMessage());
-//			e.printStackTrace();
-//		}
+
 
 		// log successful changes too!
 		try {
-//			Collections.sort(newStacks, mapComparator);
-//			Collections.sort(activateStacks, mapComparator);
-//			Collections.sort(deleletedStacks, mapComparator);
-//			Collections.sort(versionChangeCollections, mapComparator);
-			
 			msg.put("new curated collections", convertMapToJSON(newStacks));
 			msg.put("activate collections", convertMapToJSON(activateStacks));
 			msg.put("obsolete collections", convertMapToJSON(deleletedStacks));
-			msg.put("version change collections", convertMapToJSON(versionChangeCollections));
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
 			System.out.println("exception message: " + e.getMessage());
