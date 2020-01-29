@@ -28,6 +28,7 @@ import io.kabanero.v1alpha2.client.apis.KabaneroApi;
 import io.kabanero.v1alpha2.models.Stack;
 import io.kabanero.v1alpha2.models.StackList;
 import io.kabanero.v1alpha2.models.StackSpec;
+import io.kabanero.v1alpha2.models.StackSpecImages;
 import io.kabanero.v1alpha2.models.StackSpecPipelines;
 import io.kabanero.v1alpha2.models.StackSpecVersions;
 import io.kabanero.v1alpha2.models.StackStatus;
@@ -230,12 +231,18 @@ public class StackUtils {
 		for (Map map : list) {
 			String name = (String) map.get("id");
 			String version = (String) map.get("version");
-			List images = (List) map.get("images");
+			List<Map> images = (List<Map>) map.get("images");
+			List<StackSpecImages> stackSpecImages = new ArrayList<StackSpecImages>();
+			for (Map image: images) {
+				StackSpecImages stackSpecImage = new StackSpecImages();
+				stackSpecImage.setImage((String) image.get("imagename"));
+				stackSpecImages.add(stackSpecImage);
+			}
 			Map imageMap=(Map)images.get(0);
 			HashMap outMap = new HashMap();
 			outMap.put("name", name);
 			outMap.put("version", version);
-			outMap.put("image", imageMap.get("image"));
+			outMap.put("images", stackSpecImages);
 			aList.add(outMap);
 		}
 		return aList;
@@ -349,6 +356,7 @@ public class StackUtils {
 					gitMap.put("name", (String)map.get("id"));
 					gitMap.put("version", version);
 					gitMap.put("desiredState", "active");
+					gitMap.put("images", map.get("images"));
 					newStacks.add(gitMap);
 				}
 			}
@@ -523,6 +531,7 @@ public class StackUtils {
 				HashMap map = new HashMap();
 				map.put("versions",versions);
 				map.put("name",name);
+				map.put("image",stack.get("image"));
 				versions.add((String) stack.get("version"));
 				newStacks.add(map);
 			}
@@ -556,6 +565,7 @@ public class StackUtils {
 				StackSpecVersions specVersion = new StackSpecVersions();
 				specVersion.setDesiredState("active");
 				specVersion.setVersion((String) stack.get("version"));
+				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
 				
 				specVersion.setPipelines((List<StackSpecPipelines>) versionedStackMap.get(name));
 				
