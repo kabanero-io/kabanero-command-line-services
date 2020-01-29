@@ -517,7 +517,7 @@ public class StackUtils {
 	public static List<Map> packageStackMaps(List<Map> stacks) {
 		ArrayList<Map> newStacks = new ArrayList<Map>();
 		ArrayList<String> versions = null;
-		String saveName = null;
+		String saveName = "";
 		for (Map stack : stacks) {
 			System.out.println("one stack: "+stack.toString());
 			String name = (String) stack.get("name");
@@ -544,7 +544,7 @@ public class StackUtils {
 		ArrayList<Stack> newStacks = new ArrayList<Stack>();
 		ArrayList<StackSpecVersions> versions = null;
 		StackSpec stackSpec = null;
-		String saveName = null;
+		String saveName = "";
 		for (Map stack : stacks) {
 			String name = (String) stack.get("name");
 			// append versions and desiredStates to stack
