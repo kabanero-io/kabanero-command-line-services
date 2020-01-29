@@ -235,7 +235,7 @@ public class StackUtils {
 			List<StackSpecImages> stackSpecImages = new ArrayList<StackSpecImages>();
 			for (Map image: images) {
 				StackSpecImages stackSpecImage = new StackSpecImages();
-				stackSpecImage.setImage((String) image.get("imagename"));
+				stackSpecImage.setImage((String) image.get("image"));
 				stackSpecImages.add(stackSpecImage);
 			}
 			Map imageMap=(Map)images.get(0);
