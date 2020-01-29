@@ -230,9 +230,12 @@ public class StackUtils {
 		for (Map map : list) {
 			String name = (String) map.get("id");
 			String version = (String) map.get("version");
+			List images = (List) map.get("images");
+			Map imageMap=(Map)images.get(0);
 			HashMap outMap = new HashMap();
 			outMap.put("name", name);
 			outMap.put("version", version);
+			outMap.put("image", imageMap.get("image"));
 			aList.add(outMap);
 		}
 		return aList;

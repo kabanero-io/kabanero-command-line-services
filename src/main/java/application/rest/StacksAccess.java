@@ -162,14 +162,14 @@ public class StacksAccess {
 			
 			System.out.println("kabanero instance stacks:"+fromKabanero);
 			
-			List allStacks=StackUtils.allStacks(fromKabanero);
+			List kabStacks=StackUtils.allStacks(fromKabanero);
 			
-			Collections.sort(allStacks, mapComparator);
-			JSONArray allStacksJSON = convertMapToJSON(allStacks);
-			msg.put("kabanero stacks", allStacksJSON);
+			Collections.sort(kabStacks, mapComparator);
+			JSONArray allKabStacksJSON = convertMapToJSON(kabStacks);
+			msg.put("kabanero stacks", allKabStacksJSON);
 			
 			System.out.println(" ");
-			System.out.println("*** List of all kab collections= "+allStacksJSON);
+			System.out.println("*** List of all kab collections= "+allKabStacksJSON);
 			System.out.println(" ");
 			
 			
@@ -345,11 +345,11 @@ public class StacksAccess {
 				}
 			}
 			
-			kab.getKind();
-			kab.getSpec().getVersion();
-			kab.getMetadata().getName();
-			kab.getMetadata().getUid();
-			kab.getSpec().getStackController();
+//			kab.getKind();
+//			kab.getSpec().getVersion();
+//			kab.getMetadata().getName();
+//			kab.getMetadata().getUid();
+//			kab.getSpec().getStackController();
 			
 			
 			curatedStacks = StackUtils.streamLineMasterMap(stacks);
