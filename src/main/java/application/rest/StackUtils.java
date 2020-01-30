@@ -546,6 +546,7 @@ public class StackUtils {
 		ArrayList<StackSpecVersions> versions = null;
 		StackSpec stackSpec = null;
 		String saveName = "";
+		System.out.println("versionedStackMap: "+versionedStackMap);
 		for (Map stack : stacks) {
 			System.out.println("one stack: "+stack);
 			String name = (String) stack.get("name");

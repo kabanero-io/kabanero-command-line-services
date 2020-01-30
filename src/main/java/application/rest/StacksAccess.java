@@ -295,18 +295,22 @@ public class StacksAccess {
 			}
 			
 			kab = StackUtils.getKabaneroForNamespace(namespace);
-			
-			List<KabaneroSpecStacksPipelines> defaultPipelines = kab.getSpec().getStacks().getPipelines();
 			ArrayList<StackSpecPipelines> pipelines = new ArrayList<StackSpecPipelines>();
-			
-			for (KabaneroSpecStacksPipelines defaultPipelineElement: defaultPipelines) {
-				StackSpecPipelines pipeline = new StackSpecPipelines();
-				StackSpecHttps https = new StackSpecHttps();
-				https.setUrl(defaultPipelineElement.getHttps().getUrl());
-				pipeline.setHttps(https);
-				pipeline.setSha256(defaultPipelineElement.getSha256());
-				pipeline.setId(defaultPipelineElement.getId());
-				pipelines.add(pipeline);
+			try {
+				List<KabaneroSpecStacksPipelines> defaultPipelines = kab.getSpec().getStacks().getPipelines();
+				for (KabaneroSpecStacksPipelines defaultPipelineElement: defaultPipelines) {
+					StackSpecPipelines pipeline = new StackSpecPipelines();
+					StackSpecHttps https = new StackSpecHttps();
+					https.setUrl(defaultPipelineElement.getHttps().getUrl());
+					pipeline.setHttps(https);
+					pipeline.setSha256(defaultPipelineElement.getSha256());
+					pipeline.setId(defaultPipelineElement.getId());
+					pipelines.add(pipeline);
+				}}
+			catch (NullPointerException npe) {
+				JSONObject resp = new JSONObject();
+				resp.put("message", "Check the Kabanero CR spec section, you may be missing default pipeline specification");
+				return Response.status(431).entity(resp).build();
 			}
 			
 			
@@ -316,29 +320,37 @@ public class StacksAccess {
 			Map versionedStackPipelineMap = new HashMap();
 			ArrayList stacks = new ArrayList();
 			
-			for (KabaneroSpecStacksRepositories r : kab.getSpec().getStacks().getRepositories()) {
-				
-				List stacksFromRest = (ArrayList) StackUtils.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl());
-				stacks.addAll(stacksFromRest);
-				
-				//versionedStackPipelineMap.put(r.getName(),stacksFromRest);
-				
-				ArrayList<StackSpecPipelines> stackPipelines = new ArrayList<StackSpecPipelines>();
-				if (r.getPipelines()!=null && r.getPipelines().size() > 0) {
-					for (KabaneroSpecStacksPipelines pipelineElement : r.getPipelines()) {
-						StackSpecPipelines stackPipeline = new StackSpecPipelines();
-						StackSpecHttps https = new StackSpecHttps();
-						https.setUrl(pipelineElement.getHttps().getUrl());
-						stackPipeline.setHttps(https);
-						stackPipeline.setSha256(pipelineElement.getSha256());
-						stackPipeline.setId(pipelineElement.getId());
-						stackPipelines.add(stackPipeline);
+			try {
+				for (KabaneroSpecStacksRepositories r : kab.getSpec().getStacks().getRepositories()) {
+
+					List stacksFromRest = (ArrayList) StackUtils.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl());
+					stacks.addAll(stacksFromRest);
+
+					//versionedStackPipelineMap.put(r.getName(),stacksFromRest);
+
+					ArrayList<StackSpecPipelines> stackPipelines = new ArrayList<StackSpecPipelines>();
+					if (r.getPipelines()!=null && r.getPipelines().size() > 0) {
+						for (KabaneroSpecStacksPipelines pipelineElement : r.getPipelines()) {
+							StackSpecPipelines stackPipeline = new StackSpecPipelines();
+							StackSpecHttps https = new StackSpecHttps();
+							https.setUrl(pipelineElement.getHttps().getUrl());
+							stackPipeline.setHttps(https);
+							stackPipeline.setSha256(pipelineElement.getSha256());
+							stackPipeline.setId(pipelineElement.getId());
+							stackPipelines.add(stackPipeline);
+						}
+						versionedStackPipelineMap.put(r.getName(), stackPipelines);
+					} else {
+						versionedStackPipelineMap.put(r.getName(), pipelines);
 					}
-					versionedStackPipelineMap.put(r.getName(), stackPipelines);
-				} else {
-					versionedStackPipelineMap.put(r.getName(), pipelines);
 				}
+			} catch (NullPointerException npe) {
+				JSONObject resp = new JSONObject();
+				resp.put("message", "Check the Kabanero CR spec section, you may be missing the repository URLS");
+				return Response.status(431).entity(resp).build();
 			}
+			
+			System.out.println("versionedStackPipelineMap: "+versionedStackPipelineMap);
 			
 			
 			
@@ -410,6 +422,7 @@ public class StacksAccess {
 					owner.setUid(kab.getMetadata().getUid());
 					V1ObjectMeta metadata = new V1ObjectMeta().name((String)kab.getMetadata().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
 					s.setMetadata(metadata);
+					s.getMetadata().setNamespace(namespace);
 					System.out.println("Stack for create: " + s.toString());
 					api.createStack(namespace, s);
 					System.out.println("*** stack " + s.getSpec().getName() + " created, organization "+group);
