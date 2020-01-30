@@ -429,9 +429,8 @@ public class StacksAccess {
 					owner.setName(kab.getMetadata().getName());
 					owner.setController(true);
 					owner.setUid(kab.getMetadata().getUid());
-					V1ObjectMeta metadata = new V1ObjectMeta().name((String)kab.getMetadata().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
+					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
 					s.setMetadata(metadata);
-					s.getMetadata().setNamespace(namespace);
 					System.out.println("Stack for create: " + s.toString());
 					api.createStack(namespace, s);
 					System.out.println("*** stack " + s.getSpec().getName() + " created, organization "+group);
@@ -439,9 +438,9 @@ public class StacksAccess {
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** stack " + m.get("name") + " failed to create, organization "+group);
+					System.out.println("*** stack " + s.getSpec().getName() + " failed to create, organization "+group);
 					e.printStackTrace();
-					m.put("status", m.get("name") + " activation failed");
+					m.put("status", s.getSpec().getName() + " create failed");
 					m.put("exception", e.getMessage());
 				}
 				i++;
