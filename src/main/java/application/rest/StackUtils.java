@@ -284,9 +284,9 @@ public class StackUtils {
 				String name = s.getMetadata().getName();
 				name = name.trim();
 				List<StackStatusVersions> versions = s.getStatus().getVersions();
-				HashMap versionMap = new HashMap();
 				List<Map> status = new ArrayList<Map>();
 				for (StackStatusVersions stackStatusVersion : versions) {
+					HashMap versionMap = new HashMap();
 					versionMap.put("status", stackStatusVersion.getStatus());
 					versionMap.put("version", stackStatusVersion.getVersion());
 					status.add(versionMap);
