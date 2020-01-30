@@ -338,6 +338,7 @@ public class StackUtils {
 		try {
 			List<Map> kabMaps = multiVersionStacksMaps(fromKabanero);
 			for (Map map : fromGit) {
+				System.out.println("one map: "+map);
 				String name = (String) map.get("id");
 				String version = (String) map.get("version");
 				name = name.trim();
