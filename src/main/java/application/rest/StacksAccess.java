@@ -318,7 +318,7 @@ public class StacksAccess {
 				//versionedStackPipelineMap.put(r.getName(),stacksFromRest);
 				
 				ArrayList<StackSpecPipelines> stackPipelines = new ArrayList<StackSpecPipelines>();
-				if (r.getPipelines()==null || r.getPipelines().size() > 0) {
+				if (r.getPipelines()!=null && r.getPipelines().size() > 0) {
 					for (KabaneroSpecStacksPipelines pipelineElement : r.getPipelines()) {
 						StackSpecPipelines stackPipeline = new StackSpecPipelines();
 						StackSpecHttps https = new StackSpecHttps();
