@@ -344,6 +344,7 @@ public class StackUtils {
 				name = name.trim();
 				version = version.trim();
 				boolean match = false;
+				boolean nameMatch = false;
 				HashMap gitMap = new HashMap();
 				for (Map kab: kabMaps) {
 					String name1 = (String) kab.get("name");
@@ -352,9 +353,13 @@ public class StackUtils {
 					if (name1.contentEquals(name) && version1.contentEquals(version)) {
 						match = true;
 					}
+					if (name1.contentEquals(name)) {
+						nameMatch = true;
+					}
 				}
 				if (!match) {
 					gitMap.put("name", (String)map.get("id"));
+					gitMap.put("kabNameExists", nameMatch);
 					gitMap.put("version", version);
 					gitMap.put("desiredState", "active");
 					gitMap.put("images", map.get("images"));
@@ -415,20 +420,7 @@ public class StackUtils {
 		return kabMaps;
 	}
 	
-//	public static List countSingleVersionDeletedStacks(List<Map> stacksToDelete) {
-//		for(Map stack : stacksToDelete) {
-//			String name = (String) stack.get("name");
-//			int i=0;
-//			for(Map stack2 : stacksToDelete) {
-//				String name2 = (String) stack2.get("name");
-//				if (name.contentEquals(name2)) {
-//					i++;
-//				}
-//			}
-//			stack.put("count", i);
-//		}
-//		return null;
-//	}
+
 	
 	public static List isVerionInGitForStack(List<Map> fromGit, List<Map> stacksToDelete) {
 		
@@ -567,7 +559,6 @@ public class StackUtils {
 				stackSpec.setVersions(versions);
 				stackSpec.setName(name);
 				Stack stackObj = new Stack();
-				stackObj.setApiVersion(apiVersion);
 				stackObj.setKind("Stack");
 				stackObj.setSpec(stackSpec);
 				StackSpecVersions specVersion = new StackSpecVersions();
@@ -578,6 +569,13 @@ public class StackUtils {
 				specVersion.setPipelines((List<StackSpecPipelines>) versionedStackMap.get(name));
 				System.out.println("packageStackObjects one specVersion: "+specVersion);
 				versions.add(specVersion);
+				Boolean kabNameExists=(Boolean) stack.get("kabNameExists");
+				// temporarily using apiVersion field to indicate if a Kabanero instance exists for this stack from GIT
+				if (kabNameExists) {
+					stackObj.setApiVersion("kabNameExists");
+				} else {
+					stackObj.setApiVersion("kabNameDoesNotExist");
+				}
 				newStacks.add(stackObj);
 			}
 		}

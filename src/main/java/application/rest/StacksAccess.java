@@ -419,6 +419,11 @@ public class StacksAccess {
 		// iterate over new collections and create them
 		try {
 			for (Stack s  : multiVersionNewStacks) {
+				boolean kabaneroInstanceExists=false;
+				// temporary use of the apiVersion field to indicate if this name exists in Kabanero already
+				if (s.getApiVersion().trim().contentEquals("kabNameExists")) {
+					kabaneroInstanceExists=true;
+				}
 				int i=0;
 				Map m=(Map) newStacks.get(i);
 				try {
@@ -431,8 +436,13 @@ public class StacksAccess {
 					owner.setUid(kab.getMetadata().getUid());
 					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
 					s.setMetadata(metadata);
+					s.setApiVersion(apiVersion);
 					System.out.println("Stack for create: " + s.toString());
-					api.createStack(namespace, s);
+					if (kabaneroInstanceExists) {
+						api.patchStack(namespace, s.getMetadata().getName(), s);
+					} else {
+						api.createStack(namespace, s);
+					}
 					System.out.println("*** stack " + s.getSpec().getName() + " created, organization "+group);
 					m.put("status", s.getSpec().getName() + " created");
 				} catch (Exception e) {
