@@ -440,6 +440,7 @@ public class StacksAccess {
 					List<StackSpecVersions> specVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
 					if (specVersions!=null) {
 						s.getSpec().getVersions().addAll(specVersions);
+						System.out.println(s.getSpec().getName()+" stack for patch create: " + s.toString());
 						api.patchStack(namespace, s.getMetadata().getName(), s);
 					} else {
 						System.out.println(s.getSpec().getName()+" stack for just create: " + s.toString());
