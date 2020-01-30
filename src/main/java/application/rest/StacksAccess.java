@@ -378,8 +378,9 @@ public class StacksAccess {
 			Collections.sort(newStacks, mapComparator);
 			System.out.println("*** new curated stacks=" + newStacks);
 			System.out.println(" ");
+			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, versionedStackPipelineMap, apiVersion);
 			newStacks = (List<Map>) StackUtils.packageStackMaps(newStacks);
-			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, versionedStackPipelineMap, apiVersion);   
+			   
 			
 			System.out.println(" ");
 			System.out.println(" ");
@@ -387,15 +388,17 @@ public class StacksAccess {
 			Collections.sort(activateStacks, mapComparator);
 			System.out.println("*** activate stacks=" + activateStacks);
 			System.out.println(" ");
+			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, versionedStackPipelineMap, apiVersion);
 			activateStacks = (List<Map>) StackUtils.packageStackMaps(activateStacks);
-			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, versionedStackPipelineMap, apiVersion); 
+			 
 
 			deleletedStacks = (List<Map>) StackUtils.filterDeletedStacks(stacks, fromKabanero);
 			Collections.sort(deleletedStacks, mapComparator);
 			System.out.println("*** stacks to delete=" + deleletedStacks);
 			System.out.println(" ");
-			deleletedStacks = (List<Map>) StackUtils.packageStackMaps(deleletedStacks);
 			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, versionedStackPipelineMap, apiVersion);  
+			deleletedStacks = (List<Map>) StackUtils.packageStackMaps(deleletedStacks);
+			
 			
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
