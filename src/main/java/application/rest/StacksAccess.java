@@ -71,7 +71,7 @@ import io.kubernetes.client.models.V1OwnerReference;
 @Path("/v1")
 public class StacksAccess {
 
-	private static String version = "v1alpha1";
+	private static String apiVersion = "kabanero.io/v1alpha2";
 
 	private static Map envMap = System.getenv();
 	
@@ -126,17 +126,23 @@ public class StacksAccess {
 			
 			ArrayList stacks = new ArrayList();
 			
-			for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
-				stacks.addAll( (ArrayList) StackUtils
-						.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl()));
-			}
-			String firstElem = stacks.get(0).toString();
-			if (firstElem!=null) {
-				if (firstElem.contains("http code 429:")) {
-					JSONObject resp = new JSONObject();
-					resp.put("message", firstElem);
-					return Response.status(429).entity(resp).build();
+			try {
+				for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
+					stacks.addAll( (ArrayList) StackUtils
+							.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl()));
 				}
+				String firstElem = stacks.get(0).toString();
+				if (firstElem!=null) {
+					if (firstElem.contains("http code 429:")) {
+						JSONObject resp = new JSONObject();
+						resp.put("message", firstElem);
+						return Response.status(429).entity(resp).build();
+					}
+				}
+			} catch (NullPointerException npe) {
+				JSONObject resp = new JSONObject();
+				resp.put("message", "Check the Kabanero CR spec section, you may be missing the repository URLS");
+				return Response.status(431).entity(resp).build();
 			}
 			
 			
@@ -361,7 +367,7 @@ public class StacksAccess {
 			System.out.println("*** new curated stacks=" + newStacks);
 			System.out.println(" ");
 			newStacks = (List<Map>) StackUtils.packageStackMaps(newStacks);
-			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, versionedStackPipelineMap);   
+			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, versionedStackPipelineMap, apiVersion);   
 			
 			System.out.println(" ");
 			System.out.println(" ");
@@ -370,14 +376,14 @@ public class StacksAccess {
 			System.out.println("*** activate stacks=" + activateStacks);
 			System.out.println(" ");
 			activateStacks = (List<Map>) StackUtils.packageStackMaps(activateStacks);
-			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, versionedStackPipelineMap);
+			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, versionedStackPipelineMap, apiVersion); 
 
 			deleletedStacks = (List<Map>) StackUtils.filterDeletedStacks(stacks, fromKabanero);
 			Collections.sort(deleletedStacks, mapComparator);
 			System.out.println("*** stacks to delete=" + deleletedStacks);
 			System.out.println(" ");
 			deleletedStacks = (List<Map>) StackUtils.packageStackMaps(deleletedStacks);
-			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, versionedStackPipelineMap);
+			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, versionedStackPipelineMap, apiVersion);  
 			
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
@@ -431,7 +437,16 @@ public class StacksAccess {
 				int i=0;
 				Map m=(Map) activateStacks.get(i);
 				try {
+					KabaneroApi kApi = new KabaneroApi(apiClient);
+					V1OwnerReference owner = kApi.createOwnerReference(kab);
+					owner.setKind(kab.getKind());
+					owner.setApiVersion(kab.getApiVersion());
+					owner.setName(kab.getMetadata().getName());
+					owner.setController(true);
+					owner.setUid(kab.getMetadata().getUid());
+					V1ObjectMeta metadata = new V1ObjectMeta().name((String)kab.getMetadata().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
 					System.out.println("json object for activate: " + s.toString());
+					s.setMetadata(metadata);
 					api.patchStack(namespace, s.getMetadata().getName(), s);
 					System.out.println("*** stack " + m.get("name") + " activated, organization "+group);
 					m.put("status", m.get("name") + " activated");
@@ -444,6 +459,7 @@ public class StacksAccess {
 					m.put("status", m.get("name") + " activation failed");
 					m.put("exception", e.getMessage());
 				}
+				i++;
 			}
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
@@ -453,10 +469,18 @@ public class StacksAccess {
 
 		// iterate over collections to delete
 		try {
-			
+			int i=0;
 			for (Stack s : multiVersionDeletedStacks) {
-				int i=0;
 				Map m=(Map) deleletedStacks.get(i);
+				KabaneroApi kApi = new KabaneroApi(apiClient);
+				V1OwnerReference owner = kApi.createOwnerReference(kab);
+				owner.setKind(kab.getKind());
+				owner.setApiVersion(kab.getApiVersion());
+				owner.setName(kab.getMetadata().getName());
+				owner.setController(true);
+				owner.setUid(kab.getMetadata().getUid());
+				V1ObjectMeta metadata = new V1ObjectMeta().name((String)kab.getMetadata().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
+				s.setMetadata(metadata);
 				try {
 					System.out.println("object for delete: " + s.toString());
 					if (s.getSpec().getVersions().size()==1) {

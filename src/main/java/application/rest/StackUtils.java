@@ -541,7 +541,7 @@ public class StackUtils {
 		return newStacks;
 	}
 	
-	public static List<Stack> packageStackObjects(List<Map> stacks, Map versionedStackMap) {
+	public static List<Stack> packageStackObjects(List<Map> stacks, Map versionedStackMap, String apiVersion) {
 		ArrayList<Stack> newStacks = new ArrayList<Stack>();
 		ArrayList<StackSpecVersions> versions = null;
 		StackSpec stackSpec = null;
@@ -563,6 +563,8 @@ public class StackUtils {
 				stackSpec.setVersions(versions);
 				stackSpec.setName(name);
 				Stack stackObj = new Stack();
+				stackObj.setApiVersion(apiVersion);
+				stackObj.setKind("Stack");
 				stackObj.setSpec(stackSpec);
 				StackSpecVersions specVersion = new StackSpecVersions();
 				specVersion.setDesiredState("active");
