@@ -419,11 +419,6 @@ public class StacksAccess {
 		// iterate over new collections and create them
 		try {
 			for (Stack s  : multiVersionNewStacks) {
-				boolean kabaneroInstanceExists=false;
-				// temporary use of the apiVersion field to indicate if this name exists in Kabanero already
-				if (s.getApiVersion().trim().contentEquals("kabNameExists")) {
-					kabaneroInstanceExists=true;
-				}
 				int i=0;
 				Map m=(Map) newStacks.get(i);
 				try {
