@@ -439,8 +439,10 @@ public class StacksAccess {
 					s.setApiVersion(apiVersion);
 					System.out.println("Stack for create: " + s.toString());
 					if (kabaneroInstanceExists) {
+						System.out.println("Stack for patch create: " + s.toString());
 						api.patchStack(namespace, s.getMetadata().getName(), s);
 					} else {
+						System.out.println("Stack for just create: " + s.toString());
 						api.createStack(namespace, s);
 					}
 					System.out.println("*** stack " + s.getSpec().getName() + " created, organization "+group);
