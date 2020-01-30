@@ -384,7 +384,7 @@ public class StacksAccess {
 			Collections.sort(newStacks, mapComparator);
 			System.out.println("*** new curated stacks=" + newStacks);
 			System.out.println(" ");
-			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, versionedStackPipelineMap, apiVersion);
+			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, versionedStackPipelineMap);
 			newStacks = (List<Map>) StackUtils.packageStackMaps(newStacks);
 			   
 			
@@ -394,7 +394,7 @@ public class StacksAccess {
 			Collections.sort(activateStacks, mapComparator);
 			System.out.println("*** activate stacks=" + activateStacks);
 			System.out.println(" ");
-			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, versionedStackPipelineMap, apiVersion);
+			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, versionedStackPipelineMap);
 			activateStacks = (List<Map>) StackUtils.packageStackMaps(activateStacks);
 			 
 
@@ -402,7 +402,7 @@ public class StacksAccess {
 			Collections.sort(deleletedStacks, mapComparator);
 			System.out.println("*** stacks to delete=" + deleletedStacks);
 			System.out.println(" ");
-			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, versionedStackPipelineMap, apiVersion);  
+			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, versionedStackPipelineMap);  
 			deleletedStacks = (List<Map>) StackUtils.packageStackMaps(deleletedStacks);
 			
 			
@@ -414,7 +414,7 @@ public class StacksAccess {
 			resp.put("message", e.getMessage());
 			return Response.status(500).entity(resp).build();
 		}
-		System.out.println("starting refresh");
+		System.out.println("starting stack SYNC");
 
 		// iterate over new collections and create them
 		try {
@@ -437,12 +437,12 @@ public class StacksAccess {
 					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
 					s.setMetadata(metadata);
 					s.setApiVersion(apiVersion);
-					System.out.println("Stack for create: " + s.toString());
-					if (kabaneroInstanceExists) {
-						System.out.println("Stack for patch create: " + s.toString());
+					List<StackSpecVersions> specVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
+					if (specVersions!=null) {
+						s.getSpec().getVersions().addAll(specVersions);
 						api.patchStack(namespace, s.getMetadata().getName(), s);
 					} else {
-						System.out.println("Stack for just create: " + s.toString());
+						System.out.println(s.getSpec().getName()+" stack for just create: " + s.toString());
 						api.createStack(namespace, s);
 					}
 					System.out.println("*** stack " + s.getSpec().getName() + " created, organization "+group);
