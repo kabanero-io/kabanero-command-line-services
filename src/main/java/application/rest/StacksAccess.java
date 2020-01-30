@@ -346,7 +346,7 @@ public class StacksAccess {
 			}
 						
 			
-			List stackMaps = curatedStacks = StackUtils.streamLineMasterMap(stacks);
+			curatedStacks = StackUtils.streamLineMasterMap(stacks);
 			Collections.sort(curatedStacks, mapComparator); 
 			curatedStacks = StackUtils.packageStackMaps(curatedStacks);
 			
@@ -356,7 +356,7 @@ public class StacksAccess {
 			System.out.println(" ");
 			System.out.println(" ");
 
-			newStacks = (List<Map>) StackUtils.filterNewStacks(stackMaps, fromKabanero);
+			newStacks = (List<Map>) StackUtils.filterNewStacks(stacks, fromKabanero);
 			Collections.sort(newStacks, mapComparator);
 			System.out.println("*** new curated stacks=" + newStacks);
 			System.out.println(" ");
@@ -365,14 +365,14 @@ public class StacksAccess {
 			
 			System.out.println(" ");
 			System.out.println(" ");
-			activateStacks = (List<Map>) StackUtils.filterStacksToActivate(stackMaps, fromKabanero);
+			activateStacks = (List<Map>) StackUtils.filterStacksToActivate(stacks, fromKabanero);
 			Collections.sort(activateStacks, mapComparator);
 			System.out.println("*** activate stacks=" + activateStacks);
 			System.out.println(" ");
 			activateStacks = (List<Map>) StackUtils.packageStackMaps(activateStacks);
 			multiVersionActivateStacks=(List<Stack>) StackUtils.packageStackObjects(activateStacks, versionedStackPipelineMap);
 
-			deleletedStacks = (List<Map>) StackUtils.filterDeletedStacks(stackMaps, fromKabanero);
+			deleletedStacks = (List<Map>) StackUtils.filterDeletedStacks(stacks, fromKabanero);
 			Collections.sort(deleletedStacks, mapComparator);
 			System.out.println("*** stacks to delete=" + deleletedStacks);
 			System.out.println(" ");
