@@ -406,12 +406,12 @@ public class StacksAccess {
 					System.out.println("Stack for create: " + s.toString());
 					s.setMetadata(metadata);
 					api.createStack(namespace, s);
-					System.out.println("*** collection " + s.getSpec().getName() + " created, organization "+group);
+					System.out.println("*** stack " + s.getSpec().getName() + " created, organization "+group);
 					m.put("status", s.getSpec().getName() + " created");
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** collection " + m.get("name") + " failed to activate, organization "+group);
+					System.out.println("*** stack " + m.get("name") + " failed to activate, organization "+group);
 					e.printStackTrace();
 					m.put("status", m.get("name") + " activation failed");
 					m.put("exception", e.getMessage());
@@ -438,7 +438,8 @@ public class StacksAccess {
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** collection " + m.get("name") + " failed to activate, organization "+group);
+					System.out.println("*** stack " + m.get("name") + " failed to activate, organization "+group);
+					System.out.println("*** stack object: "+s.toString());
 					e.printStackTrace();
 					m.put("status", m.get("name") + " activation failed");
 					m.put("exception", e.getMessage());
@@ -493,9 +494,10 @@ public class StacksAccess {
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** collection " + m.get("name") + " failed to deactivate, organization "+group);
+					System.out.println("*** Stack " + m.get("name") + " failed to delete, organization "+group);
+					System.out.println("*** stack object: "+s.toString());
 					e.printStackTrace();
-					m.put("status", m.get("name") + " deactivation failed");
+					m.put("status", m.get("name") + " delete failed");
 					m.put("exception", e.getMessage());
 				}
 				i++;
@@ -592,14 +594,14 @@ public class StacksAccess {
 			String responseBody = apie.getResponseBody();
 			System.err.println("Response body: " + responseBody);
 			msg.put("status",
-					"Collection name: " + name + " failed to deactivate, exception message: " + apie.getMessage());
+					"Stack name: " + name + " failed to delete, exception message: " + apie.getMessage());
 			return Response.status(400).entity(msg).build();
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			msg.put("status",
-					"Collection name: " + name + " failed to deactivate, exception message: " + e.getMessage());
+					"Stack name: " + name + " failed to delete, exception message: " + e.getMessage());
 			return Response.status(400).entity(msg).build();
 		}
 
