@@ -338,7 +338,7 @@ public class StackUtils {
 		try {
 			List<Map> kabMaps = multiVersionStacksMaps(fromKabanero);
 			for (Map map : fromGit) {
-				System.out.println("one map: "+map);
+				//System.out.println("one map: "+map);
 				String name = (String) map.get("id");
 				String version = (String) map.get("version");
 				name = name.trim();
@@ -520,7 +520,7 @@ public class StackUtils {
 		ArrayList<String> versions = null;
 		String saveName = "";
 		for (Map stack : stacks) {
-			System.out.println("one stack: "+stack.toString());
+			System.out.println("packageStackMaps one stack: "+stack.toString());
 			String name = (String) stack.get("name");
 			// append versions and desiredStates to stack
 			if (name.contentEquals(saveName)) {
@@ -548,8 +548,10 @@ public class StackUtils {
 		String saveName = "";
 		System.out.println("versionedStackMap: "+versionedStackMap);
 		for (Map stack : stacks) {
-			System.out.println("one stack: "+stack);
+			System.out.println("packageStackObjects one stack: "+stack);
 			String name = (String) stack.get("name");
+			String version = (String) stack.get("version");
+			System.out.println("packageStackObjects version="+version);
 			// append versions and desiredStates to stack
 			if (name.contentEquals(saveName)) {
 				StackSpecVersions specVersion = new StackSpecVersions();
@@ -570,11 +572,11 @@ public class StackUtils {
 				stackObj.setSpec(stackSpec);
 				StackSpecVersions specVersion = new StackSpecVersions();
 				specVersion.setDesiredState("active");
-				specVersion.setVersion((String) stack.get("version"));
+				specVersion.setVersion(version);
 				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
 				
 				specVersion.setPipelines((List<StackSpecPipelines>) versionedStackMap.get(name));
-				
+				System.out.println("packageStackObjects one specVersion: "+specVersion);
 				versions.add(specVersion);
 				newStacks.add(stackObj);
 			}
