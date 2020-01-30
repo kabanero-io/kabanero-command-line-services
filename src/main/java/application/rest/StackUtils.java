@@ -547,6 +547,7 @@ public class StackUtils {
 		StackSpec stackSpec = null;
 		String saveName = "";
 		for (Map stack : stacks) {
+			System.out.println("one stack: "+stack);
 			String name = (String) stack.get("name");
 			// append versions and desiredStates to stack
 			if (name.contentEquals(saveName)) {
