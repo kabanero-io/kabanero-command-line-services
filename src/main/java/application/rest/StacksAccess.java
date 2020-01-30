@@ -326,9 +326,8 @@ public class StacksAccess {
 					List stacksFromRest = (ArrayList) StackUtils.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl());
 					stacks.addAll(stacksFromRest);
 
-					//versionedStackPipelineMap.put(r.getName(),stacksFromRest);
-
-					ArrayList<StackSpecPipelines> stackPipelines = new ArrayList<StackSpecPipelines>();
+					ArrayList<StackSpecPipelines> stackPipelines = new ArrayList<StackSpecPipelines>(); 
+					ArrayList<StackSpecPipelines> tempPipelines = null;
 					if (r.getPipelines()!=null && r.getPipelines().size() > 0) {
 						for (KabaneroSpecStacksPipelines pipelineElement : r.getPipelines()) {
 							StackSpecPipelines stackPipeline = new StackSpecPipelines();
@@ -339,10 +338,17 @@ public class StacksAccess {
 							stackPipeline.setId(pipelineElement.getId());
 							stackPipelines.add(stackPipeline);
 						}
-						versionedStackPipelineMap.put(r.getName(), stackPipelines);
+						tempPipelines = stackPipelines;
 					} else {
-						versionedStackPipelineMap.put(r.getName(), pipelines);
+						tempPipelines =  pipelines;
 					}
+					
+					for (Object o:stacksFromRest) {
+						Map m = (Map)o;
+						String name = (String) m.get("id");
+						versionedStackPipelineMap.put(name, tempPipelines);
+					}
+					
 				}
 			} catch (NullPointerException npe) {
 				JSONObject resp = new JSONObject();
