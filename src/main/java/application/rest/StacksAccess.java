@@ -437,7 +437,7 @@ public class StacksAccess {
 					List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
 					if (kabSpecVersions!=null) {
 						updateType="patch";
-						s.getSpec().getVersions().addAll(kabSpecVersions);
+						s.getSpec().getVersions().addAll(s.getSpec().getVersions());
 						System.out.println(s.getSpec().getName()+" stack for patch create: " + s.toString());
 						api.patchStack(namespace, s.getMetadata().getName(), s);
 					} else {
@@ -477,7 +477,7 @@ public class StacksAccess {
 					owner.setName(kab.getMetadata().getName());
 					owner.setController(true);
 					owner.setUid(kab.getMetadata().getUid());
-					V1ObjectMeta metadata = new V1ObjectMeta().name((String)kab.getMetadata().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
+					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
 					System.out.println("json object for activate: " + s.toString());
 					s.setMetadata(metadata);
 					api.patchStack(namespace, s.getMetadata().getName(), s);
