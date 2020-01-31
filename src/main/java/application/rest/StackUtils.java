@@ -354,7 +354,7 @@ public class StackUtils {
 							if (version.contentEquals(stackStatusVersions.getVersion())) {
 								match = true;
 								HashMap versionForName = new HashMap();
-								versionForName.put("name", version);
+								versionForName.put(name, version);
 								registerVersionForName.add(versionForName);
 							}
 							break;
@@ -373,7 +373,8 @@ public class StackUtils {
 			for (Map newStack:newStacks) {
 				boolean match = false;
 				for (Map versionForName:registerVersionForName) {
-					String version = (String) versionForName.get("name");
+					String name = (String) newStack.get("name");
+					String version = (String) versionForName.get(name);
 					String newStackVersion = (String) newStack.get("version");
 					if (version.contentEquals(newStackVersion)) {
 						match=true;
