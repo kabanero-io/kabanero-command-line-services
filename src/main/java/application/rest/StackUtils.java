@@ -336,7 +336,7 @@ public class StackUtils {
 		ArrayList<Map> newStacks = new ArrayList<Map>();
 
 		try {
-			List<Map> kabMaps = multiVersionStacksMaps(fromKabanero);
+			//List<Map> kabMaps = multiVersionStacksMaps(fromKabanero);
 			for (Map map : fromGit) {
 				//System.out.println("one map: "+map);
 				String name = (String) map.get("id");
@@ -345,12 +345,15 @@ public class StackUtils {
 				version = version.trim();
 				boolean match = false;
 				HashMap gitMap = new HashMap();
-				for (Map kab: kabMaps) {
-					String name1 = (String) kab.get("name");
-					String version1 = (String) kab.get("version");
+				for (Stack kabStack: fromKabanero.getItems()) {
+					String name1 = (String) kabStack.getSpec().getName();
+					List<StackStatusVersions> versions = kabStack.getStatus().getVersions();
 					name1 = name1.trim();
-					if (name1.contentEquals(name) && version1.contentEquals(version)) {
-						match = true;
+					if (name1.contentEquals(name)) {
+						for (StackStatusVersions stackStatusVersions:versions) {
+							if (version.contentEquals(stackStatusVersions.getVersion())) match = true;
+							break;
+						}
 					}
 				}
 				if (!match) {

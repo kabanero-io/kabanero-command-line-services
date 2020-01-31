@@ -578,9 +578,9 @@ public class StacksAccess {
 
 		// log successful changes too!
 		try {
-			msg.put("new curated collections", convertMapToJSON(newStacks));
-			msg.put("activate collections", convertMapToJSON(activateStacks));
-			msg.put("obsolete collections", convertMapToJSON(deleletedStacks));
+			msg.put("new curated stacks", convertMapToJSON(newStacks));
+			msg.put("activate stacks", convertMapToJSON(activateStacks));
+			msg.put("obsolete stacks", convertMapToJSON(deleletedStacks));
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
 			System.out.println("exception message: " + e.getMessage());
