@@ -417,7 +417,9 @@ public class StackUtils {
 	
 	public static List<StackSpecVersions> getKabInstanceVersions(StackList fromKabanero, String name) {
 		for (Stack s : fromKabanero.getItems()) {
-			return s.getSpec().getVersions();
+			if (s.getSpec().getName().contentEquals(name)) {
+				return s.getSpec().getVersions();
+			}
 		}
 		return null;
 	}

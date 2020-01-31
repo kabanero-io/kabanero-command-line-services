@@ -421,6 +421,7 @@ public class StacksAccess {
 			for (Stack s  : multiVersionNewStacks) {
 				int i=0;
 				Map m=(Map) newStacks.get(i);
+				String updateType="";
 				try {
 					KabaneroApi kApi = new KabaneroApi(apiClient);
 					V1OwnerReference owner = kApi.createOwnerReference(kab);
@@ -434,10 +435,12 @@ public class StacksAccess {
 					s.setApiVersion(apiVersion);
 					List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
 					if (kabSpecVersions!=null) {
+						updateType="patch";
 						s.getSpec().getVersions().addAll(kabSpecVersions);
 						System.out.println(s.getSpec().getName()+" stack for patch create: " + s.toString());
 						api.patchStack(namespace, s.getMetadata().getName(), s);
 					} else {
+						updateType="create";
 						System.out.println(s.getSpec().getName()+" stack for just create: " + s.toString());
 						api.createStack(namespace, s);
 					}
@@ -446,7 +449,7 @@ public class StacksAccess {
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** stack " + s.getSpec().getName() + " failed to create, organization "+group);
+					System.out.println("*** stack " + s.getSpec().getName() + " failed to "+updateType+" , organization "+group);
 					e.printStackTrace();
 					m.put("status", s.getSpec().getName() + " create failed");
 					m.put("exception", e.getMessage());
