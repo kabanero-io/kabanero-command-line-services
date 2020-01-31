@@ -439,7 +439,7 @@ public class StacksAccess {
 						updateType="patch";
 						s.getSpec().getVersions().addAll(s.getSpec().getVersions());
 						System.out.println(s.getSpec().getName()+" stack for patch create: " + s.toString());
-						api.patchStack(namespace, s.getMetadata().getName(), s);
+						api.updateStack(namespace, s.getMetadata().getName(), s);
 					} else {
 						updateType="create";
 						System.out.println(s.getSpec().getName()+" stack for just create: " + s.toString());
@@ -549,7 +549,7 @@ public class StacksAccess {
 							}
 						}
 						stack.setSpec(stackSpec);
-						api.patchStack(namespace, s.getSpec().getName(), stack);
+						api.updateStack(namespace, s.getSpec().getName(), stack);
 					}
 					String versionList="";
 					for (StackSpecVersions stackSpecVersion:s.getSpec().getVersions()) {
