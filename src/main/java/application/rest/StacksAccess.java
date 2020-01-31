@@ -432,9 +432,9 @@ public class StacksAccess {
 					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
 					s.setMetadata(metadata);
 					s.setApiVersion(apiVersion);
-					List<StackSpecVersions> specVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
-					if (specVersions!=null) {
-						s.getSpec().getVersions().addAll(specVersions);
+					List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
+					if (kabSpecVersions!=null) {
+						s.getSpec().getVersions().addAll(kabSpecVersions);
 						System.out.println(s.getSpec().getName()+" stack for patch create: " + s.toString());
 						api.patchStack(namespace, s.getMetadata().getName(), s);
 					} else {
@@ -511,8 +511,9 @@ public class StacksAccess {
 				V1ObjectMeta metadata = new V1ObjectMeta().name((String)kab.getMetadata().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
 				s.setMetadata(metadata);
 				try {
+					List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
 					System.out.println("object for delete: " + s.toString());
-					if (s.getSpec().getVersions().size()==1) {
+					if (kabSpecVersions==null) {
 						api.deleteStack(namespace, s.getSpec().getName(), null, null, null, null);
 					} else {
 						List<StackSpecVersions> stackSpecVersions=new ArrayList<StackSpecVersions>();
@@ -529,11 +530,19 @@ public class StacksAccess {
 							}
 						}
 						List<String> versions = (List<String>) saveMap.get("versions");
-						for (String version:versions) {
-							StackSpecVersions specVersion = new StackSpecVersions();
-							specVersion.setDesiredState("active");
-							specVersion.setVersion(version);
-							stackSpecVersions.add(specVersion);
+						for (StackSpecVersions versionFromKab:kabSpecVersions) {
+							boolean match=false;
+							for (String versionForDelete : versions) {
+								if (versionForDelete.contentEquals(versionFromKab.getVersion())) {
+									match=true;
+								}
+								if (!match) {
+									StackSpecVersions specVersion = new StackSpecVersions();
+									specVersion.setDesiredState("active");
+									specVersion.setVersion(versionFromKab.getVersion());
+									stackSpecVersions.add(specVersion);
+								}
+							}
 						}
 						stack.setSpec(stackSpec);
 						api.patchStack(namespace, s.getSpec().getName(), stack);
