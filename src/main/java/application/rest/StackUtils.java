@@ -351,6 +351,8 @@ public class StackUtils {
 					name1 = name1.trim();
 					if (name1.contentEquals(name)) {
 						for (StackStatusVersions stackStatusVersions:versions) {
+							System.out.println("*** filterNewStacks ***");
+							System.out.println("name="+name+" version from GIT: "+version+", stack version="+stackStatusVersions.getVersion());
 							if (version.contentEquals(stackStatusVersions.getVersion())) match = true;
 							break;
 						}
