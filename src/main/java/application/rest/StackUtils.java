@@ -344,11 +344,13 @@ public class StackUtils {
 				name = name.trim();
 				version = version.trim();
 				boolean match = false;
+				System.out.println("git stack name="+name+" version from GIT: "+version);
 				HashMap gitMap = new HashMap();
 				for (Stack kabStack: fromKabanero.getItems()) {
 					String name1 = (String) kabStack.getSpec().getName();
 					List<StackStatusVersions> versions = kabStack.getStatus().getVersions();
 					name1 = name1.trim();
+					System.out.println("kab stack name="+name);
 					if (name1.contentEquals(name)) {
 						for (StackStatusVersions stackStatusVersions:versions) {
 							System.out.println("*** filterNewStacks ***");
