@@ -331,31 +331,32 @@ public class StackUtils {
 		return inActiveCollections;
 	}
 	
+	
+	
 
 	public static List filterNewStacks(List<Map> fromGit, StackList fromKabanero) {
 		ArrayList<Map> newStacks = new ArrayList<Map>();
-
+		ArrayList<Map> registerVersionForName = new ArrayList<Map>();
 		try {
-			//List<Map> kabMaps = multiVersionStacksMaps(fromKabanero);
 			for (Map map : fromGit) {
-				//System.out.println("one map: "+map);
 				String name = (String) map.get("id");
 				String version = (String) map.get("version");
 				name = name.trim();
 				version = version.trim();
 				boolean match = false;
-				System.out.println("git stack name="+name+" version from GIT: "+version);
 				HashMap gitMap = new HashMap();
-				for (Stack kabStack: fromKabanero.getItems()) {
+				for (Stack kabStack : fromKabanero.getItems()) {
 					String name1 = (String) kabStack.getSpec().getName();
 					List<StackStatusVersions> versions = kabStack.getStatus().getVersions();
 					name1 = name1.trim();
-					System.out.println("kab stack name="+name);
 					if (name1.contentEquals(name)) {
-						for (StackStatusVersions stackStatusVersions:versions) {
-							System.out.println("*** filterNewStacks ***");
-							System.out.println("name="+name+" version from GIT: "+version+", stack version="+stackStatusVersions.getVersion());
-							if (version.contentEquals(stackStatusVersions.getVersion())) match = true;
+						for (StackStatusVersions stackStatusVersions : versions) {
+							if (version.contentEquals(stackStatusVersions.getVersion())) {
+								match = true;
+								HashMap versionForName = new HashMap();
+								versionForName.put("name", version);
+								registerVersionForName.add(versionForName);
+							}
 							break;
 						}
 					}
@@ -366,6 +367,20 @@ public class StackUtils {
 					gitMap.put("desiredState", "active");
 					gitMap.put("images", map.get("images"));
 					newStacks.add(gitMap);
+				}
+			}
+			// clean new stacks of any versions that were added extraneously
+			for (Map newStack:newStacks) {
+				boolean match = false;
+				for (Map versionForName:registerVersionForName) {
+					String version = (String) versionForName.get("name");
+					String newStackVersion = (String) newStack.get("version");
+					if (version.contentEquals(newStackVersion)) {
+						match=true;
+					}
+				}
+				if (match) {
+					newStacks.remove(newStack);
 				}
 			}
 		} catch (Exception e) {
