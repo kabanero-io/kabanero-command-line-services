@@ -60,6 +60,7 @@ import io.kabanero.v1alpha2.models.StackSpecHttps;
 import io.kabanero.v1alpha2.models.StackSpecPipelines;
 import io.kabanero.v1alpha2.models.StackSpecVersions;
 import io.kabanero.v1alpha2.models.StackStatus;
+import io.kabanero.v1alpha2.models.StackStatusVersions;
 import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
@@ -528,7 +529,7 @@ public class StacksAccess {
 						for (Object object : curatedStacks) {
 							Map map = (Map) object;
 							String name=(String) map.get("name");
-							if (name.contentEquals((String) m.get("name"))) {
+							if (name.contentEquals((String) s.getSpec().getName())) {
 								saveMap=map;
 							}
 						}
@@ -622,7 +623,7 @@ public class StacksAccess {
 
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/collections/{name}/versions/{version}")
+	@Path("/stacks/{name}/versions/{version}")
 	public Response deActivateStack(@Context final HttpServletRequest request,
 			@PathParam("name") final String name, @PathParam("version") final String version) throws Exception {
 		// make call to kabanero to delete collection
@@ -633,40 +634,46 @@ public class StacksAccess {
 		JSONObject msg = new JSONObject();
 
 		try {
+			StackList fromKabanero = null;
+			try {
+				fromKabanero = api.listStacks(namespace, null, null, null);
+			} catch (ApiException e) {
+				e.printStackTrace();
+			}
 			// mapOneResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name)
-			Stack fromKabanero = api.getStack(namespace, name);
-			System.out.println("*** reading collection object: "+fromKabanero);
-			if (fromKabanero==null) {
-				System.out.println("*** " + "Collection name: " + name + " 404 not found");
-				msg.put("status", "Collection name: " + name + " 404 not found");
+			Stack kabStack = api.getStack(namespace, name);
+			System.out.println("*** reading stack object: "+kabStack);
+			if (kabStack==null) {
+				System.out.println("*** " + "Stack name: " + name + " 404 not found");
+				msg.put("status", "Stack name: " + name + " 404 not found");
 				return Response.status(400).entity(msg).build();
 			}
-		
-			Map m = new HashMap();
-			m.put("name", name);
-			m.put("version", version);
-			m.put("desiredState","inactive");
-			Stack s = makeStack(m, namespace, null);
-			System.out.println("*** object for deactivate: " + s.toString());
-			api.patchStack(namespace, s.getMetadata().getName(), s);
+			List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, name);
+
+			for (StackSpecVersions versionFromKab:kabSpecVersions) {
+				if (version.contentEquals(versionFromKab.getVersion())) {
+					versionFromKab.setDesiredState("inactive");
+				}
+			}
+			System.out.println(kabStack.getSpec().getName()+" stack for patch deactivate: " + kabStack.toString());
+			kabStack.getSpec().setVersions(kabSpecVersions);;
+			api.patchStack(namespace, kabStack.getMetadata().getName(), kabStack);
 			System.out.println("*** " + "Collection name: " + name + " deactivated");
 			msg.put("status", "Stack name: " + name + "version: "+version+" deactivated");
-			fromKabanero = api.getStack(namespace, name);
-			System.out.println("*** reading collection object after deactivate: "+fromKabanero);
 			return Response.ok(msg).build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();
 			String responseBody = apie.getResponseBody();
 			System.err.println("Response body: " + responseBody);
 			msg.put("status",
-					"Stack name: " + name + " failed to delete, exception message: " + apie.getMessage());
+					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + apie.getMessage());
 			return Response.status(400).entity(msg).build();
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			msg.put("status",
-					"Stack name: " + name + " failed to delete, exception message: " + e.getMessage());
+					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + e.getMessage());
 			return Response.status(400).entity(msg).build();
 		}
 
