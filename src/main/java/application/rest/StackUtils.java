@@ -363,7 +363,6 @@ public class StackUtils {
 								versionForName.put(name, version);
 								registerVersionForName.add(versionForName);
 							}
-							break;
 						}
 					}
 				}
