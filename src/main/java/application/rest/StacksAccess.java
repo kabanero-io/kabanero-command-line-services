@@ -470,6 +470,7 @@ public class StacksAccess {
 			for (Stack s : multiVersionActivateStacks) {
 				int i=0;
 				Map m=(Map) activateStacks.get(i);
+				String versions = "";
 				try {
 					KabaneroApi kApi = new KabaneroApi(apiClient);
 					V1OwnerReference owner = kApi.createOwnerReference(kab);
@@ -479,18 +480,28 @@ public class StacksAccess {
 					owner.setController(true);
 					owner.setUid(kab.getMetadata().getUid());
 					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
-					System.out.println("json object for activate: " + s.toString());
 					s.setMetadata(metadata);
-					api.patchStack(namespace, s.getMetadata().getName(), s);
-					System.out.println("*** stack " + m.get("name") + " activated, organization "+group);
-					m.put("status", m.get("name") + " activated");
+					List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
+					if (kabSpecVersions!=null) {
+						s.getSpec().getVersions().addAll(s.getSpec().getVersions());
+						System.out.println(s.getSpec().getName()+" activate with multiple versions: " + s.toString());
+					} else {
+						System.out.println(s.getSpec().getName()+" activate with one version:" + s.toString());
+					}
+					
+					for ( StackSpecVersions stackSpecVersions : kabSpecVersions) {
+						versions+=" "+stackSpecVersions.getVersion();
+					}
+					api.updateStack(namespace, s.getMetadata().getName(), s);
+					System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
+					m.put("status", s.getMetadata().getName()+" versions(s): "+versions + " activated");
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
 					System.out.println("*** stack " + m.get("name") + " failed to activate, organization "+group);
 					System.out.println("*** stack object: "+s.toString());
 					e.printStackTrace();
-					m.put("status", m.get("name") + " activation failed");
+					m.put("status", s.getMetadata().getName() + ", version(s): "+versions+" activation failed");
 					m.put("exception", e.getMessage());
 				}
 				i++;

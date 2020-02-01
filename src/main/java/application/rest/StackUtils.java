@@ -422,6 +422,7 @@ public class StackUtils {
 							activateMap.put("name", map.get("id"));
 							activateMap.put("version", stackVersion.getVersion());
 							activateMap.put("desiredState","active");
+							activateMap.put("images", map.get("images"));
 							activateCollections.add(activateMap);
 						}
 					}
@@ -571,8 +572,10 @@ public class StackUtils {
 		return updatedStacks;
 	}
 	
+	
+	
 	public static List<Stack> packageStackObjects(List<Map> stacks, Map versionedStackMap) {
-		ArrayList<Stack> newStacks = new ArrayList<Stack>();
+		ArrayList<Stack> updateStacks = new ArrayList<Stack>();
 		ArrayList<StackSpecVersions> versions = null;
 		StackSpec stackSpec = null;
 		String saveName = "";
@@ -607,10 +610,10 @@ public class StackUtils {
 				specVersion.setPipelines((List<StackSpecPipelines>) versionedStackMap.get(name));
 				System.out.println("packageStackObjects one specVersion: "+specVersion);
 				versions.add(specVersion);
-				newStacks.add(stackObj);
+				updateStacks.add(stackObj);
 			}
 		}
-		return newStacks;
+		return updateStacks;
 	}
 
 	
