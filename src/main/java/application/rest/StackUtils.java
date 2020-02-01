@@ -345,11 +345,16 @@ public class StackUtils {
 				version = version.trim();
 				boolean match = false;
 				HashMap gitMap = new HashMap();
+				// check this git map against all of the kab stacks
 				for (Stack kabStack : fromKabanero.getItems()) {
 					String name1 = (String) kabStack.getSpec().getName();
 					List<StackStatusVersions> versions = kabStack.getStatus().getVersions();
 					name1 = name1.trim();
+					// see if name from git matches name from kabanero
+					// there can be multiple git maps that have the same name but different versions
 					if (name1.contentEquals(name)) {
+						// check if the version from the git map occurs in the list of versions
+						// for this stack map
 						for (StackStatusVersions stackStatusVersions : versions) {
 							if (version.contentEquals(stackStatusVersions.getVersion())) {
 								match = true;
@@ -369,18 +374,21 @@ public class StackUtils {
 					newStacks.add(gitMap);
 				}
 			}
+			
+			System.out.println("registerVersionForName: "+registerVersionForName);
 			// clean new stacks of any versions that were added extraneously
 			for (Map newStack:newStacks) {
-				boolean match = false;
+				boolean versionAlreadyThereFromGit = false;
+				String name = (String) newStack.get("name");
 				for (Map versionForName:registerVersionForName) {
-					String name = (String) newStack.get("name");
 					String version = (String) versionForName.get(name);
 					String newStackVersion = (String) newStack.get("version");
 					if (version.contentEquals(newStackVersion)) {
-						match=true;
+						versionAlreadyThereFromGit=true;
 					}
 				}
-				if (match) {
+				if (versionAlreadyThereFromGit) {
+					System.out.println("removing: "+newStack);
 					newStacks.remove(newStack);
 				}
 			}
