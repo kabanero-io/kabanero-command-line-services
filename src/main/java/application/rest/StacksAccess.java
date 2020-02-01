@@ -479,7 +479,7 @@ public class StacksAccess {
 					owner.setName(kab.getMetadata().getName());
 					owner.setController(true);
 					owner.setUid(kab.getMetadata().getUid());
-					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
+					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
 					s.setMetadata(metadata);
 					s.setApiVersion(apiVersion);
 					List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
