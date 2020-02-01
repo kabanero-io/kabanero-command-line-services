@@ -353,8 +353,9 @@ public class StackUtils {
 					// see if name from git matches name from kabanero
 					// there can be multiple git maps that have the same name but different versions
 					if (name1.contentEquals(name)) {
+						System.out.println("name="+name+",git version="+version+",versions="+versions);
 						// check if the version from the git map occurs in the list of versions
-						// for this stack map
+						// for this name matched stack map
 						for (StackStatusVersions stackStatusVersions : versions) {
 							if (version.contentEquals(stackStatusVersions.getVersion())) {
 								match = true;
@@ -383,8 +384,10 @@ public class StackUtils {
 				for (Map versionForName:registerVersionForName) {
 					String version = (String) versionForName.get(name);
 					String newStackVersion = (String) newStack.get("version");
-					if (version.contentEquals(newStackVersion)) {
-						versionAlreadyThereFromGit=true;
+					if (version!=null) {
+						if (version.contentEquals(newStackVersion)) {
+							versionAlreadyThereFromGit=true;
+						}
 					}
 				}
 				if (versionAlreadyThereFromGit) {
