@@ -488,13 +488,14 @@ public class StacksAccess {
 					
 					
 					
-					List<StackStatusVersions> statusStackVersions=kabStack.getStatus().getVersions();
+					List<StackStatusVersions> statusStackVersions=s.getStatus().getVersions();
 					
 					for (StackStatusVersions statusStackVersion:statusStackVersions) {
 						if ("inactive".equals(statusStackVersion.getStatus())) {
 							String version=statusStackVersion.getVersion();
 							for (StackSpecVersions kabSpecVersion:kabSpecVersions) {
 								if (version.contentEquals(kabSpecVersion.getVersion())) {
+									kabSpecVersion.setImages(statusStackVersion.getImages());
 									kabSpecVersion.setDesiredState("active");
 									versions+=" "+kabSpecVersion.getVersion();
 								}
