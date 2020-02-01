@@ -482,12 +482,29 @@ public class StacksAccess {
 					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
 					s.setMetadata(metadata);
 					s.setApiVersion(apiVersion);
+					Stack kabStack = api.getStack(namespace, s.getSpec().getName());
+					
 					List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
-					for (StackSpecVersions kabSpecVersion:kabSpecVersions) {
-						kabSpecVersion.setDesiredState("active");
-						versions+=" "+kabSpecVersion.getVersion();
+					
+					
+					
+					List<StackStatusVersions> statusStackVersions=kabStack.getStatus().getVersions();
+					
+					for (StackStatusVersions statusStackVersion:statusStackVersions) {
+						if ("inactive".equals(statusStackVersion.getStatus())) {
+							String version=statusStackVersion.getVersion();
+							for (StackSpecVersions kabSpecVersion:kabSpecVersions) {
+								if (version.contentEquals(kabSpecVersion.getVersion())) {
+									kabSpecVersion.setDesiredState("active");
+									versions+=" "+kabSpecVersion.getVersion();
+								}
+							}
+						}
 					}
-					s.getSpec().setVersions(kabSpecVersions);;
+					
+					
+					s.getSpec().setVersions(kabSpecVersions);
+					
 					System.out.println(s.getSpec().getName()+" activate with stack:" + s.toString());
 					api.updateStack(namespace, s.getMetadata().getName(), s);
 					System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
