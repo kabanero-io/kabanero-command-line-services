@@ -276,6 +276,7 @@ public class StacksAccess {
 		List<Stack> multiVersionNewStacks=null;
 		List<Stack> multiVersionActivateStacks=null;
 		List<Stack> multiVersionDeletedStacks=null;
+		Map versionedStackPipelineMap = new HashMap();
 		
 		KabaneroSpecStacksPipelines defaultPipeline=null;
 		
@@ -320,7 +321,7 @@ public class StacksAccess {
 			// multi custom pipelines per repository collection in 060, future, design not set on this yet
 			List<KabaneroSpecStacksRepositories> stackRepos = kab.getSpec().getStacks().getRepositories();
 			
-			Map versionedStackPipelineMap = new HashMap();
+			
 			ArrayList stacks = new ArrayList();
 			
 			try {
@@ -470,10 +471,6 @@ public class StacksAccess {
 			for (Stack s : fromKabanero.getItems()) {
 				String versions = "";
 				try {
-					
-					
-					//List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
-
 					Stack stackObj = new Stack();
 					List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
 					StackSpec stackSpec = new StackSpec();
@@ -497,26 +494,30 @@ public class StacksAccess {
 					stackSpec.setName(s.getSpec().getName());
 
 					List<StackStatusVersions> statusStackVersions=s.getStatus().getVersions();
-
+					boolean atLeastOneVersionToActivate=false;
 					for (StackStatusVersions statusStackVersion:statusStackVersions) {
-						if ("inactive".contentEquals(statusStackVersion.getStatus())) {
+						System.out.println("statusStackVersion: "+statusStackVersion.getStatus()+" name: "+s.getSpec().getName());
+						if ("inactive".equals(statusStackVersion.getStatus())) {
 							versions+=" "+statusStackVersion.getVersion();
+							atLeastOneVersionToActivate=true;
 						}
 						StackSpecVersions specVersion = new StackSpecVersions();
 						specVersion.setDesiredState("active");
 						specVersion.setVersion(statusStackVersion.getVersion());
 						specVersion.setImages(statusStackVersion.getImages());
+						specVersion.setPipelines((List<StackSpecPipelines>) versionedStackPipelineMap.get(s.getSpec().getName()));
 						stackSpecVersions.add(specVersion);
 					}
-
+					System.out.println("name: "+s.getSpec().getName()+" atLeastOneVersionToActivate="+atLeastOneVersionToActivate);
 					s.getSpec().setVersions(stackSpecVersions);
-
-					System.out.println(s.getSpec().getName()+" activate with stack:" + s.toString());
-					api.updateStack(namespace, s.getMetadata().getName(), s);
-					System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
-					HashMap m = new HashMap();
-					m.put("status", s.getMetadata().getName()+" versions(s): "+versions + " activated"); 
-					activateStacks.add(m);
+					if (atLeastOneVersionToActivate) {
+						System.out.println(s.getSpec().getName()+" activate with stack:" + s.toString());
+						api.updateStack(namespace, s.getMetadata().getName(), s);
+						System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
+						HashMap m = new HashMap();
+						m.put("status", s.getMetadata().getName()+" versions(s): "+versions + " activated"); 
+						activateStacks.add(m);
+					}
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
