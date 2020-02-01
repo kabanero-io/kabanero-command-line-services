@@ -150,8 +150,9 @@ public class StacksAccess {
 			System.out.println("stacks: "+stacks);
 			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
 			Collections.sort(curatedStacks, mapComparator);
+			List<Map> curatedStacksMaps = StackUtils.packageStackMaps(curatedStacks);
 			
-			JSONArray ja = convertMapToJSON(curatedStacks);
+			JSONArray ja = convertMapToJSON(curatedStacksMaps);
 			System.out.println("curated stack for namespace: "+namespace+" kab group: " + group +"="+ ja);
 			msg.put("curated stacks", ja);
 

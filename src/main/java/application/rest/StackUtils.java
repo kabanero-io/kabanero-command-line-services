@@ -546,7 +546,7 @@ public class StackUtils {
 	}
 	
 	public static List<Map> packageStackMaps(List<Map> stacks) {
-		ArrayList<Map> newStacks = new ArrayList<Map>();
+		ArrayList<Map> updatedStacks = new ArrayList<Map>();
 		ArrayList<String> versions = null;
 		String saveName = "";
 		for (Map stack : stacks) {
@@ -565,10 +565,10 @@ public class StackUtils {
 				map.put("name",name);
 				map.put("images",stack.get("images"));
 				versions.add((String) stack.get("version"));
-				newStacks.add(map);
+				updatedStacks.add(map);
 			}
 		}
-		return newStacks;
+		return updatedStacks;
 	}
 	
 	public static List<Stack> packageStackObjects(List<Map> stacks, Map versionedStackMap) {
