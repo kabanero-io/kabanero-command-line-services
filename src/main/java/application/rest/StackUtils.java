@@ -362,6 +362,7 @@ public class StackUtils {
 								HashMap versionForName = new HashMap();
 								versionForName.put(name, version);
 								registerVersionForName.add(versionForName);
+								break;
 							}
 						}
 					}
@@ -374,7 +375,7 @@ public class StackUtils {
 					newStacks.add(gitMap);
 				}
 			}
-			
+			System.out.println("newStacks: "+newStacks);
 			System.out.println("registerVersionForName: "+registerVersionForName);
 			// clean new stacks of any versions that were added extraneously
 			for (Map newStack:newStacks) {
