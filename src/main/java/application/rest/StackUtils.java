@@ -476,33 +476,65 @@ public class StackUtils {
 		}
 		return null;
 	}
+	
+	
+	public static boolean isStackVersionInGit(List<Map> fromGit, String version, String name) {
+		ArrayList<Map> stacksToDelete = new ArrayList<Map>();
+		boolean match;
+		try {
+			for (Map map1 : fromGit) {
+				String name1 = (String) map1.get("id");
+				name1 = name1.trim();
+				String version1 = (String) map1.get("version");
+				if (name1.contentEquals(name) && version.contentEquals(version1)) {
+					return true;	
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	public static List filterDeletedStacks(List<Map> fromGit, StackList fromKabanero) {
 		ArrayList<Map> stacksToDelete = new ArrayList<Map>();
 		String name = null;
 		String version = null;
+		boolean stackInGit;
+		boolean match;
 		try {
-			List<Map> kabMaps = multiVersionStacksMaps(fromKabanero);
-			for (Map kab: kabMaps) {
-				//System.out.println("kab map: " + kab);
-				name = (String) kab.get("name");
-				version = (String) kab.get("version");
-				boolean match = false;
+			for (Stack kabStack: fromKabanero.getItems()) {
 				Map kabMap = new HashMap();
-				// is this Kabanero CR version in GIT hub?
+				match = false;
+				stackInGit = false;
 				for (Map map1 : fromGit) {
 					String name1 = (String) map1.get("id");
 					name1 = name1.trim();
 					String version1 = (String) map1.get("version");
-					name1 = name1.trim();
-					if (name1.contentEquals(name) && version1.contentEquals(version)) {
-						match = true;
-					}
+					name = (String) kabStack.getSpec().getName();
+					if (name1.contentEquals(name)) {
+						stackInGit=true;
+						StackStatus status = kabStack.getStatus();
+						List<StackStatusVersions> stackVersions = status.getVersions();
+						// If this Kabanero Stack version does not match GIT hub stack version, add it for deletion 
+						for (StackStatusVersions stackVersion:stackVersions) {
+							// if this version is 
+							if (version1.equals(stackVersion.getVersion())) {
+								version=version1;
+								match=true;
+								break;
+							}
+						}
+						if (!match) {
+							kabMap.put("name", name);
+							kabMap.put("version",version);
+							stacksToDelete.add(kabMap);
+						}
+					} 
 				}
-				// if this version is not in GIT hub add it to map element for deletion
-				if (!match) {
+				if (!stackInGit) {
 					kabMap.put("name", name);
-					kabMap.put("version", version);
+					kabMap.put("version","");
 					stacksToDelete.add(kabMap);
 				}
 			}
