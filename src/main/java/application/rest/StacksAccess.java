@@ -469,7 +469,8 @@ public class StacksAccess {
 		// iterate over collections to activate
 		try {
 			for (Stack s : fromKabanero.getItems()) {
-				String versions = "";
+				ArrayList<String> versions= new ArrayList<String>();
+				HashMap m = new HashMap();
 				try {
 					Stack stackObj = new Stack();
 					List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
@@ -495,11 +496,14 @@ public class StacksAccess {
 
 					List<StackStatusVersions> statusStackVersions=s.getStatus().getVersions();
 					boolean atLeastOneVersionToActivate=false;
+					
+					
 					for (StackStatusVersions statusStackVersion:statusStackVersions) {
 						System.out.println("statusStackVersion: "+statusStackVersion.getStatus()+" name: "+s.getSpec().getName());
 						if ("inactive".equals(statusStackVersion.getStatus())) {
-							versions+=" "+statusStackVersion.getVersion();
 							atLeastOneVersionToActivate=true;
+							versions.add(statusStackVersion.getVersion());
+							
 						}
 						StackSpecVersions specVersion = new StackSpecVersions();
 						specVersion.setDesiredState("active");
@@ -511,12 +515,11 @@ public class StacksAccess {
 					System.out.println("name: "+s.getSpec().getName()+" atLeastOneVersionToActivate="+atLeastOneVersionToActivate);
 					s.getSpec().setVersions(stackSpecVersions);
 					if (atLeastOneVersionToActivate) {
+						m.put("versions", versions); 
+						m.put("name", s.getSpec().getName());
 						System.out.println(s.getSpec().getName()+" activate with stack:" + s.toString());
 						api.updateStack(namespace, s.getMetadata().getName(), s);
 						System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
-						HashMap m = new HashMap();
-						m.put("status", s.getMetadata().getName()+" versions(s): "+versions + " activated"); 
-						activateStacks.add(m);
 					}
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
@@ -524,12 +527,10 @@ public class StacksAccess {
 					System.out.println("*** stack " + s.getSpec().getName() + " failed to activate, organization "+group);
 					System.out.println("*** stack object: "+s.toString());
 					e.printStackTrace();
-					HashMap m = new HashMap();
-					m.put("status", s.getMetadata().getName() + ", version(s): "+versions+" activation failed");
-					m.put("exception", e.getMessage());
-					activateStacks.add(m);
+					m.put("status", "failed to activate");
+					m.put("exception message", e.getMessage()+", cause: "+e.getCause());
 				}
-
+				activateStacks.add(m);
 			}
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
@@ -539,67 +540,7 @@ public class StacksAccess {
 
 
 
-//		// iterate over collections to activate
-//		try {
-//			for (Stack s : multiVersionActivateStacks) {
-//				int i=0;
-//				Map m=(Map) activateStacks.get(i);
-//				String versions = "";
-//				try {
-//					KabaneroApi kApi = new KabaneroApi(apiClient);
-//					V1OwnerReference owner = kApi.createOwnerReference(kab);
-//					owner.setKind(kab.getKind());
-//					owner.setApiVersion(kab.getApiVersion());
-//					owner.setName(kab.getMetadata().getName());
-//					owner.setController(true);
-//					owner.setUid(kab.getMetadata().getUid());
-//					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
-//					s.setMetadata(metadata);
-//					s.setApiVersion(apiVersion);
-//					Stack kabStack = api.getStack(namespace, s.getSpec().getName());
-//					
-//					List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
-//					
-//					
-//					
-//					List<StackStatusVersions> statusStackVersions=s.getStatus().getVersions();
-//					
-//					for (StackStatusVersions statusStackVersion:statusStackVersions) {
-//						if ("inactive".equals(statusStackVersion.getStatus())) {
-//							String version=statusStackVersion.getVersion();
-//							for (StackSpecVersions kabSpecVersion:kabSpecVersions) {
-//								if (version.contentEquals(kabSpecVersion.getVersion())) {
-//									kabSpecVersion.setImages(statusStackVersion.getImages());
-//									kabSpecVersion.setDesiredState("active");
-//									versions+=" "+kabSpecVersion.getVersion();
-//								}
-//							}
-//						}
-//					}
-//					
-//					
-//					s.getSpec().setVersions(kabSpecVersions);
-//					
-//					System.out.println(s.getSpec().getName()+" activate with stack:" + s.toString());
-//					api.updateStack(namespace, s.getMetadata().getName(), s);
-//					System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
-//					m.put("status", s.getMetadata().getName()+" versions(s): "+versions + " activated");
-//				} catch (Exception e) {
-//					System.out.println("exception cause: " + e.getCause());
-//					System.out.println("exception message: " + e.getMessage());
-//					System.out.println("*** stack " + m.get("name") + " failed to activate, organization "+group);
-//					System.out.println("*** stack object: "+s.toString());
-//					e.printStackTrace();
-//					m.put("status", s.getMetadata().getName() + ", version(s): "+versions+" activation failed");
-//					m.put("exception", e.getMessage());
-//				}
-//				i++;
-//			}
-//		} catch (Exception e) {
-//			System.out.println("exception cause: " + e.getCause());
-//			System.out.println("exception message: " + e.getMessage());
-//			e.printStackTrace();
-//		}
+
 
 		// iterate over collections to delete
 		try {
