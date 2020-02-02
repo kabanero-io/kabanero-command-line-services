@@ -532,6 +532,7 @@ public class StacksAccess {
 
 		// iterate over collections to delete
 		try {
+			deletedStacks = new ArrayList<Map>();
 			for (Stack s : fromKabanero.getItems()) {
 				ArrayList<String> versions= new ArrayList<String>();
 				HashMap m = new HashMap();
