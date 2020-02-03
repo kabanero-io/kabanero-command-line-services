@@ -479,12 +479,15 @@ public class StackUtils {
 	
 	
 	public static boolean isStackVersionInGit(List<Map> fromGit, String version, String name) {
+		System.out.println("isStackVersionInGit");
+		System.out.println("input parms - name: "+name+" version: "+version);
 		try {
 			for (Map map1 : fromGit) {
 				String name1 = (String) map1.get("name");
 				name1 = name1.trim();
 				if (name1.contentEquals(name)) {
 					List<String> versions = (List<String>) map1.get("versions");
+					System.out.println("versions: "+versions);
 					for (String versionElement:versions) {
 						if (versions.equals(versionElement)) {
 							return true;

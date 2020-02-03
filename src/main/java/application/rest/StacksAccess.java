@@ -588,7 +588,7 @@ public class StacksAccess {
 					
 					if (atLeastOneToDelete) {
 						deletedStacks.add(m);
-						if (versions.size() > 0) {
+						if (versions.size() > 1) {
 							System.out.println(s.getSpec().getName()+" delete stack versions deleted: "+versions+" through omission, stack: "+stackObj);
 							api.updateStack(namespace, s.getSpec().getName(), stackObj);
 						} else {
