@@ -489,7 +489,7 @@ public class StackUtils {
 					List<String> versions = (List<String>) map1.get("versions");
 					System.out.println("versions: "+versions);
 					for (String versionElement:versions) {
-						if (versions.equals(versionElement)) {
+						if (version.equals(versionElement)) {
 							return true;
 						}
 					}
