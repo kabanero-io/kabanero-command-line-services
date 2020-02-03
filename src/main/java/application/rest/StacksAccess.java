@@ -567,7 +567,7 @@ public class StacksAccess {
 						System.out.println("statusStackVersion: "+statusStackVersion.getStatus()+" name: "+s.getSpec().getName());
 
 						boolean isVersionInGitStack=StackUtils.isStackVersionInGit(curatedStacks, statusStackVersion.getVersion(), s.getSpec().getName());
-						
+						System.out.println("isVersionInGitStack: "+isVersionInGitStack);
 						if (isVersionInGitStack) {
 							StackSpecVersions specVersion = new StackSpecVersions();
 							specVersion.setDesiredState("active");
@@ -590,7 +590,7 @@ public class StacksAccess {
 						deletedStacks.add(m);
 						if (versions.size() > 0) {
 							System.out.println(s.getSpec().getName()+" delete stack versions deleted: "+versions+" through omission, stack: "+stackObj);
-							api.updateStack(namespace, s.getMetadata().getName(), stackObj);
+							api.updateStack(namespace, s.getSpec().getName(), stackObj);
 						} else {
 							System.out.println("delete entrire stack: "+s.getSpec().getName()+", since there is only one version in it ");
 							api.deleteStack(namespace, s.getSpec().getName(), null, null, null, null);

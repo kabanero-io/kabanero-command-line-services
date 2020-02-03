@@ -479,15 +479,18 @@ public class StackUtils {
 	
 	
 	public static boolean isStackVersionInGit(List<Map> fromGit, String version, String name) {
-		ArrayList<Map> stacksToDelete = new ArrayList<Map>();
-		boolean match;
 		try {
 			for (Map map1 : fromGit) {
-				String name1 = (String) map1.get("id");
+				String name1 = (String) map1.get("name");
 				name1 = name1.trim();
-				String version1 = (String) map1.get("version");
-				if (name1.contentEquals(name) && version.contentEquals(version1)) {
-					return true;	
+				if (name1.contentEquals(name)) {
+					List<String> versions = (List<String>) map1.get("versions");
+					for (String versionElement:versions) {
+						if (versions.equals(versionElement)) {
+							return true;
+						}
+					}
+						
 				}
 			}
 		} catch (Exception e) {
