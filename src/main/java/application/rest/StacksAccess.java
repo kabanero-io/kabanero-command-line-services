@@ -431,6 +431,12 @@ public class StacksAccess {
 					if (kabSpecVersions!=null) {
 						updateType="patch";
 						s.getSpec().getVersions().addAll(kabSpecVersions);
+						
+						Stack kabStack = StackUtils.getKabInstance(fromKabanero, s.getSpec().getName());
+						
+						s.getMetadata().setUid(kabStack.getMetadata().getUid());
+						s.getMetadata().setGeneration(kabStack.getMetadata().getGeneration());
+						
 						System.out.println(s.getSpec().getName()+" stack for patch create: " + s.toString());
 						api.updateStack(namespace, s.getMetadata().getName(), s);
 					} else {
@@ -479,7 +485,8 @@ public class StacksAccess {
 					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
 					stackObj.setMetadata(metadata);
 					stackObj.setApiVersion(apiVersion);
-
+					stackObj.getMetadata().setUid(s.getMetadata().getUid());
+					stackObj.getMetadata().setGeneration(s.getMetadata().getGeneration());
 					stackSpec.setVersions(stackSpecVersions);
 
 					stackSpec.setName(s.getSpec().getName());
@@ -555,6 +562,8 @@ public class StacksAccess {
 					V1ObjectMeta metadata = new V1ObjectMeta().name((String)kabStack.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
 					stackObj.setMetadata(metadata);
 					stackObj.setApiVersion(apiVersion);
+					stackObj.getMetadata().setUid(kabStack.getMetadata().getUid());
+					stackObj.getMetadata().setGeneration(kabStack.getMetadata().getGeneration());
 
 					stackSpec.setVersions(stackSpecVersions);
 

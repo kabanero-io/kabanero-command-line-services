@@ -459,6 +459,15 @@ public class StackUtils {
 		return null;
 	}
 	
+	public static Stack getKabInstance(StackList fromKabanero, String name) {
+		for (Stack s : fromKabanero.getItems()) {
+			if (s.getSpec().getName().contentEquals(name)) {
+				return s;
+			}
+		}
+		return null;
+	}
+	
 
 	
 	public static List isVerionInGitForStack(List<Map> fromGit, List<Map> stacksToDelete) {
