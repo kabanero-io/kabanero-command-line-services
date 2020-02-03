@@ -486,10 +486,11 @@ public class StackUtils {
 				String name1 = (String) map1.get("name");
 				name1 = name1.trim();
 				if (name1.contentEquals(name)) {
-					List<String> versions = (List<String>) map1.get("versions");
+					List<Map> versions = (List<Map>) map1.get("versions");
 					System.out.println("versions: "+versions);
-					for (String versionElement:versions) {
-						if (version.equals(versionElement)) {
+					for (Map versionElement:versions) {
+						String versionValue = (String) versionElement.get("version");
+						if (version.equals(versionValue)) {
 							return true;
 						}
 					}

@@ -379,7 +379,7 @@ public class StacksAccess {
 			curatedStacks = StackUtils.packageStackMaps(curatedStacks);
 			
 			System.out.println(" ");
-			System.out.println("*** List of curated stacks= "+stacks);
+			System.out.println("*** List of curated stacks= "+curatedStacks);
 			
 			System.out.println(" ");
 			System.out.println(" ");
