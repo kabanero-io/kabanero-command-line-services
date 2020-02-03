@@ -605,7 +605,6 @@ public class StackUtils {
 				HashMap map = new HashMap();
 				map.put("versions",versions);
 				map.put("name",name);
-				map.put("images",stack.get("images"));
 				HashMap versionMap = new HashMap();
 				versionMap.put("version", (String) stack.get("version"));
 				versionMap.put("images", stack.get("images"));
