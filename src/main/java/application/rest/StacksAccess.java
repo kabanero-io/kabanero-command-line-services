@@ -563,7 +563,8 @@ public class StacksAccess {
 					List<StackStatusVersions> kabStackVersions=kabStack.getStatus().getVersions();
 					boolean atLeastOneToDelete=false;
 
-					System.out.println("Kab stack versions"+kabStackVersions);
+					System.out.println("Kab stack versions: "+kabStackVersions);
+					
 					for (StackStatusVersions statusStackVersion:kabStackVersions) {
 						System.out.println("statusStackVersion: "+statusStackVersion.getStatus()+" name: "+kabStack.getSpec().getName());
 
@@ -585,7 +586,7 @@ public class StacksAccess {
 					m.put("name", kabStack.getSpec().getName());
 					m.put("versions", versions);
 					
-					System.out.println("name: "+kabStack.getSpec().getName()+" atLeastOneVersionToActivate="+atLeastOneToDelete);
+					System.out.println("name: "+kabStack.getSpec().getName()+" atLeastOneVersionToDelete="+atLeastOneToDelete);
 					stackObj.getSpec().setVersions(stackSpecVersions);
 					
 					if (atLeastOneToDelete) {
@@ -598,7 +599,9 @@ public class StacksAccess {
 							System.out.println("delete entrire stack: "+kabStack.getSpec().getName()+", because there is only one version in it or all versions are to be deleted ");
 							api.deleteStack(namespace, kabStack.getSpec().getName(), null, null, null, null);
 						}
-						System.out.println("*** status: "+kabStack.getMetadata().getName()+" versions(s): "+versions + " activated");
+						System.out.println("*** status: "+kabStack.getMetadata().getName()+" versions(s): "+versions + " deleted");
+					} else {
+						System.out.println("Skipping: "+kabStack.getSpec().getName()+" nothing to delete");
 					}
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());

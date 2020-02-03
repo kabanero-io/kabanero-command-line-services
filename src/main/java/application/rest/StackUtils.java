@@ -494,8 +494,7 @@ public class StackUtils {
 							return true;
 						}
 					}
-						
-				}
+				} 
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
