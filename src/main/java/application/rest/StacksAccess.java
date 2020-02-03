@@ -588,11 +588,11 @@ public class StacksAccess {
 					
 					if (atLeastOneToDelete) {
 						deletedStacks.add(m);
-						if (statusStackVersions.size() > 1) {
+						if (statusStackVersions.size() > 1  &&  versions.size()!=statusStackVersions.size()) {
 							System.out.println(s.getSpec().getName()+" delete stack versions deleted: "+versions+" through omission, stack: "+stackObj);
 							api.updateStack(namespace, s.getSpec().getName(), stackObj);
 						} else {
-							System.out.println("delete entrire stack: "+s.getSpec().getName()+", since there is only one version in it ");
+							System.out.println("delete entrire stack: "+s.getSpec().getName()+", because there is only one version in it or all versions are to be deleted ");
 							api.deleteStack(namespace, s.getSpec().getName(), null, null, null, null);
 						}
 						System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
