@@ -633,6 +633,8 @@ public class StackUtils {
 				StackSpecVersions specVersion = new StackSpecVersions();
 				specVersion.setDesiredState("active");
 				specVersion.setVersion((String) stack.get("version"));
+				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
+				specVersion.setPipelines((List<StackSpecPipelines>) versionedStackMap.get(name));
 				versions.add(specVersion);
 			} 
 			// creating stack object to add to new stacks List
