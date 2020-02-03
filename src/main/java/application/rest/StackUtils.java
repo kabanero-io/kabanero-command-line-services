@@ -586,24 +586,30 @@ public class StackUtils {
 	
 	public static List<Map> packageStackMaps(List<Map> stacks) {
 		ArrayList<Map> updatedStacks = new ArrayList<Map>();
-		ArrayList<String> versions = null;
+		ArrayList<Map> versions = null;
 		String saveName = "";
 		for (Map stack : stacks) {
 			System.out.println("packageStackMaps one stack: "+stack.toString());
 			String name = (String) stack.get("name");
 			// append versions and desiredStates to stack
 			if (name.contentEquals(saveName)) {
-				versions.add((String) stack.get("version"));
+				HashMap versionMap = new HashMap();
+				versionMap.put("version", (String) stack.get("version"));
+				versionMap.put("images", stack.get("images"));
+				versions.add(versionMap);
 			} 
 			// creating stack object to add to new stacks List
 			else {
 				saveName = name;
-				versions = new ArrayList<String>();
+				versions = new ArrayList<Map>();
 				HashMap map = new HashMap();
 				map.put("versions",versions);
 				map.put("name",name);
 				map.put("images",stack.get("images"));
-				versions.add((String) stack.get("version"));
+				HashMap versionMap = new HashMap();
+				versionMap.put("version", (String) stack.get("version"));
+				versionMap.put("images", stack.get("images"));
+				versions.add(versionMap);
 				updatedStacks.add(map);
 			}
 		}
