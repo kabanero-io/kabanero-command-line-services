@@ -560,7 +560,7 @@ public class StacksAccess {
 					stackSpec.setName(s.getSpec().getName());
 
 					List<StackStatusVersions> statusStackVersions=s.getStatus().getVersions();
-					boolean atLeastToDelete=false;
+					boolean atLeastOneToDelete=false;
 
 
 					for (StackStatusVersions statusStackVersion:statusStackVersions) {
@@ -576,21 +576,23 @@ public class StacksAccess {
 							specVersion.setPipelines((List<StackSpecPipelines>) versionedStackPipelineMap.get(s.getSpec().getName()));
 							stackSpecVersions.add(specVersion);
 						} else {
-							atLeastToDelete=true;
+							atLeastOneToDelete=true;
 							versions.add(statusStackVersion.getVersion());
 						}
 					}
 					m.put("name", s.getSpec().getName());
 					m.put("versions", versions);
 					
-					System.out.println("name: "+s.getSpec().getName()+" atLeastOneVersionToActivate="+atLeastToDelete);
-					s.getSpec().setVersions(stackSpecVersions);
-					if (atLeastToDelete) {
+					System.out.println("name: "+s.getSpec().getName()+" atLeastOneVersionToActivate="+atLeastOneToDelete);
+					stackObj.getSpec().setVersions(stackSpecVersions);
+					
+					if (atLeastOneToDelete) {
 						deletedStacks.add(m);
-						System.out.println(s.getSpec().getName()+" delete with stack:" + s.toString());
 						if (versions.size() > 0) {
-							api.updateStack(namespace, s.getMetadata().getName(), s);
+							System.out.println(s.getSpec().getName()+" delete stack versions deleted: "+versions+" through omission, stack: "+stackObj);
+							api.updateStack(namespace, s.getMetadata().getName(), stackObj);
 						} else {
+							System.out.println("delete entrire stack: "+s.getSpec().getName()+", since there is only one version in it ");
 							api.deleteStack(namespace, s.getSpec().getName(), null, null, null, null);
 						}
 						System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
