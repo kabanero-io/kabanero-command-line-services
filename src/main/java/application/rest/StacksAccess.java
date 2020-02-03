@@ -592,6 +592,8 @@ public class StacksAccess {
 							versions.add(statusStackVersion.getVersion());
 						}
 					}
+					
+					kabStack.getSpec().setVersions(stackSpecVersions);
 					m.put("name", kabStack.getSpec().getName());
 					m.put("versions", versions);
 					
@@ -602,8 +604,8 @@ public class StacksAccess {
 						deletedStacks.add(m);
 						// if there is more than one version in the stack and the number of versions to delete is not equal to the total number of versions
 						if (kabStackVersions.size() > 1  &&  versions.size()!=kabStackVersions.size()) {
-							System.out.println(kabStack.getSpec().getName()+" delete stack versions deleted: "+versions+" through omission, stack: "+stackObj);
-							api.updateStack(namespace, kabStack.getSpec().getName(), stackObj);
+							System.out.println(kabStack.getSpec().getName()+" delete stack versions deleted: "+versions+" through omission, stack: "+kabStack);
+							api.updateStack(namespace, kabStack.getSpec().getName(), kabStack);
 						} else {
 							System.out.println("delete entrire stack: "+kabStack.getSpec().getName()+", because there is only one version in it or all versions are to be deleted ");
 							api.deleteStack(namespace, kabStack.getSpec().getName(), null, null, null, null);
