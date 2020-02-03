@@ -531,9 +531,10 @@ public class StacksAccess {
 
 
 		// iterate over collections to delete
+		System.out.println("Starting DELETE processing");
 		try {
 			deletedStacks = new ArrayList<Map>();
-			for (Stack s : fromKabanero.getItems()) {
+			for (Stack kabStack : fromKabanero.getItems()) {
 				ArrayList<String> versions= new ArrayList<String>();
 				HashMap m = new HashMap();
 				try {
@@ -551,58 +552,59 @@ public class StacksAccess {
 					owner.setName(kab.getMetadata().getName());
 					owner.setController(true);
 					owner.setUid(kab.getMetadata().getUid());
-					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
+					V1ObjectMeta metadata = new V1ObjectMeta().name((String)kabStack.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
 					stackObj.setMetadata(metadata);
 					stackObj.setApiVersion(apiVersion);
 
 					stackSpec.setVersions(stackSpecVersions);
 
-					stackSpec.setName(s.getSpec().getName());
+					stackSpec.setName(kabStack.getSpec().getName());
 
-					List<StackStatusVersions> statusStackVersions=s.getStatus().getVersions();
+					List<StackStatusVersions> kabStackVersions=kabStack.getStatus().getVersions();
 					boolean atLeastOneToDelete=false;
 
+					System.out.println("Kab stack versions"+kabStackVersions);
+					for (StackStatusVersions statusStackVersion:kabStackVersions) {
+						System.out.println("statusStackVersion: "+statusStackVersion.getStatus()+" name: "+kabStack.getSpec().getName());
 
-					for (StackStatusVersions statusStackVersion:statusStackVersions) {
-						System.out.println("statusStackVersion: "+statusStackVersion.getStatus()+" name: "+s.getSpec().getName());
-
-						boolean isVersionInGitStack=StackUtils.isStackVersionInGit(curatedStacks, statusStackVersion.getVersion(), s.getSpec().getName());
+						boolean isVersionInGitStack=StackUtils.isStackVersionInGit(curatedStacks, statusStackVersion.getVersion(), kabStack.getSpec().getName());
 						System.out.println("isVersionInGitStack: "+isVersionInGitStack);
 						if (isVersionInGitStack) {
+							System.out.println("Version: "+statusStackVersion.getVersion()+" is in GIT so keep put it in the specversions list: ");
 							StackSpecVersions specVersion = new StackSpecVersions();
 							specVersion.setDesiredState("active");
 							specVersion.setVersion(statusStackVersion.getVersion());
 							specVersion.setImages(statusStackVersion.getImages());
-							specVersion.setPipelines((List<StackSpecPipelines>) versionedStackPipelineMap.get(s.getSpec().getName()));
+							specVersion.setPipelines((List<StackSpecPipelines>) versionedStackPipelineMap.get(kabStack.getSpec().getName()));
 							stackSpecVersions.add(specVersion);
 						} else {
 							atLeastOneToDelete=true;
 							versions.add(statusStackVersion.getVersion());
 						}
 					}
-					m.put("name", s.getSpec().getName());
+					m.put("name", kabStack.getSpec().getName());
 					m.put("versions", versions);
 					
-					System.out.println("name: "+s.getSpec().getName()+" atLeastOneVersionToActivate="+atLeastOneToDelete);
+					System.out.println("name: "+kabStack.getSpec().getName()+" atLeastOneVersionToActivate="+atLeastOneToDelete);
 					stackObj.getSpec().setVersions(stackSpecVersions);
 					
 					if (atLeastOneToDelete) {
 						deletedStacks.add(m);
 						// if there is more than one version in the stack and the number of versions to delete is not equal to the total number of versions
-						if (statusStackVersions.size() > 1  &&  versions.size()!=statusStackVersions.size()) {
-							System.out.println(s.getSpec().getName()+" delete stack versions deleted: "+versions+" through omission, stack: "+stackObj);
-							api.updateStack(namespace, s.getSpec().getName(), stackObj);
+						if (kabStackVersions.size() > 1  &&  versions.size()!=kabStackVersions.size()) {
+							System.out.println(kabStack.getSpec().getName()+" delete stack versions deleted: "+versions+" through omission, stack: "+stackObj);
+							api.updateStack(namespace, kabStack.getSpec().getName(), stackObj);
 						} else {
-							System.out.println("delete entrire stack: "+s.getSpec().getName()+", because there is only one version in it or all versions are to be deleted ");
-							api.deleteStack(namespace, s.getSpec().getName(), null, null, null, null);
+							System.out.println("delete entrire stack: "+kabStack.getSpec().getName()+", because there is only one version in it or all versions are to be deleted ");
+							api.deleteStack(namespace, kabStack.getSpec().getName(), null, null, null, null);
 						}
-						System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
+						System.out.println("*** status: "+kabStack.getMetadata().getName()+" versions(s): "+versions + " activated");
 					}
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** stack " + s.getSpec().getName() + " failed to delete, organization "+group);
-					System.out.println("*** stack object: "+s.toString());
+					System.out.println("*** stack " + kabStack.getSpec().getName() + " failed to delete, organization "+group);
+					System.out.println("*** stack object: "+kabStack.toString());
 					e.printStackTrace();
 					m.put("status", "failed to delete");
 					m.put("exception message", e.getMessage()+", cause: "+e.getCause());
@@ -615,94 +617,7 @@ public class StacksAccess {
 			e.printStackTrace();
 		}
 
-		//		// iterate over collections to delete
-		//		try {
-		//			int i=0;
-		//			for (Stack s : multiVersionDeletedStacks) {
-		//				Map m=(Map) deleletedStacks.get(i);
-		//				KabaneroApi kApi = new KabaneroApi(apiClient);
-		//				V1OwnerReference owner = kApi.createOwnerReference(kab);
-		//				owner.setKind(kab.getKind());
-		//				owner.setApiVersion(kab.getApiVersion());
-		//				owner.setName(kab.getMetadata().getName());
-		//				owner.setController(true);
-		//				owner.setUid(kab.getMetadata().getUid());
-		//				V1ObjectMeta metadata = new V1ObjectMeta().name((String)kab.getMetadata().getName()).namespace((String)m.get("namespace")).addOwnerReferencesItem(owner);
-		//				s.setMetadata(metadata);
-		//				try {
-		//					List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, s.getSpec().getName());
-		//					System.out.println("object for delete: " + s.toString());
-		//					if (kabSpecVersions==null) {
-		//						api.deleteStack(namespace, s.getSpec().getName(), null, null, null, null);
-		//					} else {
-		//						List<StackSpecVersions> stackSpecVersions=new ArrayList<StackSpecVersions>();
-		//						Stack stack = new Stack();
-		//						StackSpec stackSpec = new StackSpec();
-		//						stackSpec.setVersions(stackSpecVersions);
-		//						stack.setSpec(stackSpec);
-		//						Map saveMap = null;
-		//						for (Object object : curatedStacks) {
-		//							Map map = (Map) object;
-		//							String name=(String) map.get("name");
-		//							if (name.contentEquals((String) s.getSpec().getName())) {
-		//								saveMap=map;
-		//							}
-		//						}
-		//						
-		//						List<StackStatusVersions> statusStackVersions=s.getStatus().getVersions();
-		//						boolean atLeastOneVersionToActivate=false;
-		//						
-		//						
-		//						for (StackStatusVersions statusStackVersion:statusStackVersions) {
-		//							
-		//							StackSpecVersions specVersion = new StackSpecVersions();
-		//							specVersion.setDesiredState("active");
-		//							specVersion.setVersion(statusStackVersion.getVersion());
-		//							specVersion.setImages(statusStackVersion.getImages());
-		//							specVersion.setPipelines((List<StackSpecPipelines>) versionedStackPipelineMap.get(s.getSpec().getName()));
-		//							stackSpecVersions.add(specVersion);
-		//						}
-		//						
-		//						List<String> versions = (List<String>) saveMap.get("versions");
-		//						for (StackSpecVersions versionFromKab:kabSpecVersions) {
-		//							boolean match=false;
-		//							for (String versionForDelete : versions) {
-		//								if (versionForDelete.contentEquals(versionFromKab.getVersion())) {
-		//									match=true;
-		//								}
-		//								if (!match) {
-		//									StackSpecVersions specVersion = new StackSpecVersions();
-		//									specVersion.setDesiredState("active");
-		//									specVersion.setVersion(versionFromKab.getVersion());
-		//									stackSpecVersions.add(specVersion);
-		//								}
-		//							}
-		//						}
-		//						stack.setSpec(stackSpec);
-		//						api.updateStack(namespace, s.getSpec().getName(), stack);
-		//					}
-		//					String versionList="";
-		//					for (StackSpecVersions stackSpecVersion:s.getSpec().getVersions()) {
-		//						versionList=versionList+" "+stackSpecVersion;
-		//					}
-		//					System.out.println("*** stack " + m.get("name") + " versions: "+versionList+" deleted, organization "+group);
-		//					m.put("status", s.getSpec().getName() + " versions: "+versionList+" deleted");
-		//				} catch (Exception e) {
-		//					System.out.println("exception cause: " + e.getCause());
-		//					System.out.println("exception message: " + e.getMessage());
-		//					System.out.println("*** Stack " + m.get("name") + " failed to delete, organization "+group);
-		//					System.out.println("*** stack object: "+s.toString());
-		//					e.printStackTrace();
-		//					m.put("status", m.get("name") + " delete failed");
-		//					m.put("exception", e.getMessage());
-		//				}
-		//				i++;
-		//			}
-		//		} catch (Exception e) {
-		//			System.out.println("exception cause: " + e.getCause());
-		//			System.out.println("exception message: " + e.getMessage());
-		//			e.printStackTrace();
-		//		}
+		
 
 
 
