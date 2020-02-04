@@ -434,11 +434,10 @@ public class StacksAccess {
 						
 						Stack kabStack = StackUtils.getKabInstance(fromKabanero, s.getSpec().getName());
 						
-						s.getMetadata().setUid(kabStack.getMetadata().getUid());
-						s.getMetadata().setGeneration(kabStack.getMetadata().getGeneration());
+						kabStack.getSpec().setVersions(s.getSpec().getVersions());
 						
 						System.out.println(s.getSpec().getName()+" stack for patch create: " + s.toString());
-						api.updateStack(namespace, s.getMetadata().getName(), s);
+						api.updateStack(namespace, s.getMetadata().getName(), kabStack);
 					} else {
 						updateType="create";
 						System.out.println(s.getSpec().getName()+" stack for just create: " + s.toString());
