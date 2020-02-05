@@ -521,43 +521,39 @@ public class StackUtils {
 			for (Stack kabStack: fromKabanero.getItems()) {
 				Map kabMap = new HashMap();
 				match = false;
-				stackInGit = false;
-				for (Map map1 : fromGit) {
-					String name1 = (String) map1.get("id");
-					name1 = name1.trim();
-					String version1 = (String) map1.get("version");
-					name = (String) kabStack.getSpec().getName();
-					if (name1.contentEquals(name)) {
-						stackInGit=true;
-						StackStatus status = kabStack.getStatus();
-						List<StackStatusVersions> stackVersions = status.getVersions();
-						// If this Kabanero Stack version does not match GIT hub stack version, add it for deletion 
-						for (StackStatusVersions stackVersion:stackVersions) {
+				List<StackSpecVersions> stackSpecVersions = kabStack.getSpec().getVersions();
+				String kabName = kabStack.getSpec().getName();
+				for (StackSpecVersions stackSpecVersion:stackSpecVersions) {
+					String kabVersion=stackSpecVersion.getVersion();
+					for (Map map1 : fromGit) {
+						String gitName = (String) map1.get("id");
+						gitName = gitName.trim();
+						String gitVersion = (String) map1.get("version");
+						name = (String) kabStack.getSpec().getName();
+						if (gitName.contentEquals(kabName)) {
+							stackInGit=true;
+							// If this Kabanero Stack version does not match GIT hub stack version, add it for deletion 
 							// if this version is 
-							if (version1.equals(stackVersion.getVersion())) {
-								version=version1;
+							if (kabVersion.equals(gitVersion)) {
+								version=gitVersion;
 								match=true;
 								break;
 							}
-						}
-						String stat=" is not";
-						if (match) {
-							stat=" is";
 						} 
-						System.out.println("GIT Stack name: "+name1+" version number: "+version1+stat+" found in list of kab versions");
-						System.out.println("Version list is: "+stackVersions);
-						if (!match) {
-							kabMap.put("name", name);
-							kabMap.put("version",version);
-							stacksToDelete.add(kabMap);
-						}
+					}
+					String stat=" is not";
+					if (match) {
+						stat=" is";
 					} 
+					System.out.println("Kab Stack name: "+kabName+" version number: "+kabVersion+stat+" found in list of GIT versions");
+					System.out.println("Version list is: "+stackSpecVersions);
+					if (!match) {
+						kabMap.put("name", kabName);
+						kabMap.put("version",kabVersion);
+						stacksToDelete.add(kabMap);
+					}
 				}
-				if (!stackInGit) {
-					kabMap.put("name", name);
-					kabMap.put("version","");
-					stacksToDelete.add(kabMap);
-				}
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
