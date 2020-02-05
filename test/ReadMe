@@ -6,3 +6,5 @@
    b. user: is your GIT hub userid
    c. gitpat: is either your GIT password or GIT personal access token
    d. JWT: is the json web token that you get back isse the POST remote auth call
+
+
