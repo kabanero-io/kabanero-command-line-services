@@ -1,5 +1,34 @@
 apiVersion: v2
 stacks:
+- default-image: java-microprofile
+  default-pipeline: default
+  default-template: default
+  description: Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
+  id: java-microprofile
+  images:
+  - id: java-microprofile
+    image: docker.io/kabanerobeta/java-microprofile:0.2
+  language: java
+  license: Apache-2.0
+  maintainers:
+  - email: emijiang6@googlemail.com
+    github-id: Emily-Jiang
+    name: Emily Jiang
+  - email: neeraj.laad@gmail.com
+    github-id: neeraj-laad
+    name: Neeraj Laad
+  - email: ozzy@ca.ibm.com
+    github-id: BarDweller
+    name: Ozzy
+  name: Eclipse MicroProfile®
+  pipelines:
+  - id: default
+    sha256: 6537a5a25f845266d6b81c47d97a97c711a98306a78339d039d5af8ed700bff5
+    url: https://github.com/kabanero-io/collections/releases/download/0.5.0-rc.4/incubator.common.pipeline.default.tar.gz
+  templates:
+  - id: default
+    url: https://github.com/kabanero-io/collections/releases/download/0.5.0-rc.4/incubator.java-microprofile.v0.2.21.templates.default.tar.gz
+  version: 0.2.21
 - default-image: java-spring-boot2
   default-pipeline: default
   default-template: default
