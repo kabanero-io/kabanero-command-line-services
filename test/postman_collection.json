@@ -1,0 +1,184 @@
+{
+	"info": {
+		"_postman_id": "d4eb7a16-f4b0-4b9c-99fb-2efcf413d551",
+		"name": "kabanero",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "remote AUTH",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"gituser\":\"{{user}}\",\"gitpat\":\"{{gitpat}}\"}"
+				},
+				"url": {
+					"raw": "https://{{myurl}}/login",
+					"protocol": "https",
+					"host": [
+						"{{myurl}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "remote get stacks",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{JWT}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{myurl}}/v1/stacks",
+					"protocol": "https",
+					"host": [
+						"{{myurl}}"
+					],
+					"path": [
+						"v1",
+						"stacks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remote SYNC",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiQmVhcmVyIiwic3ViIjoiZGF2Y28wMWEiLCJ1cG4iOiJkYXZjbzAxYSIsInBhdCI6ImI2YjZlN2Q0OTAyZmNkYzRjNmU3MTUyYjgyNjA0MDVkOTQwZjQ0NDQxNjVlMzFkYzRmOWE2ZjMyNTliODZkYWU5MzliYmI3OGFjNTQxNDAyNjg4Y2IwNDIzZDc0ZTZiOCIsImdyb3VwcyI6WyJwaXBlbGluZUBrYWJhbmVyby1pbyIsInRlc3Qtcm9sZXNAa2FiYW5lcm8taW8iLCJ0ZXN0LXJvbGVzMkBrYWJhbmVyby1pbyIsIm15LW9yZ0BrYWJhbmVyby1pbyIsImFsbHVzZXJzIiwiYWRtaW4iXSwianRpIjoiVFlRak5HT3ZnWlIzckdOcSIsImlzcyI6Imh0dHBzOi8va2FiYXNlYy5jb20iLCJleHAiOjE1ODA4NTI1OTcsImlhdCI6MTU4MDc2NjE5N30.QNYIf4nVu57vb2zp_UeDmy8aFlGrNKpE3RS_sH4RwMU",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{myurl}}/v1/stacks",
+					"protocol": "https",
+					"host": [
+						"{{myurl}}"
+					],
+					"path": [
+						"v1",
+						"stacks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "remote get version",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiQmVhcmVyIiwic3ViIjoiZGF2Y28wMWEiLCJ1cG4iOiJkYXZjbzAxYSIsInBhdCI6IjU1MTBhNzIzODUxYWY2MjU2MjMyYzEzMjFmYThkODJiZmU4ZmMzYjI2OWEwYWQxYWVkYjZjMTU1ODgyMjMzODc2NzU1Y2I5ZTNiNGI5OGQ5ODkwMzNmMjQ5NmRlZTEwYyIsImdyb3VwcyI6WyJwaXBlbGluZUBrYWJhbmVyby1pbyIsInRlc3Qtcm9sZXNAa2FiYW5lcm8taW8iLCJ0ZXN0LXJvbGVzMkBrYWJhbmVyby1pbyIsIm15LW9yZ0BrYWJhbmVyby1pbyIsImFsbHVzZXJzIiwiYWRtaW4iXSwianRpIjoidVhiVU11cnAzcmFYbndmUiIsImlzcyI6Imh0dHBzOi8va2FiYXNlYy5jb20iLCJleHAiOjE1Nzk3MjMwMTUsImlhdCI6MTU3OTYzNjYxNX0.vwKHZE5_LX3y6wvYNx281u1yWR-wOq3MrR2rF9yQfwY",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{myurl}}/v1/image",
+					"protocol": "https",
+					"host": [
+						"{{myurl}}"
+					],
+					"path": [
+						"v1",
+						"image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "remote deactivate",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiQmVhcmVyIiwic3ViIjoiZGF2Y28wMWEiLCJ1cG4iOiJkYXZjbzAxYSIsInBhdCI6ImI2YjZlN2Q0OTAyZmNkYzRjNmU3MTUyYjgyNjA0MDVkOTQwZjQ0NDQxNjVlMzFkYzRmOWE2ZjMyNTliODZkYWU5MzliYmI3OGFjNTQxNDAyNjg4Y2IwNDIzZDc0ZTZiOCIsImdyb3VwcyI6WyJwaXBlbGluZUBrYWJhbmVyby1pbyIsInRlc3Qtcm9sZXNAa2FiYW5lcm8taW8iLCJ0ZXN0LXJvbGVzMkBrYWJhbmVyby1pbyIsIm15LW9yZ0BrYWJhbmVyby1pbyIsImFsbHVzZXJzIiwiYWRtaW4iXSwianRpIjoiMUFNejA1ck5WSXFleWdmayIsImlzcyI6Imh0dHBzOi8va2FiYXNlYy5jb20iLCJleHAiOjE1ODA3NDQ0ODksImlhdCI6MTU4MDY1ODA4OX0.xxw_L25uEsBggWRBM5YxKsCumxvcFtHe121GB5FZMq0",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{myurl}}/stacks/nodejs/versions/0.3.1",
+					"protocol": "https",
+					"host": [
+						"{{myurl}}"
+					],
+					"path": [
+						"stacks",
+						"nodejs",
+						"versions",
+						"0.3.1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remote logout",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{JWT}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{myurl}}/logout",
+					"protocol": "https",
+					"host": [
+						"{{myurl}}"
+					],
+					"path": [
+						"logout"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
