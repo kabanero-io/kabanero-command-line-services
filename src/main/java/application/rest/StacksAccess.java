@@ -391,13 +391,6 @@ public class StacksAccess {
 			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, versionedStackPipelineMap);
 			newStacks = (List<Map>) StackUtils.packageStackMaps(newStacks);
 			 
-
-//			deleletedStacks = (List<Map>) StackUtils.filterDeletedStacks(stacks, fromKabanero);
-//			Collections.sort(deleletedStacks, mapComparator);
-//			System.out.println("*** stacks to delete=" + deleletedStacks);
-//			System.out.println(" ");
-//			multiVersionDeletedStacks=(List<Stack>) StackUtils.packageStackObjects(deleletedStacks, versionedStackPipelineMap);  
-//			deleletedStacks = (List<Map>) StackUtils.packageStackMaps(deleletedStacks);
 			
 			
 		} catch (Exception e) {
@@ -467,28 +460,28 @@ public class StacksAccess {
 				ArrayList<String> versions= new ArrayList<String>();
 				HashMap m = new HashMap();
 				try {
-					Stack stackObj = new Stack();
+					//Stack stackObj = new Stack();
 					List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
 					StackSpec stackSpec = new StackSpec();
 
-					stackObj.setKind("Stack");
-					stackObj.setSpec(stackSpec);
+//					stackObj.setKind("Stack");
+//					stackObj.setSpec(stackSpec);
 					
-					KabaneroApi kApi = new KabaneroApi(apiClient);
-					V1OwnerReference owner = kApi.createOwnerReference(kab);
-					owner.setKind(kab.getKind());
-					owner.setApiVersion(kab.getApiVersion());
-					owner.setName(kab.getMetadata().getName());
-					owner.setController(true);
-					owner.setUid(kab.getMetadata().getUid());
-					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
-					stackObj.setMetadata(metadata);
-					stackObj.setApiVersion(apiVersion);
-					stackObj.getMetadata().setUid(s.getMetadata().getUid());
-					stackObj.getMetadata().setGeneration(s.getMetadata().getGeneration());
-					stackSpec.setVersions(stackSpecVersions);
+//					KabaneroApi kApi = new KabaneroApi(apiClient);
+//					V1OwnerReference owner = kApi.createOwnerReference(kab);
+//					owner.setKind(kab.getKind());
+//					owner.setApiVersion(kab.getApiVersion());
+//					owner.setName(kab.getMetadata().getName());
+//					owner.setController(true);
+//					owner.setUid(kab.getMetadata().getUid());
+//					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
+//					stackObj.setMetadata(metadata);
+//					stackObj.setApiVersion(apiVersion);
+//					stackObj.getMetadata().setUid(s.getMetadata().getUid());
+//					stackObj.getMetadata().setGeneration(s.getMetadata().getGeneration());
+//					stackSpec.setVersions(stackSpecVersions);
 
-					stackSpec.setName(s.getSpec().getName());
+					//stackSpec.setName(s.getSpec().getName());
 
 					List<StackStatusVersions> statusStackVersions=s.getStatus().getVersions();
 					boolean atLeastOneVersionToActivate=false;
@@ -544,29 +537,29 @@ public class StacksAccess {
 				ArrayList<String> versions= new ArrayList<String>();
 				HashMap m = new HashMap();
 				try {
-					Stack stackObj = new Stack();
+					//Stack stackObj = new Stack();
 					List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
-					StackSpec stackSpec = new StackSpec();
+					//StackSpec stackSpec = new StackSpec();
 
-					stackObj.setKind("Stack");
-					stackObj.setSpec(stackSpec);
+//					stackObj.setKind("Stack");
+//					stackObj.setSpec(stackSpec);
+//
+//					KabaneroApi kApi = new KabaneroApi(apiClient);
+//					V1OwnerReference owner = kApi.createOwnerReference(kab);
+//					owner.setKind(kab.getKind());
+//					owner.setApiVersion(kab.getApiVersion());
+//					owner.setName(kab.getMetadata().getName());
+//					owner.setController(true);
+//					owner.setUid(kab.getMetadata().getUid());
+//					V1ObjectMeta metadata = new V1ObjectMeta().name((String)kabStack.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
+//					stackObj.setMetadata(metadata);
+//					stackObj.setApiVersion(apiVersion);
+//					stackObj.getMetadata().setUid(kabStack.getMetadata().getUid());
+//					stackObj.getMetadata().setGeneration(kabStack.getMetadata().getGeneration());
 
-					KabaneroApi kApi = new KabaneroApi(apiClient);
-					V1OwnerReference owner = kApi.createOwnerReference(kab);
-					owner.setKind(kab.getKind());
-					owner.setApiVersion(kab.getApiVersion());
-					owner.setName(kab.getMetadata().getName());
-					owner.setController(true);
-					owner.setUid(kab.getMetadata().getUid());
-					V1ObjectMeta metadata = new V1ObjectMeta().name((String)kabStack.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
-					stackObj.setMetadata(metadata);
-					stackObj.setApiVersion(apiVersion);
-					stackObj.getMetadata().setUid(kabStack.getMetadata().getUid());
-					stackObj.getMetadata().setGeneration(kabStack.getMetadata().getGeneration());
-
-					stackSpec.setVersions(stackSpecVersions);
-
-					stackSpec.setName(kabStack.getSpec().getName());
+//					stackSpec.setVersions(stackSpecVersions);
+//
+//					stackSpec.setName(kabStack.getSpec().getName());
 
 					List<StackStatusVersions> kabStackVersions=kabStack.getStatus().getVersions();
 					boolean atLeastOneToDelete=false;
@@ -597,7 +590,7 @@ public class StacksAccess {
 					m.put("versions", versions);
 					
 					System.out.println("name: "+kabStack.getSpec().getName()+" atLeastOneVersionToDelete="+atLeastOneToDelete);
-					stackObj.getSpec().setVersions(stackSpecVersions);
+					//stackObj.getSpec().setVersions(stackSpecVersions);
 					
 					if (atLeastOneToDelete) {
 						deletedStacks.add(m);

@@ -540,6 +540,12 @@ public class StackUtils {
 								break;
 							}
 						}
+						String stat=" is not";
+						if (match) {
+							stat=" is";
+						} 
+						System.out.println("GIT Stack name: "+name1+" version number: "+version1+stat+" found in list of kab versions");
+						System.out.println("Version list is: "+stackVersions);
 						if (!match) {
 							kabMap.put("name", name);
 							kabMap.put("version",version);
@@ -560,38 +566,6 @@ public class StackUtils {
 	}
 	
 	
-	public static List filterVersionsToAdd(List<Map> fromGit, StackList fromKabanero) {
-		ArrayList<Map> stacksToDelete = new ArrayList<Map>();
-		String name = null;
-		String version = null;
-		try {
-			List<Map> kabMaps = multiVersionStacksMaps(fromKabanero);
-			for (Map kab: kabMaps) {
-				//System.out.println("kab map: " + kab);
-				name = (String) kab.get("name");
-				version = (String) kab.get("version");
-				boolean match = false;
-				Map kabMap = new HashMap();
-				for (Map map1 : fromGit) {
-					String name1 = (String) map1.get("id");
-					name1 = name1.trim();
-					String version1 = (String) map1.get("version");
-					name1 = name1.trim();
-					if (name1.contentEquals(name) && version1.contentEquals(version)) {
-						match = true;
-					} 
-				}
-				if (!match) {
-					kabMap.put("name", name);
-					kabMap.put("version", version);
-					stacksToDelete.add(kabMap);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return stacksToDelete;
-	}
 	
 	public static List<Map> packageStackMaps(List<Map> stacks) {
 		ArrayList<Map> updatedStacks = new ArrayList<Map>();
@@ -670,46 +644,5 @@ public class StackUtils {
 		return updateStacks;
 	}
 
-	
-	
-
-//	public static List filterVersionChanges(List<Map> fromGit, StackList fromKabanero) {
-//		ArrayList<Map> versionChangeCollections = new ArrayList<Map>();
-//		List<Map> kabMaps = multiVersionStacksMaps(fromKabanero);
-//		try {
-//			for (Map map : fromGit) {
-//				String version = (String) map.get("version");
-//				String name = (String) map.get("id");
-//				name = name.trim();
-//				version = version.trim();
-//				boolean match = true;
-//				HashMap gitMap = new HashMap();
-//				StackStatus status = null;
-//				List<StackSpecVersions> versions=null;
-//				for (Stack s : fromKabanero.getItems()) {
-//					String name1 = s.getMetadata().getName();
-//					name1 = name1.trim();
-//					versions = s.getSpec().getVersions();
-//					StackStatus status1 = s.getStatus();
-//					version1 = version1.trim();
-//					if (name.contentEquals(name1)) {
-//						if (!version1.contentEquals(version)) {
-//							match = false;
-//							status =  s.getStatus();
-//						}
-//					}
-//				}
-//				if (!match) {
-//					gitMap.put("name", map.get("id"));
-//					gitMap.put("versions", versions);
-//					gitMap.put("desiredState", status);
-//					versionChangeCollections.add(gitMap);
-//				}
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return versionChangeCollections;
-//	}
 
 }
