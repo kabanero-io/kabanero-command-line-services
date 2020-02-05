@@ -622,16 +622,22 @@ public class StacksAccess {
 			System.out.println("exception message: " + e.getMessage());
 			e.printStackTrace();
 		}
-
 		
+		JSONArray newStacksJA = convertMapToJSON(newStacks);
+		JSONArray activateStacksJA = convertMapToJSON(activateStacks);
+		JSONArray deletedStacksJA = convertMapToJSON(deletedStacks);
+
+		System.out.println("new curated stacks: "+newStacksJA);
+		System.out.println("activated stacks: "+activateStacksJA);
+		System.out.println("obsolete stacks: "+deletedStacks);
 
 
 
 		// log successful changes too!
 		try {
-			msg.put("new curated stacks", convertMapToJSON(newStacks));
-			msg.put("activate stacks", convertMapToJSON(activateStacks));
-			msg.put("obsolete stacks", convertMapToJSON(deletedStacks));
+			msg.put("new curated stacks", newStacksJA);
+			msg.put("activate stacks", activateStacksJA);
+			msg.put("obsolete stacks", deletedStacksJA);
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
 			System.out.println("exception message: " + e.getMessage());
