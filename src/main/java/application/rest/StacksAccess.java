@@ -457,31 +457,14 @@ public class StacksAccess {
 		// iterate over collections to activate
 		try {
 			for (Stack s : fromKabanero.getItems()) {
-				ArrayList<String> versions= new ArrayList<String>();
+				ArrayList<Map> versions= new ArrayList<Map>();
 				HashMap m = new HashMap();
 				try {
-					//Stack stackObj = new Stack();
+					
 					List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
 					StackSpec stackSpec = new StackSpec();
 
-//					stackObj.setKind("Stack");
-//					stackObj.setSpec(stackSpec);
-					
-//					KabaneroApi kApi = new KabaneroApi(apiClient);
-//					V1OwnerReference owner = kApi.createOwnerReference(kab);
-//					owner.setKind(kab.getKind());
-//					owner.setApiVersion(kab.getApiVersion());
-//					owner.setName(kab.getMetadata().getName());
-//					owner.setController(true);
-//					owner.setUid(kab.getMetadata().getUid());
-//					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
-//					stackObj.setMetadata(metadata);
-//					stackObj.setApiVersion(apiVersion);
-//					stackObj.getMetadata().setUid(s.getMetadata().getUid());
-//					stackObj.getMetadata().setGeneration(s.getMetadata().getGeneration());
-//					stackSpec.setVersions(stackSpecVersions);
 
-					//stackSpec.setName(s.getSpec().getName());
 
 					List<StackStatusVersions> statusStackVersions=s.getStatus().getVersions();
 					boolean atLeastOneVersionToActivate=false;
@@ -491,7 +474,9 @@ public class StacksAccess {
 						System.out.println("statusStackVersion: "+statusStackVersion.getStatus()+" name: "+s.getSpec().getName());
 						if ("inactive".equals(statusStackVersion.getStatus())) {
 							atLeastOneVersionToActivate=true;
-							versions.add(statusStackVersion.getVersion());
+							HashMap versionMap = new HashMap();
+							versionMap.put("version", statusStackVersion.getVersion());
+							versions.add(versionMap);
 							
 						}
 						StackSpecVersions specVersion = new StackSpecVersions();
@@ -534,32 +519,12 @@ public class StacksAccess {
 		try {
 			deletedStacks = new ArrayList<Map>();
 			for (Stack kabStack : fromKabanero.getItems()) {
-				ArrayList<String> versions= new ArrayList<String>();
+				ArrayList<Map> versions= new ArrayList<Map>();
 				HashMap m = new HashMap();
 				try {
-					//Stack stackObj = new Stack();
+					
 					List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
-					//StackSpec stackSpec = new StackSpec();
-
-//					stackObj.setKind("Stack");
-//					stackObj.setSpec(stackSpec);
-//
-//					KabaneroApi kApi = new KabaneroApi(apiClient);
-//					V1OwnerReference owner = kApi.createOwnerReference(kab);
-//					owner.setKind(kab.getKind());
-//					owner.setApiVersion(kab.getApiVersion());
-//					owner.setName(kab.getMetadata().getName());
-//					owner.setController(true);
-//					owner.setUid(kab.getMetadata().getUid());
-//					V1ObjectMeta metadata = new V1ObjectMeta().name((String)kabStack.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
-//					stackObj.setMetadata(metadata);
-//					stackObj.setApiVersion(apiVersion);
-//					stackObj.getMetadata().setUid(kabStack.getMetadata().getUid());
-//					stackObj.getMetadata().setGeneration(kabStack.getMetadata().getGeneration());
-
-//					stackSpec.setVersions(stackSpecVersions);
-//
-//					stackSpec.setName(kabStack.getSpec().getName());
+					
 
 					List<StackStatusVersions> kabStackVersions=kabStack.getStatus().getVersions();
 					boolean atLeastOneToDelete=false;
@@ -581,12 +546,16 @@ public class StacksAccess {
 							stackSpecVersions.add(specVersion);
 						} else {
 							atLeastOneToDelete=true;
-							versions.add(statusStackVersion.getVersion());
+							HashMap versionMap = new HashMap();
+							versionMap.put("version", statusStackVersion.getVersion());
+							versions.add(versionMap);
 						}
 					}
 					
 					kabStack.getSpec().setVersions(stackSpecVersions);
 					m.put("name", kabStack.getSpec().getName());
+					
+					
 					m.put("versions", versions);
 					
 					System.out.println("name: "+kabStack.getSpec().getName()+" atLeastOneVersionToDelete="+atLeastOneToDelete);
