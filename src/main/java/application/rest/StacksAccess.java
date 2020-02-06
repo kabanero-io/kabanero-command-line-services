@@ -674,18 +674,26 @@ public class StacksAccess {
 				msg.put("status", "Stack name: " + name + " 404 not found");
 				return Response.status(400).entity(msg).build();
 			}
-			List<StackSpecVersions> kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, name);
+			List<StackSpecVersions> kabSpecVersions=null;
+			if (version!=null) {
+				kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, name);
 
-			for (StackSpecVersions versionFromKab:kabSpecVersions) {
-				if (version.contentEquals(versionFromKab.getVersion())) {
-					versionFromKab.setDesiredState("inactive");
+				for (StackSpecVersions versionFromKab:kabSpecVersions) {
+					if (version.contentEquals(versionFromKab.getVersion())) {
+						versionFromKab.setDesiredState("inactive");
+					}
 				}
+			} else {
+				System.out.println("no version number supplied for stack: "+name);
+				msg.put("status", "no version number supplied for stack: "+name);
+				return Response.status(400).entity(msg).build();
+
 			}
 			System.out.println(kabStack.getSpec().getName()+" stack for patch deactivate: " + kabStack.toString());
 			kabStack.getSpec().setVersions(kabSpecVersions);;
 			api.patchStack(namespace, kabStack.getMetadata().getName(), kabStack);
-			System.out.println("*** " + "Collection name: " + name + " deactivated");
-			msg.put("status", "Stack name: " + name + "version: "+version+" deactivated");
+			System.out.println("*** " + "Stack name: " + name + " deactivated");
+			msg.put("status", "Stack name: " + name + " version: "+version+" deactivated");
 			return Response.ok(msg).build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();

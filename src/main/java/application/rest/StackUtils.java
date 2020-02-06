@@ -177,25 +177,7 @@ public class StackUtils {
 		return null;
 	}
 	
-	public static List<Map> getMasterStacks(Kabanero k) {
-		
-		ArrayList<Map> maps = new ArrayList<Map>();
-		try {
-			HashMap map = new HashMap();
-			KabaneroSpecStacks kabaneroSpecStacks = k.getSpec().getStacks();
-			kabaneroSpecStacks.getRepositories();
-			kabaneroSpecStacks.getPipelines();  // take as is and set as list into stack CR being created
-			//stack.getImages ??
-//			for (??:??) {
-//				
-//			}
-			return maps;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
+	
 	
 	public static List getStackFromGIT(String user, String pw, String url) {
 		String response = null;
@@ -248,32 +230,7 @@ public class StackUtils {
 		return aList;
 	}
 	
-//	public static List filterActiveCollections(List<Map> fromKabanero) {
-//		ArrayList<Map> activeCollections = new ArrayList<Map>();
-//
-//		try {
-//			for (Map map : fromKabanero) {
-//				HashMap activeMap = new HashMap();
-//				System.out.println("working on one collection: " + map);
-//				Map metadata = (Map) map.get("metadata");
-//				String name = (String) metadata.get("name");
-//				name = name.trim();
-//				Map spec = (Map) map.get("spec");
-//				String version = (String) spec.get("version");
-//				Map status = (Map) map.get("status");
-//				String statusStr = (String) status.get("status");
-//				if ("active".contentEquals(statusStr)) {
-//					activeMap.put("name", name);
-//					activeMap.put("version", version);
-//					activeMap.put("status","active");
-//					activeCollections.add(activeMap);
-//				}
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return activeCollections;
-//	}
+
 	
 	public static List allStacks(StackList fromKabanero) {
 		ArrayList<Map> allStacks = new ArrayList<Map>();
@@ -302,34 +259,7 @@ public class StackUtils {
 		return allStacks;
 	}
 	
-	public static List filterInActiveCollections(List<Map> fromKabanero) {
-		ArrayList<Map> inActiveCollections = new ArrayList<Map>();
-
-		try {
-				for (Map map : fromKabanero) {
-					HashMap inActiveMap = new HashMap();
-					//System.out.println("working on one collection: " + map);
-					Map metadata = (Map) map.get("metadata");
-					String name = (String) metadata.get("name");
-					name = name.trim();
-					Map spec = (Map) map.get("spec");
-					String version = (String) spec.get("version");
-					Map status = (Map) map.get("status");
-					String statusStr = (String) status.get("status");
-					if ("inactive".contentEquals(statusStr)) {
-						inActiveMap.put("name", name);
-						inActiveMap.put("version", version);
-						inActiveMap.put("status","inactive");
-						inActiveCollections.add(inActiveMap);
-					}
-				}
-				
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return inActiveCollections;
-	}
+	
 	
 	
 	
@@ -435,20 +365,7 @@ public class StackUtils {
 	}
 	
 	
-	private static List<Map> multiVersionStacksMaps(StackList fromKabanero) {
-		List<Map> kabMaps = new ArrayList<Map>();
-		for (Stack s : fromKabanero.getItems()) {
-			List<StackSpecVersions> versions = s.getSpec().getVersions();
-			Map map=new HashMap();
-			for (StackSpecVersions version: versions) {
-				map.put("name",s.getMetadata().getName());
-				map.put("version",version.getVersion());
-				map.put("desiredState", version.getDesiredState());
-			}
-			kabMaps.add(map);
-		}
-		return kabMaps;
-	}
+	
 	
 	public static List<StackSpecVersions> getKabInstanceVersions(StackList fromKabanero, String name) {
 		for (Stack s : fromKabanero.getItems()) {
@@ -470,21 +387,7 @@ public class StackUtils {
 	
 
 	
-	public static List isVerionInGitForStack(List<Map> fromGit, List<Map> stacksToDelete) {
-		
-		for(Map stack : stacksToDelete) {
-			String name = (String) stack.get("name");
-			int i=0;
-			for(Map stack2 : stacksToDelete) {
-				String name2 = (String) stack2.get("name");
-				if (name.contentEquals(name2)) {
-					i++;
-				}
-			}
-			stack.put("count", i);
-		}
-		return null;
-	}
+	
 	
 	
 	public static boolean isStackVersionInGit(List<Map> fromGit, String version, String name) {
