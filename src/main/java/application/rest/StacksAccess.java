@@ -313,7 +313,7 @@ public class StacksAccess {
 				}}
 			catch (NullPointerException npe) {
 				JSONObject resp = new JSONObject();
-				resp.put("message", "Check the Kabanero CR spec section, you may be missing default pipeline specification");
+				resp.put("message", "The CLI service could not read the pipeline specification(s) from the Kabanero CR");
 				return Response.status(431).entity(resp).build();
 			}
 			
