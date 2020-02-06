@@ -143,8 +143,8 @@ public class StacksAccess {
 				}
 			} catch (NullPointerException npe) {
 				JSONObject resp = new JSONObject();
-				resp.put("message", "Check the Kabanero CR spec section, you may be missing the repository URLS");
-				return Response.status(431).entity(resp).build();
+				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
+				return Response.status(424).entity(resp).build();
 			}
 			
 			
@@ -313,8 +313,8 @@ public class StacksAccess {
 				}}
 			catch (NullPointerException npe) {
 				JSONObject resp = new JSONObject();
-				resp.put("message", "Check the Kabanero CR spec section, you may be missing default pipeline specification");
-				return Response.status(431).entity(resp).build();
+				resp.put("message", "The CLI service could not read the pipeline specification(s) from the Kabanero CR");
+				return Response.status(424).entity(resp).build();
 			}
 			
 			
@@ -356,8 +356,8 @@ public class StacksAccess {
 				}
 			} catch (NullPointerException npe) {
 				JSONObject resp = new JSONObject();
-				resp.put("message", "Check the Kabanero CR spec section, you may be missing the repository URLS");
-				return Response.status(431).entity(resp).build();
+				resp.put("message", "The CLI service could not read the repository or pipelines URL specification(s) from the Kabanero CR");
+				return Response.status(424).entity(resp).build();
 			}
 			
 			System.out.println("versionedStackPipelineMap: "+versionedStackPipelineMap);
