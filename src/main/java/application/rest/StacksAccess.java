@@ -50,7 +50,7 @@ import com.ibm.json.java.JSONObject;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import kabasec.PATHelper;
-
+import io.kabanero.v1alpha1.models.KabaneroStatusKabaneroInstance;
 import io.kabanero.v1alpha2.client.apis.KabaneroApi;
 import io.kabanero.v1alpha2.client.apis.StackApi;
 import io.kabanero.v1alpha2.models.Stack;
@@ -113,6 +113,13 @@ public class StacksAccess {
 			System.out.println("Entering listStacks, namespace =" + namespace);
 			
 			Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
+			
+			
+			if (!KabaneroStatusKabaneroInstance.SERIALIZED_NAME_READY.contentEquals(k.getStatus().getKabaneroInstance().getReady())) {
+				JSONObject resp = new JSONObject();
+				resp.put("message", "The Kabanero operator is not ready, error message: "+k.getStatus().getKabaneroInstance().getErrorMessage());
+				return Response.status(401).entity(resp).build();
+			}
 			
 			System.out.println("entering LIST function");
 			String user = getUser(request);
@@ -201,6 +208,14 @@ public class StacksAccess {
 				ja = convertMapToJSON(deleletedStacks);
 				System.out.println("*** obsolete stacks: " + ja);
 				msg.put("obsolete stacks", ja);
+				
+				JSONArray repoJA = new JSONArray();
+				for (KabaneroSpecStacksRepositories repo: k.getSpec().getStacks().getRepositories()) {
+					JSONObject jo = new JSONObject();
+					jo.put("repository", repo.getName());
+					repoJA.add(jo);
+				}
+				msg.put("repositories", repoJA);
 
 			} catch (Exception e) {
 				System.out.println("exception cause: " + e.getCause());
@@ -252,6 +267,16 @@ public class StacksAccess {
 		
 		System.out.println("Entering syncStacks, namespace =" + namespace);
 		
+		Kabanero kab = null;
+		
+		kab = StackUtils.getKabaneroForNamespace(namespace);
+		
+		if (!KabaneroStatusKabaneroInstance.SERIALIZED_NAME_READY.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
+			JSONObject resp = new JSONObject();
+			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
+			return Response.status(401).entity(resp).build();
+		}
+		
 		// kube call to sync collection
 		ApiClient apiClient = null;
 		try {
@@ -282,7 +307,7 @@ public class StacksAccess {
 		
 		List curatedStacks = null;
 		
-		Kabanero kab = null;
+		
 		String collectionsUrl = null;
 		JSONObject msg = new JSONObject();
 		try {
@@ -298,7 +323,7 @@ public class StacksAccess {
 				return Response.status(401).entity(resp).build();
 			}
 			
-			kab = StackUtils.getKabaneroForNamespace(namespace);
+			
 			ArrayList<StackSpecPipelines> pipelines = new ArrayList<StackSpecPipelines>();
 			try {
 				List<KabaneroSpecStacksPipelines> defaultPipelines = kab.getSpec().getStacks().getPipelines();
@@ -412,11 +437,11 @@ public class StacksAccess {
 				try {
 					KabaneroApi kApi = new KabaneroApi(apiClient);
 					V1OwnerReference owner = kApi.createOwnerReference(kab);
-					owner.setKind(kab.getKind());
-					owner.setApiVersion(kab.getApiVersion());
-					owner.setName(kab.getMetadata().getName());
-					owner.setController(true);
-					owner.setUid(kab.getMetadata().getUid());
+//					owner.setKind(kab.getKind());
+//					owner.setApiVersion(kab.getApiVersion());
+//					owner.setName(kab.getMetadata().getName());
+//					owner.setController(true);
+//					owner.setUid(kab.getMetadata().getUid());
 					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
 					s.setMetadata(metadata);
 					s.setApiVersion(apiVersion);
@@ -596,17 +621,26 @@ public class StacksAccess {
 		JSONArray activateStacksJA = convertMapToJSON(activateStacks);
 		JSONArray deletedStacksJA = convertMapToJSON(deletedStacks);
 
+		
+		
+		// log successful changes too!
 		System.out.println("new curated stacks: "+newStacksJA);
 		System.out.println("activated stacks: "+activateStacksJA);
 		System.out.println("obsolete stacks: "+deletedStacks);
-
-
-
-		// log successful changes too!
 		try {
 			msg.put("new curated stacks", newStacksJA);
 			msg.put("activate stacks", activateStacksJA);
 			msg.put("obsolete stacks", deletedStacksJA);
+
+			JSONArray repoJA = new JSONArray();
+			
+			for (KabaneroSpecStacksRepositories repo: kab.getSpec().getStacks().getRepositories()) {
+				JSONObject jo = new JSONObject();
+				jo.put("repository", repo.getName());
+				repoJA.add(jo);
+			}
+			msg.put("repositories", repoJA);
+			
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
 			System.out.println("exception message: " + e.getMessage());
@@ -653,6 +687,16 @@ public class StacksAccess {
 	public Response deActivateStack(@Context final HttpServletRequest request,
 			@PathParam("name") final String name, @PathParam("version") final String version) throws Exception {
 		// make call to kabanero to delete collection
+		
+		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
+		
+		if (!KabaneroStatusKabaneroInstance.SERIALIZED_NAME_READY.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
+			JSONObject resp = new JSONObject();
+			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
+			return Response.status(401).entity(resp).build();
+		}
+		
+		
 		ApiClient apiClient = KubeUtils.getApiClient();
 		StackApi api = new StackApi(apiClient);
 		String plural = "stacks";
@@ -677,11 +721,17 @@ public class StacksAccess {
 			List<StackSpecVersions> kabSpecVersions=null;
 			if (version!=null) {
 				kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, name);
-
+				boolean verMatch=false;
 				for (StackSpecVersions versionFromKab:kabSpecVersions) {
 					if (version.contentEquals(versionFromKab.getVersion())) {
 						versionFromKab.setDesiredState("inactive");
+						verMatch=false;
 					}
+				}
+				if (!verMatch) {
+					System.out.println("*** " + "Version: "+version+" not found in Stack name: " + name);
+					msg.put("status", "Version: "+version+" not found in Stack name: " + name);
+					return Response.status(400).entity(msg).build();
 				}
 			} else {
 				System.out.println("no version number supplied for stack: "+name);
