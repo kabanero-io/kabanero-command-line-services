@@ -214,7 +214,7 @@ public class StacksAccess {
 				JSONArray repoJA = new JSONArray();
 				for (KabaneroSpecStacksRepositories repo: k.getSpec().getStacks().getRepositories()) {
 					JSONObject jo = new JSONObject();
-					jo.put("repository", repo.getName());
+					jo.put("repository", repo.getHttps().getUrl());
 					repoJA.add(jo);
 				}
 				msg.put("repositories", repoJA);
@@ -641,7 +641,7 @@ public class StacksAccess {
 			
 			for (KabaneroSpecStacksRepositories repo: kab.getSpec().getStacks().getRepositories()) {
 				JSONObject jo = new JSONObject();
-				jo.put("repository", repo.getName());
+				jo.put("repository", repo.getHttps().getUrl());
 				repoJA.add(jo);
 			}
 			msg.put("repositories", repoJA);
