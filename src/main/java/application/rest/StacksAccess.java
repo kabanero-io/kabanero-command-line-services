@@ -74,6 +74,8 @@ import io.kubernetes.client.models.V1OwnerReference;
 public class StacksAccess {
 
 	private static String apiVersion = "kabanero.io/v1alpha2";
+	
+	private final static String trueStr = "True";
 
 	private static Map envMap = System.getenv();
 	
@@ -117,10 +119,10 @@ public class StacksAccess {
 			System.out.println("Operator ready: "+k.getStatus().getKabaneroInstance().getReady());
 			System.out.println("Operator error msg: "+k.getStatus().getKabaneroInstance().getErrorMessage());
 			
-			if (!"True".contentEquals(k.getStatus().getKabaneroInstance().getReady())) {
+			if (!trueStr.contentEquals(k.getStatus().getKabaneroInstance().getReady())) {
 				JSONObject resp = new JSONObject();
 				resp.put("message", "The Kabanero operator is not ready, error message: "+k.getStatus().getKabaneroInstance().getErrorMessage());
-				return Response.status(401).entity(resp).build();
+				return Response.status(503).entity(resp).build();
 			}
 			
 			System.out.println("entering LIST function");
@@ -211,14 +213,7 @@ public class StacksAccess {
 				System.out.println("*** obsolete stacks: " + ja);
 				msg.put("obsolete stacks", ja);
 				
-				JSONArray repoJA = new JSONArray();
-				for (KabaneroSpecStacksRepositories repo: k.getSpec().getStacks().getRepositories()) {
-					JSONObject jo = new JSONObject();
-					jo.put("name", repo.getName());
-					jo.put("url", repo.getHttps().getUrl());
-					repoJA.add(jo);
-				}
-				msg.put("repositories", repoJA);
+				msg.put("repositories",  getRepositories(k));
 
 			} catch (Exception e) {
 				System.out.println("exception cause: " + e.getCause());
@@ -277,10 +272,10 @@ public class StacksAccess {
 		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
 		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
 		
-		if (!"True".contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
+		if (!trueStr.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
 			JSONObject resp = new JSONObject();
 			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
-			return Response.status(401).entity(resp).build();
+			return Response.status(503).entity(resp).build();
 		}
 		
 		// kube call to sync collection
@@ -638,15 +633,7 @@ public class StacksAccess {
 			msg.put("activate stacks", activateStacksJA);
 			msg.put("obsolete stacks", deletedStacksJA);
 
-			JSONArray repoJA = new JSONArray();
-			
-			for (KabaneroSpecStacksRepositories repo: kab.getSpec().getStacks().getRepositories()) {
-				JSONObject jo = new JSONObject();
-				jo.put("name", repo.getName());
-				jo.put("url", repo.getHttps().getUrl());
-				repoJA.add(jo);
-			}
-			msg.put("repositories", repoJA);
+			msg.put("repositories", getRepositories(kab));
 			
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
@@ -676,6 +663,20 @@ public class StacksAccess {
 		}
 		return state;
 	}
+	
+	private JSONArray getRepositories(Kabanero kab) {
+		JSONArray repoJA = new JSONArray();
+		
+		for (KabaneroSpecStacksRepositories repo: kab.getSpec().getStacks().getRepositories()) {
+			JSONObject jo = new JSONObject();
+			jo.put("name", repo.getName());
+			jo.put("url", repo.getHttps().getUrl());
+			repoJA.add(jo);
+		}
+		return repoJA;
+	}
+	
+	
 
 	private JSONArray convertMapToJSON(List<Map> list) {
 		JSONArray ja = new JSONArray();
@@ -700,10 +701,10 @@ public class StacksAccess {
 		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
 		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
 		
-		if (!"True".contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
+		if (!trueStr.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
 			JSONObject resp = new JSONObject();
 			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
-			return Response.status(401).entity(resp).build();
+			return Response.status(503).entity(resp).build();
 		}
 		
 		
@@ -735,7 +736,7 @@ public class StacksAccess {
 				for (StackSpecVersions versionFromKab:kabSpecVersions) {
 					if (version.contentEquals(versionFromKab.getVersion())) {
 						versionFromKab.setDesiredState("inactive");
-						verMatch=false;
+						verMatch=true;
 					}
 				}
 				if (!verMatch) {
@@ -754,6 +755,7 @@ public class StacksAccess {
 			api.patchStack(namespace, kabStack.getMetadata().getName(), kabStack);
 			System.out.println("*** " + "Stack name: " + name + " deactivated");
 			msg.put("status", "Stack name: " + name + " version: "+version+" deactivated");
+			msg.put("repositories", getRepositories(kab));
 			return Response.ok(msg).build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();
