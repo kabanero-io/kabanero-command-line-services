@@ -117,7 +117,7 @@ public class StacksAccess {
 			System.out.println("Operator ready: "+k.getStatus().getKabaneroInstance().getReady());
 			System.out.println("Operator error msg: "+k.getStatus().getKabaneroInstance().getErrorMessage());
 			
-			if (!KabaneroStatusKabaneroInstance.SERIALIZED_NAME_READY.contentEquals(k.getStatus().getKabaneroInstance().getReady())) {
+			if (!"True".contentEquals(k.getStatus().getKabaneroInstance().getReady())) {
 				JSONObject resp = new JSONObject();
 				resp.put("message", "The Kabanero operator is not ready, error message: "+k.getStatus().getKabaneroInstance().getErrorMessage());
 				return Response.status(401).entity(resp).build();
@@ -276,7 +276,7 @@ public class StacksAccess {
 		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
 		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
 		
-		if (!KabaneroStatusKabaneroInstance.SERIALIZED_NAME_READY.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
+		if (!"True".contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
 			JSONObject resp = new JSONObject();
 			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
 			return Response.status(401).entity(resp).build();
@@ -698,7 +698,7 @@ public class StacksAccess {
 		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
 		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
 		
-		if (!KabaneroStatusKabaneroInstance.SERIALIZED_NAME_READY.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
+		if (!"True".contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
 			JSONObject resp = new JSONObject();
 			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
 			return Response.status(401).entity(resp).build();
