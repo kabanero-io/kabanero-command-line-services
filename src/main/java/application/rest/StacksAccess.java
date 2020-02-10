@@ -114,6 +114,8 @@ public class StacksAccess {
 			
 			Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
 			
+			System.out.println("Operator ready: "+k.getStatus().getKabaneroInstance().getReady());
+			System.out.println("Operator error msg: "+k.getStatus().getKabaneroInstance().getErrorMessage());
 			
 			if (!KabaneroStatusKabaneroInstance.SERIALIZED_NAME_READY.contentEquals(k.getStatus().getKabaneroInstance().getReady())) {
 				JSONObject resp = new JSONObject();
@@ -270,6 +272,9 @@ public class StacksAccess {
 		Kabanero kab = null;
 		
 		kab = StackUtils.getKabaneroForNamespace(namespace);
+		
+		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
+		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
 		
 		if (!KabaneroStatusKabaneroInstance.SERIALIZED_NAME_READY.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
 			JSONObject resp = new JSONObject();
@@ -689,6 +694,9 @@ public class StacksAccess {
 		// make call to kabanero to delete collection
 		
 		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
+		
+		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
+		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
 		
 		if (!KabaneroStatusKabaneroInstance.SERIALIZED_NAME_READY.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
 			JSONObject resp = new JSONObject();
