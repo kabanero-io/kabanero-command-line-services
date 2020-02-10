@@ -688,26 +688,13 @@ public class StacksAccess {
 		return ja;
 	}
 	
-
+	
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/stacks/{name}/versions/{version}")
 	public Response deActivateStack(@Context final HttpServletRequest request,
 			@PathParam("name") final String name, @PathParam("version") final String version) throws Exception {
 		// make call to kabanero to delete collection
-		
-		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
-		
-		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
-		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
-		
-		if (!trueStr.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
-			JSONObject resp = new JSONObject();
-			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
-			return Response.status(503).entity(resp).build();
-		}
-		
-		
 		ApiClient apiClient = KubeUtils.getApiClient();
 		StackApi api = new StackApi(apiClient);
 		String plural = "stacks";
@@ -732,17 +719,11 @@ public class StacksAccess {
 			List<StackSpecVersions> kabSpecVersions=null;
 			if (version!=null) {
 				kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, name);
-				boolean verMatch=false;
+
 				for (StackSpecVersions versionFromKab:kabSpecVersions) {
 					if (version.contentEquals(versionFromKab.getVersion())) {
 						versionFromKab.setDesiredState("inactive");
-						verMatch=true;
 					}
-				}
-				if (!verMatch) {
-					System.out.println("*** " + "Version: "+version+" not found in Stack name: " + name);
-					msg.put("status", "Version: "+version+" not found in Stack name: " + name);
-					return Response.status(400).entity(msg).build();
 				}
 			} else {
 				System.out.println("no version number supplied for stack: "+name);
@@ -755,7 +736,6 @@ public class StacksAccess {
 			api.patchStack(namespace, kabStack.getMetadata().getName(), kabStack);
 			System.out.println("*** " + "Stack name: " + name + " deactivated");
 			msg.put("status", "Stack name: " + name + " version: "+version+" deactivated");
-			msg.put("repositories", getRepositories(kab));
 			return Response.ok(msg).build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();
@@ -774,6 +754,96 @@ public class StacksAccess {
 		}
 
 	}
+
+	
+
+//	@DELETE
+//	@Produces(MediaType.APPLICATION_JSON)
+//	@Path("/stacks/{name}/versions/{version}")
+//	public Response deActivateStack(@Context final HttpServletRequest request,
+//			@PathParam("name") final String name, @PathParam("version") final String version) throws Exception {
+//		// make call to kabanero to delete collection
+//		
+//		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
+//		
+//		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
+//		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
+//		
+//		if (!trueStr.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
+//			JSONObject resp = new JSONObject();
+//			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
+//			return Response.status(503).entity(resp).build();
+//		}
+//		
+//		
+//		ApiClient apiClient = KubeUtils.getApiClient();
+//		StackApi api = new StackApi(apiClient);
+//		String plural = "stacks";
+//
+//		JSONObject msg = new JSONObject();
+//
+//		try {
+//			StackList fromKabanero = null;
+//			try {
+//				fromKabanero = api.listStacks(namespace, null, null, null);
+//			} catch (ApiException e) {
+//				e.printStackTrace();
+//			}
+//			// mapOneResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name)
+//			Stack kabStack = api.getStack(namespace, name);
+//			System.out.println("*** reading stack object: "+kabStack);
+//			if (kabStack==null) {
+//				System.out.println("*** " + "Stack name: " + name + " 404 not found");
+//				msg.put("status", "Stack name: " + name + " 404 not found");
+//				return Response.status(400).entity(msg).build();
+//			}
+//			List<StackSpecVersions> kabSpecVersions=null;
+//			if (version!=null) {
+//				kabSpecVersions=StackUtils.getKabInstanceVersions(fromKabanero, name);
+//				boolean verMatch=false;
+//				for (StackSpecVersions versionFromKab:kabSpecVersions) {
+//					if (version.contentEquals(versionFromKab.getVersion())) {
+//						versionFromKab.setDesiredState("inactive");
+//						verMatch=true;
+//					}
+//				}
+//				if (!verMatch) {
+//					System.out.println("*** " + "Version: "+version+" not found in Stack name: " + name);
+//					msg.put("status", "Version: "+version+" not found in Stack name: " + name);
+//					return Response.status(400).entity(msg).build();
+//				}
+//			} else {
+//				System.out.println("no version number supplied for stack: "+name);
+//				msg.put("status", "no version number supplied for stack: "+name);
+//				return Response.status(400).entity(msg).build();
+//
+//			}
+//			System.out.println(kabStack.getSpec().getName()+" stack for patch deactivate: " + kabStack.toString());
+//			kabStack.getSpec().setVersions(kabSpecVersions);;
+//			api.patchStack(namespace, kabStack.getMetadata().getName(), kabStack);
+//			System.out.println("*** " + "Stack name: " + name + " deactivated");
+//			msg.put("status", "Stack name: " + name + " version: "+version+" deactivated");
+//			msg.put("repositories", getRepositories(kab));
+//			return Response.ok(msg).build();
+//		} catch (ApiException apie) {
+//			apie.printStackTrace();
+//			String responseBody = apie.getResponseBody();
+//			System.err.println("Response body: " + responseBody);
+//			msg.put("status",
+//					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + apie.getMessage());
+//			msg.put("exception message", apie.getMessage()+", cause: "+apie.getCause());
+//			return Response.status(400).entity(msg).build();
+//
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			msg.put("status",
+//					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + e.getMessage());
+//			msg.put("exception message", e.getMessage()+", cause: "+e.getCause());
+//			return Response.status(400).entity(msg).build();
+//		}
+//
+//	}
 
 	private Stack makeStack(Map m, String namespace, String url) {
 		ArrayList<StackSpecVersions> versions = new ArrayList<StackSpecVersions>();
