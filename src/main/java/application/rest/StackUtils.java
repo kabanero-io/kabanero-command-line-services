@@ -216,6 +216,7 @@ public class StackUtils {
 		for (Map map : list) {
 			String name = (String) map.get("id");
 			String version = (String) map.get("version");
+			String reponame = (String) map.get("reponame");
 			List<Map> images = (List<Map>) map.get("images");
 			List<StackSpecImages> stackSpecImages = new ArrayList<StackSpecImages>();
 			for (Map image: images) {
@@ -228,6 +229,7 @@ public class StackUtils {
 			outMap.put("name", name);
 			outMap.put("version", version);
 			outMap.put("images", stackSpecImages);
+			outMap.put("reponame", reponame);
 			aList.add(outMap);
 		}
 		return aList;
