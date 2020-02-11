@@ -438,11 +438,6 @@ public class StacksAccess {
 				try {
 					KabaneroApi kApi = new KabaneroApi(apiClient);
 					V1OwnerReference owner = kApi.createOwnerReference(kab);
-//					owner.setKind(kab.getKind());
-//					owner.setApiVersion(kab.getApiVersion());
-//					owner.setName(kab.getMetadata().getName());
-//					owner.setController(true);
-//					owner.setUid(kab.getMetadata().getUid());
 					V1ObjectMeta metadata = new V1ObjectMeta().name((String)s.getSpec().getName()).namespace(namespace).addOwnerReferencesItem(owner);
 					s.setMetadata(metadata);
 					s.setApiVersion(apiVersion);
