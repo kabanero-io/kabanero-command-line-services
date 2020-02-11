@@ -307,6 +307,7 @@ public class StackUtils {
 					gitMap.put("version", version);
 					gitMap.put("desiredState", "active");
 					gitMap.put("images", map.get("images"));
+					gitMap.put("reponame", map.get("reponame"));
 					newStacks.add(gitMap);
 				}
 			}
@@ -495,6 +496,7 @@ public class StackUtils {
 				HashMap versionMap = new HashMap();
 				versionMap.put("version", (String) stack.get("version"));
 				versionMap.put("images", stack.get("images"));
+				versionMap.put("reponame", stack.get("reponame"));
 				versions.add(versionMap);
 				updatedStacks.add(map);
 			}
