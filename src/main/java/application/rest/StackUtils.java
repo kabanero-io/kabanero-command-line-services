@@ -484,6 +484,7 @@ public class StackUtils {
 				HashMap versionMap = new HashMap();
 				versionMap.put("version", (String) stack.get("version"));
 				versionMap.put("images", stack.get("images"));
+				versionMap.put("reponame", stack.get("reponame"));
 				versions.add(versionMap);
 			} 
 			// creating stack object to add to new stacks List
