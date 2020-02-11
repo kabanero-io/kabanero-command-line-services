@@ -47,7 +47,7 @@ import io.kubernetes.client.proto.Meta.Status;
 
 public class StackUtils {
 	
-	public static boolean readGitSuccess=true;
+	public static boolean readGitSuccess=false;
 	
 	public static Comparator<Map<String, String>> mapComparator = new Comparator<Map<String, String>>() {
 	    public int compare(Map<String, String> m1, Map<String, String> m2) {
@@ -179,8 +179,9 @@ public class StackUtils {
 	
 	
 	
-	public static List getStackFromGIT(String user, String pw, String url) {
+	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r) {
 		String response = null;
+		String url = r.getHttps().getUrl();
 		try {
 			response = getFromGit(url, user, pw);
 			if (response!=null) {
@@ -194,13 +195,15 @@ public class StackUtils {
 			e.printStackTrace();
 			throw e;
 		}
-		//System.out.println("response = " + response);
 		ArrayList<Map> list = null;
 		try {
 			Map m = readYaml(response);
 			list = (ArrayList<Map>) m.get("stacks");
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		for (Map map: list) {
+			map.put("reponame", r.getName());
 		}
 		return list;
 	}
@@ -213,6 +216,7 @@ public class StackUtils {
 		for (Map map : list) {
 			String name = (String) map.get("id");
 			String version = (String) map.get("version");
+			String reponame = (String) map.get("reponame");
 			List<Map> images = (List<Map>) map.get("images");
 			List<StackSpecImages> stackSpecImages = new ArrayList<StackSpecImages>();
 			for (Map image: images) {
@@ -225,6 +229,7 @@ public class StackUtils {
 			outMap.put("name", name);
 			outMap.put("version", version);
 			outMap.put("images", stackSpecImages);
+			outMap.put("reponame", reponame);
 			aList.add(outMap);
 		}
 		return aList;
@@ -302,6 +307,7 @@ public class StackUtils {
 					gitMap.put("version", version);
 					gitMap.put("desiredState", "active");
 					gitMap.put("images", map.get("images"));
+					gitMap.put("reponame", map.get("reponame"));
 					newStacks.add(gitMap);
 				}
 			}
@@ -478,6 +484,7 @@ public class StackUtils {
 				HashMap versionMap = new HashMap();
 				versionMap.put("version", (String) stack.get("version"));
 				versionMap.put("images", stack.get("images"));
+				versionMap.put("reponame", stack.get("reponame"));
 				versions.add(versionMap);
 			} 
 			// creating stack object to add to new stacks List
@@ -490,6 +497,7 @@ public class StackUtils {
 				HashMap versionMap = new HashMap();
 				versionMap.put("version", (String) stack.get("version"));
 				versionMap.put("images", stack.get("images"));
+				versionMap.put("reponame", stack.get("reponame"));
 				versions.add(versionMap);
 				updatedStacks.add(map);
 			}
