@@ -179,8 +179,9 @@ public class StackUtils {
 	
 	
 	
-	public static List getStackFromGIT(String user, String pw, String url) {
+	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r) {
 		String response = null;
+		String url = r.getHttps().getUrl();
 		try {
 			response = getFromGit(url, user, pw);
 			if (response!=null) {
@@ -194,13 +195,15 @@ public class StackUtils {
 			e.printStackTrace();
 			throw e;
 		}
-		//System.out.println("response = " + response);
 		ArrayList<Map> list = null;
 		try {
 			Map m = readYaml(response);
 			list = (ArrayList<Map>) m.get("stacks");
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		for (Map map: list) {
+			map.put("reponame", r.getName());
 		}
 		return list;
 	}

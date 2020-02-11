@@ -142,7 +142,7 @@ public class StacksAccess {
 			try {
 				for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
 					stacks.addAll( (ArrayList) StackUtils
-							.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl()));
+							.getStackFromGIT(getUser(request), PAT, r));
 				}
 				String firstElem = stacks.get(0).toString();
 				if (firstElem!=null) {
@@ -353,7 +353,7 @@ public class StacksAccess {
 			try {
 				for (KabaneroSpecStacksRepositories r : kab.getSpec().getStacks().getRepositories()) {
 
-					List stacksFromRest = (ArrayList) StackUtils.getStackFromGIT(getUser(request), PAT, r.getHttps().getUrl());
+					List stacksFromRest = (ArrayList) StackUtils.getStackFromGIT(getUser(request), PAT, r);
 					stacks.addAll(stacksFromRest);
 
 					ArrayList<StackSpecPipelines> stackPipelines = new ArrayList<StackSpecPipelines>(); 
