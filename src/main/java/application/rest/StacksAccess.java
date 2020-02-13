@@ -49,6 +49,7 @@ import com.ibm.json.java.JSONObject;
 //import io.kabanero.event.KubeUtils;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
+import io.kubernetes.client.ApiResponse;
 import kabasec.PATHelper;
 import io.kabanero.v1alpha1.models.KabaneroStatusKabaneroInstance;
 import io.kabanero.v1alpha2.client.apis.KabaneroApi;
@@ -477,9 +478,15 @@ public class StacksAccess {
 		
 		// iterate over collections to activate
 		try {
+			try {
+				fromKabanero = api.listStacks(namespace, null, null, null);
+			} catch (ApiException e) {
+				e.printStackTrace();
+			}
 			for (Stack s : fromKabanero.getItems()) {
 				ArrayList<Map> versions= new ArrayList<Map>();
 				HashMap m = new HashMap();
+				ApiResponse apiResponse = null;
 				try {
 					
 					List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
@@ -515,7 +522,7 @@ public class StacksAccess {
 						activateStacks.add(m);
 						System.out.println(s.getSpec().getName()+" activate with stack:" + s.toString());
 						api.updateStack(namespace, s.getMetadata().getName(), s);
-						m.put("status", s.getSpec().getName() + " activated");
+					     m.put("status", s.getSpec().getName() + " activated");
 						System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
 					}
 				} catch (Exception e) {
@@ -539,6 +546,11 @@ public class StacksAccess {
 		// iterate over collections to delete
 		System.out.println("Starting DELETE processing");
 		try {
+			try {
+				fromKabanero = api.listStacks(namespace, null, null, null);
+			} catch (ApiException e) {
+				e.printStackTrace();
+			}
 			deletedStacks = new ArrayList<Map>();
 			for (Stack kabStack : fromKabanero.getItems()) {
 				ArrayList<Map> versions= new ArrayList<Map>();
