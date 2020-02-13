@@ -515,6 +515,7 @@ public class StacksAccess {
 						activateStacks.add(m);
 						System.out.println(s.getSpec().getName()+" activate with stack:" + s.toString());
 						api.updateStack(namespace, s.getMetadata().getName(), s);
+						m.put("status", s.getSpec().getName() + " activated");
 						System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
 					}
 				} catch (Exception e) {
@@ -523,8 +524,8 @@ public class StacksAccess {
 					System.out.println("*** stack " + s.getSpec().getName() + " failed to activate, organization "+group);
 					System.out.println("*** stack object: "+s.toString());
 					e.printStackTrace();
-					m.put("status", "failed to activate");
-					m.put("exception message", e.getMessage()+", cause: "+e.getCause());
+						m.put("status", "failed to activate");
+						m.put("exception message", e.getMessage()+", cause: "+e.getCause());
 				}
 				
 			}
@@ -588,9 +589,11 @@ public class StacksAccess {
 						if (kabStackVersions.size() > 1  &&  versions.size()!=kabStackVersions.size()) {
 							System.out.println(kabStack.getSpec().getName()+" delete stack versions deleted: "+versions+" through omission, stack: "+kabStack);
 							api.updateStack(namespace, kabStack.getSpec().getName(), kabStack);
+							m.put("status", kabStack.getSpec().getName() + " deleted");
 						} else {
 							System.out.println("delete entrire stack: "+kabStack.getSpec().getName()+", because there is only one version in it or all versions are to be deleted ");
 							api.deleteStack(namespace, kabStack.getSpec().getName(), null, null, null, null);
+							m.put("status", kabStack.getSpec().getName() + " deleted");
 						}
 						System.out.println("*** status: "+kabStack.getMetadata().getName()+" versions(s): "+versions + " deleted");
 					} else {
