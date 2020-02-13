@@ -527,7 +527,9 @@ public class StacksAccess {
 					System.out.println("*** stack object: "+s.toString());
 					e.printStackTrace();
 					m.put("status", "failed to activate");
-					m.put("exception message", "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause()+", stack status message: "+stack.getStatus().getStatusMessage());
+					String message = "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause()+", stack status message: "+stack.getStatus().getStatusMessage();
+					System.out.println("message="+message);
+					m.put("exception message", message);
 				}
 				
 			}
