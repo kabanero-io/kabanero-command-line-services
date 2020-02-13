@@ -485,7 +485,7 @@ public class StacksAccess {
 					List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
 					StackSpec stackSpec = new StackSpec();
 
-
+					System.out.println(" stack just gotten from Kabanero ( soon to be activated ):" + s.toString());
 
 					List<StackStatusVersions> statusStackVersions=s.getStatus().getVersions();
 					boolean atLeastOneVersionToActivate=false;
