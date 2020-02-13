@@ -525,14 +525,23 @@ public class StacksAccess {
 					     m.put("status", s.getSpec().getName() + " activated");
 						System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
 					}
+				} catch (ApiException e) {
+					System.out.println("exception cause: " + e.getCause());
+					System.out.println("exception message: " + e.getMessage());
+					System.out.println("exception response: " + e.getResponseBody());
+					System.out.println("*** stack " + s.getSpec().getName() + " failed to activate, organization "+group);
+					System.out.println("*** stack object: "+s.toString());
+					e.printStackTrace();
+					m.put("status", "failed to activate");
+					m.put("exception message", e.getMessage()+", cause: "+e.getCause()+", response: "+e.getResponseBody());
 				} catch (Exception e) {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
 					System.out.println("*** stack " + s.getSpec().getName() + " failed to activate, organization "+group);
 					System.out.println("*** stack object: "+s.toString());
 					e.printStackTrace();
-						m.put("status", "failed to activate");
-						m.put("exception message", e.getMessage()+", cause: "+e.getCause());
+					m.put("status", "failed to activate");
+					m.put("exception message", e.getMessage()+", cause: "+e.getCause());
 				}
 				
 			}
