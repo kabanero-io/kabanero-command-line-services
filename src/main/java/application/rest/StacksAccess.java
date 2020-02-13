@@ -468,7 +468,8 @@ public class StacksAccess {
 					System.out.println("*** stack " + s.getSpec().getName() + " failed to "+updateType+" , organization "+group);
 					e.printStackTrace();
 					m.put("status", s.getSpec().getName() + " create failed");
-					m.put("exception message", "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause()+", stack status message: "+stack.getStatus().getStatusMessage());
+					//m.put("exception message", "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause()+", stack status message: "+stack.getStatus().getStatusMessage());
+					m.put("exception message", "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause());
 				}
 				i++;
 			}
@@ -527,7 +528,7 @@ public class StacksAccess {
 					System.out.println("*** stack object: "+s.toString());
 					e.printStackTrace();
 					m.put("status", "failed to activate");
-					String message = "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause()+", stack status message: "+stack.getStatus().getStatusMessage();
+					String message = "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause();
 					System.out.println("message="+message);
 					m.put("exception message", message);
 				}
@@ -612,7 +613,7 @@ public class StacksAccess {
 					if (statusMsg == null) {
 						statusMsg = v1status.getMessage();
 					}
-					m.put("exception message", "stack name: "+kabStack.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause()+", stack status message: "+statusMsg);
+					m.put("exception message", "stack name: "+kabStack.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause());
 				}
 
 			}
