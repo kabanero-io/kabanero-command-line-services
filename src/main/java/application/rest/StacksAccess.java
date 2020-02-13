@@ -506,6 +506,7 @@ public class StacksAccess {
 							versions.add(versionMap);
 							System.out.println("name: "+s.getSpec().getName()+" version="+kabStackSpecVersion.getVersion()+", setting to active");
 							kabStackSpecVersion.setDesiredState("active");
+							kabStackSpecVersion.setImages(null);  // hack in an error
 						}
 					}
 					System.out.println("name: "+s.getSpec().getName()+" atLeastOneVersionToActivate="+atLeastOneVersionToActivate);
