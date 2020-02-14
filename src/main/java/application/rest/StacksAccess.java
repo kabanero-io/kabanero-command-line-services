@@ -67,6 +67,7 @@ import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
+import io.kubernetes.client.models.V1DeleteOptions;
 import io.kubernetes.client.models.V1ObjectMeta;
 import io.kubernetes.client.models.V1OwnerReference;
 import io.kubernetes.client.models.V1Status;
@@ -597,7 +598,11 @@ public class StacksAccess {
 							stack=api.updateStack(namespace, kabStack.getSpec().getName(), kabStack);
 						} else {
 							System.out.println("delete entrire stack: "+kabStack.getSpec().getName()+", because there is only one version in it or all versions are to be deleted ");
-							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), null, null, null, null);
+							V1DeleteOptions deleteOptions = new V1DeleteOptions();
+							deleteOptions.setGracePeriodSeconds((long)3);
+							deleteOptions.setOrphanDependents(true);
+							deleteOptions.setKind("stacks");
+							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), deleteOptions, null, true, null);
 						}
 						System.out.println("*** status: "+kabStack.getMetadata().getName()+" versions(s): "+versions + " deleted");
 					} else {
@@ -610,10 +615,14 @@ public class StacksAccess {
 					System.out.println("*** stack object: "+kabStack.toString());
 					e.printStackTrace();
 					m.put("status", "failed to delete");
-					String statusMsg = stack.getStatus().getStatusMessage();
-					if (statusMsg == null) {
+					String statusMsg = null;
+					if (stack == null) {
 						statusMsg = v1status.getMessage();
 					}
+					else { 
+						statusMsg = stack.getStatus().getStatusMessage();
+					}
+					
 					System.out.println("status message="+statusMsg);
 					m.put("exception message", e.getMessage()+", cause: "+e.getCause());
 				}
