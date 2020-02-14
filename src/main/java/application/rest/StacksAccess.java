@@ -541,15 +541,9 @@ public class StacksAccess {
 			e.printStackTrace();
 		}
 
-
 		// iterate over collections to delete
 		System.out.println("Starting DELETE processing");
 		try {
-			try {
-				fromKabanero = api.listStacks(namespace, null, null, null);
-			} catch (ApiException e) {
-				e.printStackTrace();
-			}
 			deletedStacks = new ArrayList<Map>();
 			for (Stack kabStack : fromKabanero.getItems()) {
 				ArrayList<Map> versions= new ArrayList<Map>();
@@ -557,47 +551,53 @@ public class StacksAccess {
 				V1Status v1status=null;
 				Stack stack=null;
 				try {
-				
-					List<StackSpecVersions> kabSpecVersions=kabStack.getSpec().getVersions();
+
+					List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
+
+
+					List<StackSpecVersions> kabStackVersions=kabStack.getSpec().getVersions();
 					boolean atLeastOneToDelete=false;
 
-					System.out.println("Kab stack versions: "+kabSpecVersions);
-					
-					for (StackSpecVersions kabSpecVersion:kabSpecVersions) {
-						System.out.println("statusStackVersion: "+kabSpecVersion.getDesiredState()+" name: "+kabStack.getSpec().getName());
+					System.out.println("Kab stack versions: "+kabStackVersions);
 
-						boolean isVersionInGitStack=StackUtils.isStackVersionInGit(curatedStacks, kabSpecVersion.getVersion(), kabStack.getSpec().getName());
+					for (StackSpecVersions stackSpecVersion:kabStackVersions) {
+						System.out.println("statusStackVersion: "+stackSpecVersion.getVersion()+" name: "+kabStack.getSpec().getName());
+
+						boolean isVersionInGitStack=StackUtils.isStackVersionInGit(curatedStacks, stackSpecVersion.getVersion(), kabStack.getSpec().getName());
 						System.out.println("isVersionInGitStack: "+isVersionInGitStack);
-
-						if (!isVersionInGitStack) {
+						if (isVersionInGitStack) {
+							System.out.println("Version: "+stackSpecVersion.getVersion()+" is in GIT so keep it in the specversions list: ");
+							StackSpecVersions specVersion = new StackSpecVersions();
+							specVersion.setDesiredState("active");
+							specVersion.setVersion(stackSpecVersion.getVersion());
+							specVersion.setImages(stackSpecVersion.getImages());
+							specVersion.setPipelines((List<StackSpecPipelines>) versionedStackPipelineMap.get(kabStack.getSpec().getName()));
+							stackSpecVersions.add(specVersion);
+						} else {
 							atLeastOneToDelete=true;
-							kabSpecVersions.remove(kabSpecVersion);
 							HashMap versionMap = new HashMap();
-							versionMap.put("version", kabSpecVersion.getVersion());
+							versionMap.put("version", stackSpecVersion.getVersion());
 							versions.add(versionMap);
 						}
 					}
-					
-					kabStack.getSpec().setVersions(kabSpecVersions);
+
+					kabStack.getSpec().setVersions(stackSpecVersions);
 					m.put("name", kabStack.getSpec().getName());
-					
-					
+
+
 					m.put("versions", versions);
-					
+
 					System.out.println("name: "+kabStack.getSpec().getName()+" atLeastOneVersionToDelete="+atLeastOneToDelete);
-					//stackObj.getSpec().setVersions(stackSpecVersions);
-					
+
 					if (atLeastOneToDelete) {
 						deletedStacks.add(m);
 						// if there is more than one version in the stack and the number of versions to delete is not equal to the total number of versions
-						if (kabSpecVersions.size() > 1  &&  versions.size()!=kabSpecVersions.size()) {
+						if (kabStackVersions.size() > 1  &&  versions.size()!=kabStackVersions.size()) {
 							System.out.println(kabStack.getSpec().getName()+" delete stack versions deleted: "+versions+" through omission, stack: "+kabStack);
 							stack=api.updateStack(namespace, kabStack.getSpec().getName(), kabStack);
-							m.put("status", kabStack.getSpec().getName() + " deleted");
 						} else {
 							System.out.println("delete entrire stack: "+kabStack.getSpec().getName()+", because there is only one version in it or all versions are to be deleted ");
-							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), null, null, true, null);
-							m.put("status", kabStack.getSpec().getName() + " deleted");
+							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), null, null, null, null);
 						}
 						System.out.println("*** status: "+kabStack.getMetadata().getName()+" versions(s): "+versions + " deleted");
 					} else {
@@ -615,7 +615,7 @@ public class StacksAccess {
 						statusMsg = v1status.getMessage();
 					}
 					System.out.println("status message="+statusMsg);
-					m.put("exception message", "stack name: "+kabStack.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause());
+					m.put("exception message", e.getMessage()+", cause: "+e.getCause());
 				}
 
 			}
@@ -624,7 +624,8 @@ public class StacksAccess {
 			System.out.println("exception message: " + e.getMessage());
 			e.printStackTrace();
 		}
-		
+
+
 		JSONArray newStacksJA = convertMapToJSON(newStacks);
 		JSONArray activateStacksJA = convertMapToJSON(activateStacks);
 		JSONArray deletedStacksJA = convertMapToJSON(deletedStacks);
