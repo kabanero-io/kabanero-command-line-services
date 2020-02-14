@@ -82,29 +82,6 @@ stacks:
   - id: scaffold
     url: https://github.com/kabanero-io/collections/releases/download/0.5.0-rc.4/incubator.nodejs-loopback.v0.1.8.templates.scaffold.tar.gz
   version: 0.1.8
-- default-image: nodejs
-  default-pipeline: default
-  default-template: simple
-  description: Runtime for Node.js applications
-  id: nodejs
-  images:
-  - id: nodejs
-    image: docker.io/kabanerobeta/nodejs:0.3
-  language: nodejs
-  license: Apache-2.0
-  maintainers:
-  - email: vieuxtech@gmail.com
-    github-id: sam-github
-    name: Sam Roberts
-  name: Node.js
-  pipelines:
-  - id: default
-    sha256: 6537a5a25f845266d6b81c47d97a97c711a98306a78339d039d5af8ed700bff5
-    url: https://github.com/kabanero-io/collections/releases/download/0.5.0-rc.4/incubator.common.pipeline.default.tar.gz
-  templates:
-  - id: simple
-    url: https://github.com/kabanero-io/collections/releases/download/0.5.0-rc.4/incubator.nodejs.v0.3.1.templates.simple.tar.gz
-  version: 0.3.1
 triggers:
 - id: incubator
   url: https://github.com/kabanero-io/collections/releases/download/0.5.0-rc.4/incubator.trigger.tar.gz
