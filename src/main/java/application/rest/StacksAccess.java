@@ -740,7 +740,6 @@ public class StacksAccess {
 				for (StackSpecVersions versionFromKab:kabSpecVersions) {
 					if (version.contentEquals(versionFromKab.getVersion())) {
 						versionFromKab.setDesiredState("inactive");
-						versionFromKab.setImages(null);  // hack in an error
 						verMatch=true;
 					}
 				}
