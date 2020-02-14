@@ -127,6 +127,14 @@ public class StacksAccess {
 				return Response.status(503).entity(resp).build();
 			}
 			
+			//****************
+			if (true) {
+			JSONObject resp = new JSONObject();
+			resp.put("message", "The Kabanero operator is not ready, error message: "+k.getStatus().getKabaneroInstance().getErrorMessage());
+			return Response.status(503).entity(resp).build();
+			}
+			
+			
 			System.out.println("entering LIST function");
 			String user = getUser(request);
 			System.out.println("user=" + user);
@@ -744,7 +752,6 @@ public class StacksAccess {
 				for (StackSpecVersions versionFromKab:kabSpecVersions) {
 					if (version.contentEquals(versionFromKab.getVersion())) {
 						versionFromKab.setDesiredState("inactive");
-						versionFromKab.setImages(null);
 						verMatch=true;
 					}
 				}
