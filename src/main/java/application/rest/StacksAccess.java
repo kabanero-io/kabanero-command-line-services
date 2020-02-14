@@ -507,7 +507,6 @@ public class StacksAccess {
 							versions.add(versionMap);
 							System.out.println("name: "+s.getSpec().getName()+" version="+kabStackSpecVersion.getVersion()+", setting to active");
 							kabStackSpecVersion.setDesiredState("active");
-							kabStackSpecVersion.setImages(null);  // hack in an error
 						}
 					}
 					System.out.println("name: "+s.getSpec().getName()+" atLeastOneVersionToActivate="+atLeastOneVersionToActivate);
@@ -741,6 +740,7 @@ public class StacksAccess {
 				for (StackSpecVersions versionFromKab:kabSpecVersions) {
 					if (version.contentEquals(versionFromKab.getVersion())) {
 						versionFromKab.setDesiredState("inactive");
+						versionFromKab.setImages(null);  // hack in an error
 						verMatch=true;
 					}
 				}
@@ -756,7 +756,7 @@ public class StacksAccess {
 
 			}
 			System.out.println(kabStack.getSpec().getName()+" stack for patch deactivate: " + kabStack.toString());
-			kabStack.getSpec().setVersions(kabSpecVersions);;
+			kabStack.getSpec().setVersions(kabSpecVersions);
 			api.patchStack(namespace, kabStack.getMetadata().getName(), kabStack);
 			System.out.println("*** " + "Stack name: " + name + " deactivated");
 			msg.put("status", "Stack name: " + name + " version: "+version+" deactivated");
