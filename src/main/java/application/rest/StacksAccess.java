@@ -729,7 +729,7 @@ public class StacksAccess {
 			} catch (ApiException e) {
 				e.printStackTrace();
 			}
-			// mapOneResource(ApiClient apiClient, String group, String version, String plural, String namespace, String name)
+			
 			Stack kabStack = api.getStack(namespace, name);
 			System.out.println("*** reading stack object: "+kabStack);
 			if (kabStack==null) {
