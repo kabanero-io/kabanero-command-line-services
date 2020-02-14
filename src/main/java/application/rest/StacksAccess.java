@@ -469,6 +469,7 @@ public class StacksAccess {
 					e.printStackTrace();
 					m.put("status", s.getSpec().getName() + " create failed");
 					//m.put("exception message", "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause()+", stack status message: "+stack.getStatus().getStatusMessage());
+					System.out.println("stack status message="+stack.getStatus().getStatusMessage());
 					m.put("exception message", "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause());
 				}
 				i++;
@@ -528,6 +529,7 @@ public class StacksAccess {
 					e.printStackTrace();
 					m.put("status", "failed to activate");
 					String message = "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause();
+					System.out.println("stack status message="+stack.getStatus().getStatusMessage());
 					System.out.println("message="+message);
 					m.put("exception message", message);
 				}
@@ -594,7 +596,7 @@ public class StacksAccess {
 							m.put("status", kabStack.getSpec().getName() + " deleted");
 						} else {
 							System.out.println("delete entrire stack: "+kabStack.getSpec().getName()+", because there is only one version in it or all versions are to be deleted ");
-							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), null, null, null, null);
+							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), null, null, true, null);
 							m.put("status", kabStack.getSpec().getName() + " deleted");
 						}
 						System.out.println("*** status: "+kabStack.getMetadata().getName()+" versions(s): "+versions + " deleted");
@@ -612,6 +614,7 @@ public class StacksAccess {
 					if (statusMsg == null) {
 						statusMsg = v1status.getMessage();
 					}
+					System.out.println("status message="+statusMsg);
 					m.put("exception message", "stack name: "+kabStack.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause());
 				}
 
