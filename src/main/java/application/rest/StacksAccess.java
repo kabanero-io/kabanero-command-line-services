@@ -606,7 +606,7 @@ public class StacksAccess {
 							deleteOptions.setOrphanDependents(true);
 							deleteOptions.setKind("stacks");
 							deleteOptions.setApiVersion(apiVersion);
-							o=api.deleteStack(namespace, kabStack.getSpec().getName(), deleteOptions, 0, true, "");
+							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), deleteOptions, 0, true, "");
 							
 //							int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, "stacks");
 //							if (rc == 0) {
@@ -636,8 +636,7 @@ public class StacksAccess {
 					e.printStackTrace();
 					m.put("status", "failed to delete");
 					String statusMsg = null;
-					System.out.println("object o="+o);
-					if (stack == null) {
+					if (stack == null && v1status!=null) {
 						statusMsg = v1status.getMessage();
 					}
 					else { 
