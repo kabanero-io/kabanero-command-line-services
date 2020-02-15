@@ -636,14 +636,17 @@ public class StacksAccess {
 					e.printStackTrace();
 					m.put("status", "failed to delete");
 					String statusMsg = null;
-					if (stack == null && v1status!=null) {
+					if (v1status!=null) {
 						statusMsg = v1status.getMessage();
 					}
-					else { 
+					if (stack!=null) {
 						statusMsg = stack.getStatus().getStatusMessage();
 					}
-					
-					System.out.println("status message="+statusMsg);
+					if (statusMsg!=null) {
+						System.out.println("status message="+statusMsg);
+					} else {
+						System.out.println("no status message");
+					}
 					m.put("exception message", e.getMessage()+", cause: "+e.getCause());
 				}
 
