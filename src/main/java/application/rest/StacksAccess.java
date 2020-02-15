@@ -600,11 +600,12 @@ public class StacksAccess {
 							String name = kabStack.getSpec().getName();
 							String version = kabStackVersions.get(0).getVersion();
 							System.out.println("delete single stack: "+name+", version number: "+version);
-//							V1DeleteOptions deleteOptions = new V1DeleteOptions();
-//							deleteOptions.setGracePeriodSeconds((long)3);
-//							deleteOptions.setOrphanDependents(true);
-//							deleteOptions.setKind("stacks");
-//							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), deleteOptions, null, true, null);
+							V1DeleteOptions deleteOptions = new V1DeleteOptions();
+							deleteOptions.setGracePeriodSeconds((long)3);
+							deleteOptions.setOrphanDependents(true);
+							deleteOptions.setKind("stacks");
+							deleteOptions.setApiVersion(apiVersion);
+							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), deleteOptions, 0, true, "");
 							
 							int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, "stacks");
 							if (rc == 0) {
