@@ -607,21 +607,21 @@ public class StacksAccess {
 							deleteOptions.setApiVersion(apiVersion);
 							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), deleteOptions, 0, true, "");
 							
-							int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, "stacks");
-							if (rc == 0) {
-								System.out.println("*** " + "Stack name: " + name + " deleted");
-								msg.put("status", "Stack name: " + name + " deleted");
-								return Response.ok(msg).build();
-							}
-							else if (rc == 404) {
-								System.out.println("*** " + "Stack name: " + name + " 404 not found");
-								msg.put("status", "Stack name: " + name + " 404 not found");
-								return Response.status(400).entity(msg).build();
-							} else {
-								System.out.println("*** " + "Stack name: " + name + " was not deleted, rc="+rc);
-								msg.put("status", "Stack name: " + name + " was not deleted, rc="+rc);
-								return Response.status(400).entity(msg).build();
-							}
+//							int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, "stacks");
+//							if (rc == 0) {
+//								System.out.println("*** " + "Stack name: " + name + " deleted");
+//								msg.put("status", "Stack name: " + name + " deleted");
+//								return Response.ok(msg).build();
+//							}
+//							else if (rc == 404) {
+//								System.out.println("*** " + "Stack name: " + name + " 404 not found");
+//								msg.put("status", "Stack name: " + name + " 404 not found");
+//								return Response.status(400).entity(msg).build();
+//							} else {
+//								System.out.println("*** " + "Stack name: " + name + " was not deleted, rc="+rc);
+//								msg.put("status", "Stack name: " + name + " was not deleted, rc="+rc);
+//								return Response.status(400).entity(msg).build();
+//							}
 						}
 						System.out.println("*** status: "+kabStack.getMetadata().getName()+" versions(s): "+versions + " deleted");
 					} else {
