@@ -598,11 +598,27 @@ public class StacksAccess {
 							stack=api.updateStack(namespace, kabStack.getSpec().getName(), kabStack);
 						} else {
 							System.out.println("delete entrire stack: "+kabStack.getSpec().getName()+", because there is only one version in it or all versions are to be deleted ");
-							V1DeleteOptions deleteOptions = new V1DeleteOptions();
-							deleteOptions.setGracePeriodSeconds((long)3);
-							deleteOptions.setOrphanDependents(true);
-							deleteOptions.setKind("stacks");
-							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), deleteOptions, null, true, null);
+//							V1DeleteOptions deleteOptions = new V1DeleteOptions();
+//							deleteOptions.setGracePeriodSeconds((long)3);
+//							deleteOptions.setOrphanDependents(true);
+//							deleteOptions.setKind("stacks");
+//							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), deleteOptions, null, true, null);
+							String name = kabStack.getSpec().getName();
+							int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, null, "stacks");
+							if (rc == 0) {
+								System.out.println("*** " + "Stack name: " + name + " deleted");
+								msg.put("status", "Stack name: " + name + " deleted");
+								return Response.ok(msg).build();
+							}
+							else if (rc == 404) {
+								System.out.println("*** " + "Stack name: " + name + " 404 not found");
+								msg.put("status", "Stack name: " + name + " 404 not found");
+								return Response.status(400).entity(msg).build();
+							} else {
+								System.out.println("*** " + "Stack name: " + name + " was not deleted, rc="+rc);
+								msg.put("status", "Stack name: " + name + " was not deleted, rc="+rc);
+								return Response.status(400).entity(msg).build();
+							}
 						}
 						System.out.println("*** status: "+kabStack.getMetadata().getName()+" versions(s): "+versions + " deleted");
 					} else {
