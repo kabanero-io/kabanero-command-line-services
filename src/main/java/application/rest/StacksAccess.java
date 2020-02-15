@@ -604,7 +604,8 @@ public class StacksAccess {
 //							deleteOptions.setKind("stacks");
 //							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), deleteOptions, null, true, null);
 							String name = kabStack.getSpec().getName();
-							int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, null, "stacks");
+							String version = kabStackVersions.get(0).getVersion();
+							int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, "stacks");
 							if (rc == 0) {
 								System.out.println("*** " + "Stack name: " + name + " deleted");
 								msg.put("status", "Stack name: " + name + " deleted");
