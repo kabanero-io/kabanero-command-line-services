@@ -67,6 +67,7 @@ import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
+import io.kubernetes.client.models.V1DeleteOptions;
 import io.kubernetes.client.models.V1ObjectMeta;
 import io.kubernetes.client.models.V1OwnerReference;
 import io.kubernetes.client.models.V1Status;
@@ -550,6 +551,7 @@ public class StacksAccess {
 				HashMap m = new HashMap();
 				V1Status v1status=null;
 				Stack stack=null;
+				Object o=null;
 				try {
 
 					List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
@@ -596,8 +598,31 @@ public class StacksAccess {
 							System.out.println(kabStack.getSpec().getName()+" delete stack versions deleted: "+versions+" through omission, stack: "+kabStack);
 							stack=api.updateStack(namespace, kabStack.getSpec().getName(), kabStack);
 						} else {
-							System.out.println("delete entrire stack: "+kabStack.getSpec().getName()+", because there is only one version in it or all versions are to be deleted ");
-							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), null, null, null, null);
+							String name = kabStack.getSpec().getName();
+							String version = kabStackVersions.get(0).getVersion();
+							System.out.println("delete single stack: "+name+", version number: "+version);
+							V1DeleteOptions deleteOptions = new V1DeleteOptions();
+							deleteOptions.setGracePeriodSeconds((long)3);
+							deleteOptions.setOrphanDependents(true);
+							deleteOptions.setKind("stacks");
+							deleteOptions.setApiVersion(apiVersion);
+							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), deleteOptions, 0, true, "");
+							
+//							int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, "stacks");
+//							if (rc == 0) {
+//								System.out.println("*** " + "Stack name: " + name + " deleted");
+//								msg.put("status", "Stack name: " + name + " deleted");
+//								return Response.ok(msg).build();
+//							}
+//							else if (rc == 404) {
+//								System.out.println("*** " + "Stack name: " + name + " 404 not found");
+//								msg.put("status", "Stack name: " + name + " 404 not found");
+//								return Response.status(400).entity(msg).build();
+//							} else {
+//								System.out.println("*** " + "Stack name: " + name + " was not deleted, rc="+rc);
+//								msg.put("status", "Stack name: " + name + " was not deleted, rc="+rc);
+//								return Response.status(400).entity(msg).build();
+//							}
 						}
 						System.out.println("*** status: "+kabStack.getMetadata().getName()+" versions(s): "+versions + " deleted");
 					} else {
@@ -610,11 +635,18 @@ public class StacksAccess {
 					System.out.println("*** stack object: "+kabStack.toString());
 					e.printStackTrace();
 					m.put("status", "failed to delete");
-					String statusMsg = stack.getStatus().getStatusMessage();
-					if (statusMsg == null) {
+					String statusMsg = null;
+					if (v1status!=null) {
 						statusMsg = v1status.getMessage();
 					}
-					System.out.println("status message="+statusMsg);
+					if (stack!=null) {
+						statusMsg = stack.getStatus().getStatusMessage();
+					}
+					if (statusMsg!=null) {
+						System.out.println("status message="+statusMsg);
+					} else {
+						System.out.println("no status message");
+					}
 					m.put("exception message", e.getMessage()+", cause: "+e.getCause());
 				}
 

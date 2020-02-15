@@ -217,14 +217,16 @@ public class StackUtils {
 			String name = (String) map.get("id");
 			String version = (String) map.get("version");
 			String reponame = (String) map.get("reponame");
-			List<Map> images = (List<Map>) map.get("images");
+			String image = (String) map.get("image");
+		//	List<Map> images = new ArrayList<Map>();
+		
 			List<StackSpecImages> stackSpecImages = new ArrayList<StackSpecImages>();
-			for (Map image: images) {
+			//for (Map image: images) {
 				StackSpecImages stackSpecImage = new StackSpecImages();
-				stackSpecImage.setImage((String) image.get("image"));
+				stackSpecImage.setImage(image);
 				stackSpecImages.add(stackSpecImage);
-			}
-			Map imageMap=(Map)images.get(0);
+			//}
+			//Map imageMap=(Map)images.get(0);
 			HashMap outMap = new HashMap();
 			outMap.put("name", name);
 			outMap.put("version", version);
