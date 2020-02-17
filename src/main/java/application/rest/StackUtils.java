@@ -47,7 +47,7 @@ import io.kubernetes.client.proto.Meta.Status;
 
 public class StackUtils {
 	
-	public static boolean readGitSuccess=false;
+	public static boolean readGitSuccess=true;
 	
 	public static Comparator<Map<String, String>> mapComparator = new Comparator<Map<String, String>>() {
 	    public int compare(Map<String, String> m1, Map<String, String> m2) {
