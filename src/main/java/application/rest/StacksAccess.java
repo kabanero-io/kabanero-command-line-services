@@ -120,11 +120,11 @@ public class StacksAccess {
 			Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
 			
 			System.out.println("Operator ready: "+k.getStatus().getKabaneroInstance().getReady());
-			System.out.println("Operator error msg: "+k.getStatus().getKabaneroInstance().getErrorMessage());
+			System.out.println("Operator error msg: "+k.getStatus().getKabaneroInstance().getMessage());
 			
 			if (!trueStr.contentEquals(k.getStatus().getKabaneroInstance().getReady())) {
 				JSONObject resp = new JSONObject();
-				resp.put("message", "The Kabanero operator is not ready, error message: "+k.getStatus().getKabaneroInstance().getErrorMessage());
+				resp.put("message", "The Kabanero operator is not ready, error message: "+k.getStatus().getKabaneroInstance().getMessage());
 				return Response.status(503).entity(resp).build();
 			}
 			
@@ -273,11 +273,11 @@ public class StacksAccess {
 		kab = StackUtils.getKabaneroForNamespace(namespace);
 		
 		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
-		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
+		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getMessage());
 		
 		if (!trueStr.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
 			JSONObject resp = new JSONObject();
-			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
+			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getMessage());
 			return Response.status(503).entity(resp).build();
 		}
 		
@@ -601,28 +601,7 @@ public class StacksAccess {
 							String name = kabStack.getSpec().getName();
 							String version = kabStackVersions.get(0).getVersion();
 							System.out.println("delete single stack: "+name+", version number: "+version);
-							V1DeleteOptions deleteOptions = new V1DeleteOptions();
-							deleteOptions.setGracePeriodSeconds((long)3);
-							deleteOptions.setOrphanDependents(true);
-							deleteOptions.setKind("stacks");
-							deleteOptions.setApiVersion(apiVersion);
-							v1status=api.deleteStack(namespace, kabStack.getSpec().getName(), deleteOptions, 0, true, "");
-							
-//							int rc = KubeUtils.deleteKubeResource(apiClient, namespace, name, group, version, "stacks");
-//							if (rc == 0) {
-//								System.out.println("*** " + "Stack name: " + name + " deleted");
-//								msg.put("status", "Stack name: " + name + " deleted");
-//								return Response.ok(msg).build();
-//							}
-//							else if (rc == 404) {
-//								System.out.println("*** " + "Stack name: " + name + " 404 not found");
-//								msg.put("status", "Stack name: " + name + " 404 not found");
-//								return Response.status(400).entity(msg).build();
-//							} else {
-//								System.out.println("*** " + "Stack name: " + name + " was not deleted, rc="+rc);
-//								msg.put("status", "Stack name: " + name + " was not deleted, rc="+rc);
-//								return Response.status(400).entity(msg).build();
-//							}
+							stack=api.deleteStack(namespace, kabStack.getSpec().getName(), null, 0, true, "");
 						}
 						System.out.println("*** status: "+kabStack.getMetadata().getName()+" versions(s): "+versions + " deleted");
 					} else {
@@ -636,18 +615,12 @@ public class StacksAccess {
 					e.printStackTrace();
 					m.put("status", "failed to delete");
 					String statusMsg = null;
-					if (v1status!=null) {
-						statusMsg = v1status.getMessage();
-					}
 					if (stack!=null) {
 						statusMsg = stack.getStatus().getStatusMessage();
-					}
-					if (statusMsg!=null) {
-						System.out.println("status message="+statusMsg);
 					} else {
 						System.out.println("no status message");
 					}
-					m.put("exception message", e.getMessage()+", cause: "+e.getCause());
+					m.put("exception message", e.getMessage()+", cause: "+e.getCause()+", stack status message: "+statusMsg);
 				}
 
 			}
@@ -739,11 +712,11 @@ public class StacksAccess {
 		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
 		
 		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
-		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
+		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getMessage());
 		
 		if (!trueStr.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
 			JSONObject resp = new JSONObject();
-			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getErrorMessage());
+			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getMessage());
 			return Response.status(503).entity(resp).build();
 		}
 		
