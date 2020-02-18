@@ -47,6 +47,8 @@ import io.kubernetes.client.proto.Meta.Status;
 
 public class StackUtils {
 	
+	// this value needs to start out as true, otherwise the liveness probe can't come up 
+	// as healthy initially
 	public static boolean readGitSuccess=true;
 	
 	public static Comparator<Map<String, String>> mapComparator = new Comparator<Map<String, String>>() {
