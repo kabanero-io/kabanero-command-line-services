@@ -207,9 +207,7 @@ public class StackUtils {
 		}
 		return list;
 	}
-	
-	
-	
+		
 
 	public static List streamLineMasterMap(List<Map> list) {
 		ArrayList aList = new ArrayList();
@@ -217,16 +215,20 @@ public class StackUtils {
 			String name = (String) map.get("id");
 			String version = (String) map.get("version");
 			String reponame = (String) map.get("reponame");
-			String image = (String) map.get("image");
-		//	List<Map> images = new ArrayList<Map>();
-		
+			String imageStr = (String) map.get("image");
 			List<StackSpecImages> stackSpecImages = new ArrayList<StackSpecImages>();
-			//for (Map image: images) {
+			if (imageStr==null) {
+				List<Map> images = (List<Map>) map.get("images");
+				for (Map image: images) {
+					StackSpecImages stackSpecImage = new StackSpecImages();
+					stackSpecImage.setImage((String) image.get("image"));
+					stackSpecImages.add(stackSpecImage);
+				}
+			} else {
 				StackSpecImages stackSpecImage = new StackSpecImages();
-				stackSpecImage.setImage(image);
+				stackSpecImage.setImage(imageStr);
 				stackSpecImages.add(stackSpecImage);
-			//}
-			//Map imageMap=(Map)images.get(0);
+			}
 			HashMap outMap = new HashMap();
 			outMap.put("name", name);
 			outMap.put("version", version);
