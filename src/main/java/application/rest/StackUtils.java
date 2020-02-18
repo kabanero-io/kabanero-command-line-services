@@ -312,7 +312,15 @@ public class StackUtils {
 					gitMap.put("name", (String)map.get("id"));
 					gitMap.put("version", version);
 					gitMap.put("desiredState", "active");
-					gitMap.put("images", map.get("images"));
+					List<StackSpecImages> images=(List<StackSpecImages>)map.get("images");
+					if (images == null) {
+						String imageStr=(String) map.get("image");
+						images = new ArrayList<StackSpecImages>();
+						StackSpecImages stackSpecImages=new StackSpecImages();
+						stackSpecImages.setImage(imageStr);
+						images.add(stackSpecImages);
+					}
+					gitMap.put("images", images);
 					gitMap.put("reponame", map.get("reponame"));
 					newStacks.add(gitMap);
 				}
@@ -364,7 +372,15 @@ public class StackUtils {
 							activateMap.put("name", map.get("id"));
 							activateMap.put("version", stackVersion.getVersion());
 							activateMap.put("desiredState","active");
-							activateMap.put("images", map.get("images"));
+							List<StackSpecImages> images=(List<StackSpecImages>)map.get("images");
+							if (images == null) {
+								String imageStr=(String) map.get("image");
+								images = new ArrayList<StackSpecImages>();
+								StackSpecImages stackSpecImages = new StackSpecImages();
+								stackSpecImages.setImage(imageStr);
+								images.add(stackSpecImages);
+							}
+							activateMap.put("images", images);
 							activateCollections.add(activateMap);
 						}
 					}
