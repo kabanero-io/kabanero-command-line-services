@@ -27,7 +27,9 @@ public class KabSecFilter implements ContainerRequestFilter {
         if (uri.endsWith("/logout") || uri.endsWith("/logout/")) {
             return;
         }
+        System.out.println("*** KabSecFilter examining jwt to see if it was logged out");
         if (isJwtPreviouslyLoggedOut(requestContext)) {
+            System.out.println("*** Jwt is reused, send 401");
             ResponseBuilder responseBuilder = Response.serverError();
             JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT was previously logged out.").build();
             Response response = responseBuilder.entity(responseBody.toString()).status(401).build();

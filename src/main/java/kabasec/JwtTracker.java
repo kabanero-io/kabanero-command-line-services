@@ -29,13 +29,16 @@ public class JwtTracker {
     private static BoundedHashMap loggedOutJwts = null;
 
     public static synchronized boolean isLoggedOut(String jwt) {
-        init();
+        init();        
         boolean result = loggedOutJwts.get(getSha256Digest(jwt)) != null;
+        System.out.println("*** JwtTracker logout check result: "+ result + " for jwt: >" + jwt+"<");
         return result;
     }
 
+    
     public synchronized static void add(String rawToken) {
         init();
+        System.out.println("*** JwtTracker add jwt to logged out list: >"+ rawToken + "<");
         // digest it to reduce size
         String digestedJwt = getSha256Digest(rawToken);
         if (digestedJwt != null) {
@@ -59,6 +62,7 @@ public class JwtTracker {
             return null;
         }
         byte[] digest = md.digest(in.getBytes(Charset.forName("UTF-8")));
+        System.out.println("** getSha256Digest out: " + new String(digest)+ "  in: "+ in);
         return new String(digest);
     }
 
