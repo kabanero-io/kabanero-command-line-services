@@ -136,7 +136,7 @@ public class StacksAccess {
 			if (PAT==null) {
 				System.out.println("login token has expired, please login again");
 				JSONObject resp = new JSONObject();
-				resp.put("message", "your login token has expired, please login again");
+				resp.put("message", "your login token has expired or your credentials are invalid, please login again");
 				return Response.status(401).entity(resp).build();
 			}
 			
@@ -761,7 +761,6 @@ public class StacksAccess {
 				System.out.println("no version number supplied for stack: "+name);
 				msg.put("status", "no version number supplied for stack: "+name);
 				return Response.status(400).entity(msg).build();
-
 			}
 			System.out.println(kabStack.getSpec().getName()+" stack for patch deactivate: " + kabStack.toString());
 			kabStack.getSpec().setVersions(kabSpecVersions);
