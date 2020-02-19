@@ -1,8 +1,5 @@
 package kabasec;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import javax.annotation.Priority;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -25,21 +22,12 @@ public class KabSecFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
+
         String uri = requestContext.getUriInfo().getRequestUri().toString();
-        
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
-        LocalDateTime ldt = LocalDateTime.now();
-        String now = dtf.format(ldt);
-        String header = requestContext.getHeaderString("Authorization");
-        
-        System.out.println("*** "+ now + " kabSecFilter running, uri = "+ uri + "  Header:" + header);
-        
         if (uri.endsWith("/logout") || uri.endsWith("/logout/")) {
             return;
         }
-        System.out.println("*** KabSecFilter examining jwt to see if it was logged out");
         if (isJwtPreviouslyLoggedOut(requestContext)) {
-            System.out.println("*** Jwt is reused, send 401");
             ResponseBuilder responseBuilder = Response.serverError();
             JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT was previously logged out.").build();
             Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
@@ -49,7 +37,6 @@ public class KabSecFilter implements ContainerRequestFilter {
 
     private boolean isJwtPreviouslyLoggedOut(ContainerRequestContext context) {
         String jwt = httpUtils.getBearerTokenFromAuthzHeader(context);
-        System.out.println("*** kabsecFilter jwt from authz header: " + jwt);
         if (jwt != null) {
             return JwtTracker.isLoggedOut(jwt);
         }

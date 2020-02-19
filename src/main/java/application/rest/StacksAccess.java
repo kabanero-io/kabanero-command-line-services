@@ -755,11 +755,13 @@ public class StacksAccess {
 				if (!verMatch) {
 					System.out.println("*** " + "Version: "+version+" not found in Stack name: " + name);
 					msg.put("status", "Version: "+version+" not found in Stack name: " + name);
+					msg.put("message", "Version: "+version+" not found in Stack name: " + name);
 					return Response.status(400).entity(msg).build();
 				}
 			} else {
 				System.out.println("no version number supplied for stack: "+name);
 				msg.put("status", "no version number supplied for stack: "+name);
+				msg.put("message", "no version number supplied for stack: "+name);
 				return Response.status(400).entity(msg).build();
 			}
 			System.out.println(kabStack.getSpec().getName()+" stack for patch deactivate: " + kabStack.toString());
@@ -767,6 +769,7 @@ public class StacksAccess {
 			api.patchStack(namespace, kabStack.getMetadata().getName(), kabStack);
 			System.out.println("*** " + "Stack name: " + name + " deactivated");
 			msg.put("status", "Stack name: " + name + " version: "+version+" deactivated");
+			msg.put("message", "Stack name: " + name + " version: "+version+" deactivated");
 			msg.put("repositories", getRepositories(kab));
 			return Response.ok(msg).build();
 		} catch (ApiException apie) {
@@ -775,6 +778,8 @@ public class StacksAccess {
 			System.err.println("Response body: " + responseBody);
 			msg.put("status",
 					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + apie.getMessage());
+			msg.put("message",
+					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + apie.getMessage());
 			msg.put("exception message", apie.getMessage()+", cause: "+apie.getCause());
 			return Response.status(400).entity(msg).build();
 
@@ -782,6 +787,8 @@ public class StacksAccess {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			msg.put("status",
+					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + e.getMessage());
+			msg.put("message",
 					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + e.getMessage());
 			msg.put("exception message", e.getMessage()+", cause: "+e.getCause());
 			return Response.status(400).entity(msg).build();
