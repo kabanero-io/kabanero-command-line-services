@@ -387,7 +387,7 @@ public class StacksAccess {
 			
 			if (foundOneCustomPipeline==false && pipelines.size() == 0) {
 				JSONObject resp = new JSONObject();
-				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
+				resp.put("message", "The CLI service could not read the pipeline specification(s) from the Kabanero CR");
 				return Response.status(424).entity(resp).build();
 			} 
 			
