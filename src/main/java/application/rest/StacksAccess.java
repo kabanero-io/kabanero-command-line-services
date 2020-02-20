@@ -161,6 +161,12 @@ public class StacksAccess {
 				return Response.status(424).entity(resp).build();
 			}
 			
+			if (true) {
+				JSONObject resp = new JSONObject();
+				resp.put("message", "http code 429: Github retry Limited Exceeded, please try again in 2 minutes");
+				return Response.status(429).entity(resp).build();
+			}
+			
 			
 			System.out.println("stacks: "+stacks);
 			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
@@ -331,7 +337,7 @@ public class StacksAccess {
 			ArrayList<StackSpecPipelines> pipelines = new ArrayList<StackSpecPipelines>();
 			try {
 				List<KabaneroSpecStacksPipelines> defaultPipelines = kab.getSpec().getStacks().getPipelines();
-				for (KabaneroSpecStacksPipelines defaultPipelineElement: defaultPipelines) {
+				for (KabaneroSpecStacksPipelines defaultPipelineElement : defaultPipelines) {
 					StackSpecPipelines pipeline = new StackSpecPipelines();
 					StackSpecHttps https = new StackSpecHttps();
 					https.setUrl(defaultPipelineElement.getHttps().getUrl());
@@ -339,10 +345,11 @@ public class StacksAccess {
 					pipeline.setSha256(defaultPipelineElement.getSha256());
 					pipeline.setId(defaultPipelineElement.getId());
 					pipelines.add(pipeline);
-				}}
-			catch (NullPointerException npe) {
+				}
+			} catch (NullPointerException npe) {
 				JSONObject resp = new JSONObject();
-				resp.put("message", "The CLI service could not read the pipeline specification(s) from the Kabanero CR");
+				resp.put("message",
+						"The CLI service could not read the pipeline specification(s) from the Kabanero CR");
 				return Response.status(424).entity(resp).build();
 			}
 			
