@@ -335,6 +335,8 @@ public class StacksAccess {
 					pipelines.add(pipeline);
 				}
 			}
+			
+			System.out.println("default pipelines size="+pipelines.size());
 
 			// multi custom pipelines per repository collection in 060, future, design not
 			// set on this yet
@@ -360,9 +362,9 @@ public class StacksAccess {
 							stackPipeline.setSha256(pipelineElement.getSha256());
 							stackPipeline.setId(pipelineElement.getId());
 							stackPipelines.add(stackPipeline);
+							foundOneCustomPipeline=true;
 						}
 						tempPipelines = stackPipelines;
-						foundOneCustomPipeline=true;
 					} else {
 						tempPipelines =  pipelines;
 					}
@@ -379,6 +381,9 @@ public class StacksAccess {
 				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
 				return Response.status(424).entity(resp).build();
 			}
+			
+			System.out.println("default pipelines size="+pipelines.size());
+			System.out.println("foundOneCustomPipeline="+foundOneCustomPipeline);
 			
 			if (foundOneCustomPipeline==false && pipelines.size() == 0) {
 				JSONObject resp = new JSONObject();
