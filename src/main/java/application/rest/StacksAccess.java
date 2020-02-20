@@ -740,6 +740,7 @@ public class StacksAccess {
 			if (kabStack==null) {
 				System.out.println("*** " + "Stack name: " + name + " 404 not found");
 				msg.put("status", "Stack name: " + name + " 404 not found");
+				msg.put("message", "Stack name: " + name + " 404 not found");
 				return Response.status(400).entity(msg).build();
 			}
 			List<StackSpecVersions> kabSpecVersions=null;
