@@ -299,19 +299,13 @@ public class StacksAccess {
 		List newStacks = null;
 		List<Map> activateStacks = new ArrayList<Map>();
 		List<Map> deletedStacks = null;
-		List versionChangeCollections = null;
 		
 		List<Stack> multiVersionNewStacks=null;
-		List<Stack> multiVersionActivateStacks=null;
-		List<Stack> multiVersionDeletedStacks=null;
-		Map versionedStackPipelineMap = new HashMap();
 		
-		KabaneroSpecStacksPipelines defaultPipeline=null;
+		Map versionedStackPipelineMap = new HashMap();
 		
 		List curatedStacks = null;
 		
-		
-		String collectionsUrl = null;
 		JSONObject msg = new JSONObject();
 		try {
 			
@@ -328,8 +322,9 @@ public class StacksAccess {
 			
 			
 			ArrayList<StackSpecPipelines> pipelines = new ArrayList<StackSpecPipelines>();
-			try {
-				List<KabaneroSpecStacksPipelines> defaultPipelines = kab.getSpec().getStacks().getPipelines();
+
+			List<KabaneroSpecStacksPipelines> defaultPipelines = kab.getSpec().getStacks().getPipelines();
+			if (defaultPipelines != null) {
 				for (KabaneroSpecStacksPipelines defaultPipelineElement : defaultPipelines) {
 					StackSpecPipelines pipeline = new StackSpecPipelines();
 					StackSpecHttps https = new StackSpecHttps();
@@ -339,22 +334,19 @@ public class StacksAccess {
 					pipeline.setId(defaultPipelineElement.getId());
 					pipelines.add(pipeline);
 				}
-			} catch (NullPointerException npe) {
-				JSONObject resp = new JSONObject();
-				resp.put("message",
-						"The CLI service could not read the pipeline specification(s) from the Kabanero CR");
-				return Response.status(424).entity(resp).build();
 			}
 			
-			
-			// multi custom pipelines per repository collection in 060, future, design not set on this yet
+			System.out.println("default pipelines size="+pipelines.size());
+
+			// multi custom pipelines per repository collection in 060, future, design not
+			// set on this yet
 			List<KabaneroSpecStacksRepositories> stackRepos = kab.getSpec().getStacks().getRepositories();
 			
 			
 			ArrayList stacks = new ArrayList();
-			
-			try {
-				for (KabaneroSpecStacksRepositories r : kab.getSpec().getStacks().getRepositories()) {
+			boolean foundOneCustomPipeline = false;
+			if (stackRepos!=null) {
+				for (KabaneroSpecStacksRepositories r : stackRepos) {
 
 					List stacksFromRest = (ArrayList) StackUtils.getStackFromGIT(getUser(request), PAT, r);
 					stacks.addAll(stacksFromRest);
@@ -370,6 +362,7 @@ public class StacksAccess {
 							stackPipeline.setSha256(pipelineElement.getSha256());
 							stackPipeline.setId(pipelineElement.getId());
 							stackPipelines.add(stackPipeline);
+							foundOneCustomPipeline=true;
 						}
 						tempPipelines = stackPipelines;
 					} else {
@@ -383,11 +376,19 @@ public class StacksAccess {
 					}
 					
 				}
-			} catch (NullPointerException npe) {
+			} else {
 				JSONObject resp = new JSONObject();
-				resp.put("message", "The CLI service could not read the repository or pipelines URL specification(s) from the Kabanero CR");
+				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
 				return Response.status(424).entity(resp).build();
 			}
+			
+			if (foundOneCustomPipeline==false && pipelines.size() == 0) {
+				JSONObject resp = new JSONObject();
+				resp.put("message", "The CLI service could not read the pipeline specification(s) from the Kabanero CR");
+				return Response.status(424).entity(resp).build();
+			} 
+			
+			
 			
 			System.out.println("versionedStackPipelineMap: "+versionedStackPipelineMap);
 			
