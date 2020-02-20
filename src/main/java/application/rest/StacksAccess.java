@@ -149,7 +149,7 @@ public class StacksAccess {
 				}
 				String firstElem = stacks.get(0).toString();
 				if (firstElem!=null) {
-					if (firstElem.contains("http code 429:")) {
+					if (firstElem.contains("HTTP Code 429:")) {
 						JSONObject resp = new JSONObject();
 						resp.put("message", firstElem);
 						return Response.status(429).entity(resp).build();
@@ -160,13 +160,6 @@ public class StacksAccess {
 				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
 				return Response.status(424).entity(resp).build();
 			}
-			
-			if (true) {
-				JSONObject resp = new JSONObject();
-				resp.put("message", "http code 429: Github retry Limited Exceeded, please try again in 2 minutes");
-				return Response.status(429).entity(resp).build();
-			}
-			
 			
 			System.out.println("stacks: "+stacks);
 			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
@@ -402,7 +395,7 @@ public class StacksAccess {
 			
 			String firstElem = stacks.get(0).toString();
 			if (firstElem!=null) {
-				if (firstElem.contains("http code 429:")) {
+				if (firstElem.contains("HTTP Code 429:")) {
 					JSONObject resp = new JSONObject();
 					resp.put("message", firstElem);
 					return Response.status(429).entity(resp).build();
