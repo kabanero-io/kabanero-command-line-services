@@ -54,7 +54,7 @@ stacks:
   image: docker.io/kabanerobeta/java-openliberty:0.2.1
 - id: java-spring-boot2
   name: Spring Boot®
-  version: 0.3.23
+  version: 0.3.33
   description: Spring Boot using OpenJ9 and Maven
   license: Apache-2.0
   language: java
@@ -99,7 +99,7 @@ stacks:
   image: docker.io/kabanerobeta/nodejs-express:0.2.8
 - id: nodejs-loopback
   name: LoopBack 4
-  version: 0.1.8
+  version: 0.2.9
   description: LoopBack 4 API Framework for Node.js
   license: Apache-2.0
   language: nodejs
