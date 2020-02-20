@@ -382,9 +382,6 @@ public class StacksAccess {
 				return Response.status(424).entity(resp).build();
 			}
 			
-			System.out.println("default pipelines size="+pipelines.size());
-			System.out.println("foundOneCustomPipeline="+foundOneCustomPipeline);
-			
 			if (foundOneCustomPipeline==false && pipelines.size() == 0) {
 				JSONObject resp = new JSONObject();
 				resp.put("message", "The CLI service could not read the pipeline specification(s) from the Kabanero CR");
