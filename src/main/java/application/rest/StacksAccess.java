@@ -339,7 +339,7 @@ public class StacksAccess {
 			System.out.println("default pipelines size="+pipelines.size());
 
 			// multi custom pipelines per repository collection in 060, future, design not
-			// set on this yet
+			// set on this yet.
 			List<KabaneroSpecStacksRepositories> stackRepos = kab.getSpec().getStacks().getRepositories();
 			
 			
