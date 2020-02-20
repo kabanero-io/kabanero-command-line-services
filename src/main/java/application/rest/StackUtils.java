@@ -115,7 +115,7 @@ public class StackUtils {
 		}
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 		if (response.getStatusLine().getStatusCode()==429) {
-			return "http code 429: Github retry Limited Exceeded, please try again in 2 minutes";
+			return "HTTP Code 429: GitHub retry limit exceeded, please try again in 2 minutes";
 		}
 		BufferedReader rd = null;
 		try {
@@ -187,7 +187,7 @@ public class StackUtils {
 		try {
 			response = getFromGit(url, user, pw);
 			if (response!=null) {
-				if (response.contains("http code 429:")) {
+				if (response.contains("HTTP Code 429:")) {
 					ArrayList<String> list= new ArrayList();
 					list.add(response);
 					return list;

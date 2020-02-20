@@ -136,7 +136,7 @@ public class StacksAccess {
 			if (PAT==null) {
 				System.out.println("login token has expired, please login again");
 				JSONObject resp = new JSONObject();
-				resp.put("message", "your login token has expired, please login again");
+				resp.put("message", "your login token has expired or your credentials are invalid, please login again");
 				return Response.status(401).entity(resp).build();
 			}
 			
@@ -149,7 +149,7 @@ public class StacksAccess {
 				}
 				String firstElem = stacks.get(0).toString();
 				if (firstElem!=null) {
-					if (firstElem.contains("http code 429:")) {
+					if (firstElem.contains("HTTP Code 429:")) {
 						JSONObject resp = new JSONObject();
 						resp.put("message", firstElem);
 						return Response.status(429).entity(resp).build();
@@ -160,7 +160,6 @@ public class StacksAccess {
 				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
 				return Response.status(424).entity(resp).build();
 			}
-			
 			
 			System.out.println("stacks: "+stacks);
 			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
@@ -331,7 +330,7 @@ public class StacksAccess {
 			ArrayList<StackSpecPipelines> pipelines = new ArrayList<StackSpecPipelines>();
 			try {
 				List<KabaneroSpecStacksPipelines> defaultPipelines = kab.getSpec().getStacks().getPipelines();
-				for (KabaneroSpecStacksPipelines defaultPipelineElement: defaultPipelines) {
+				for (KabaneroSpecStacksPipelines defaultPipelineElement : defaultPipelines) {
 					StackSpecPipelines pipeline = new StackSpecPipelines();
 					StackSpecHttps https = new StackSpecHttps();
 					https.setUrl(defaultPipelineElement.getHttps().getUrl());
@@ -339,10 +338,11 @@ public class StacksAccess {
 					pipeline.setSha256(defaultPipelineElement.getSha256());
 					pipeline.setId(defaultPipelineElement.getId());
 					pipelines.add(pipeline);
-				}}
-			catch (NullPointerException npe) {
+				}
+			} catch (NullPointerException npe) {
 				JSONObject resp = new JSONObject();
-				resp.put("message", "The CLI service could not read the pipeline specification(s) from the Kabanero CR");
+				resp.put("message",
+						"The CLI service could not read the pipeline specification(s) from the Kabanero CR");
 				return Response.status(424).entity(resp).build();
 			}
 			
@@ -395,7 +395,7 @@ public class StacksAccess {
 			
 			String firstElem = stacks.get(0).toString();
 			if (firstElem!=null) {
-				if (firstElem.contains("http code 429:")) {
+				if (firstElem.contains("HTTP Code 429:")) {
 					JSONObject resp = new JSONObject();
 					resp.put("message", firstElem);
 					return Response.status(429).entity(resp).build();
@@ -740,6 +740,7 @@ public class StacksAccess {
 			if (kabStack==null) {
 				System.out.println("*** " + "Stack name: " + name + " 404 not found");
 				msg.put("status", "Stack name: " + name + " 404 not found");
+				msg.put("message", "Stack name: " + name + " 404 not found");
 				return Response.status(400).entity(msg).build();
 			}
 			List<StackSpecVersions> kabSpecVersions=null;
@@ -755,19 +756,21 @@ public class StacksAccess {
 				if (!verMatch) {
 					System.out.println("*** " + "Version: "+version+" not found in Stack name: " + name);
 					msg.put("status", "Version: "+version+" not found in Stack name: " + name);
+					msg.put("message", "Version: "+version+" not found in Stack name: " + name);
 					return Response.status(400).entity(msg).build();
 				}
 			} else {
 				System.out.println("no version number supplied for stack: "+name);
 				msg.put("status", "no version number supplied for stack: "+name);
+				msg.put("message", "no version number supplied for stack: "+name);
 				return Response.status(400).entity(msg).build();
-
 			}
 			System.out.println(kabStack.getSpec().getName()+" stack for patch deactivate: " + kabStack.toString());
 			kabStack.getSpec().setVersions(kabSpecVersions);
 			api.patchStack(namespace, kabStack.getMetadata().getName(), kabStack);
 			System.out.println("*** " + "Stack name: " + name + " deactivated");
 			msg.put("status", "Stack name: " + name + " version: "+version+" deactivated");
+			msg.put("message", "Stack name: " + name + " version: "+version+" deactivated");
 			msg.put("repositories", getRepositories(kab));
 			return Response.ok(msg).build();
 		} catch (ApiException apie) {
@@ -776,6 +779,8 @@ public class StacksAccess {
 			System.err.println("Response body: " + responseBody);
 			msg.put("status",
 					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + apie.getMessage());
+			msg.put("message",
+					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + apie.getMessage());
 			msg.put("exception message", apie.getMessage()+", cause: "+apie.getCause());
 			return Response.status(400).entity(msg).build();
 
@@ -783,6 +788,8 @@ public class StacksAccess {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			msg.put("status",
+					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + e.getMessage());
+			msg.put("message",
 					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + e.getMessage());
 			msg.put("exception message", e.getMessage()+", cause: "+e.getCause());
 			return Response.status(400).entity(msg).build();

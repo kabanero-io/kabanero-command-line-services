@@ -18,6 +18,9 @@
  */
 package kabasec;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.annotation.security.PermitAll;
@@ -29,12 +32,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+
 @PermitAll()
 @Path("/login")
 public class Login {
 
     @Context
     HttpServletResponse response;
+    
+    static long lastTimeJWTissued=0;
+    
+    static HashMap<String, Object> trackJWTs = new BoundedHashMap(5000);
 
     /**
      * Uses GitHub credentials from the request body to obtain user information that is used to create and return a JWT that
@@ -88,7 +96,27 @@ public class Login {
         } catch (Exception e) {
             return returnError(500, "An error occurred during authentication for user [" + creds.getId() + "].", e);
         }
+        throttle();
+        lastTimeJWTissued=System.currentTimeMillis();
+        // logout/invalidate the previous JWT
+        if (trackJWTs.get(creds.getId())!=null) {
+        	jwt=(String) trackJWTs.get(creds.getId());
+        	JwtTracker.add(jwt);
+        }
+        // put/replace id:JWT in the hashtable
+        trackJWTs.put(creds.getId(), jwt);
         return returnSuccess(jwt);
+    }
+    
+    private void throttle() {
+    	// if it's less than 10 seconds, then sleep for 10 seconds
+        if (System.currentTimeMillis()-lastTimeJWTissued<=10000) {
+        	try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        }
     }
     
     private void checkTeamsAndGithubURL(Authentication auth) throws KabaneroSecurityException {
@@ -140,6 +168,37 @@ public class Login {
         p.put("jwt", jwt);
         p.put("message", "ok");
         return p;
+    }
+    
+    static class BoundedHashMap extends LinkedHashMap<String, Object> {
+
+        private static final long serialVersionUID = 7306671418293201026L;
+
+        private int MAX_ENTRIES = 10000;
+
+        public BoundedHashMap(int maxEntries) {
+            super();
+            if (maxEntries > 0) {
+                MAX_ENTRIES = maxEntries;
+            }
+        }
+
+        public BoundedHashMap(int initSize, int maxEntries) {
+            super(initSize);
+            if (maxEntries > 0) {
+                MAX_ENTRIES = maxEntries;
+            }
+        }
+
+        public BoundedHashMap() {
+            super();
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > MAX_ENTRIES;
+        }
+
     }
 
 }
