@@ -343,8 +343,8 @@ public class StacksAccess {
 			
 			ArrayList stacks = new ArrayList();
 			boolean foundOneCustomPipeline = false;
-			try {
-				for (KabaneroSpecStacksRepositories r : kab.getSpec().getStacks().getRepositories()) {
+			if (stackRepos!=null) {
+				for (KabaneroSpecStacksRepositories r : stackRepos) {
 
 					List stacksFromRest = (ArrayList) StackUtils.getStackFromGIT(getUser(request), PAT, r);
 					stacks.addAll(stacksFromRest);
@@ -374,15 +374,17 @@ public class StacksAccess {
 					}
 					
 				}
-			} catch (NullPointerException npe) {
+			} else {
 				JSONObject resp = new JSONObject();
-				if (foundOneCustomPipeline) {
-					resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
-				} else if (pipelines.size() == 0) {
-					resp.put("message", "The CLI service could not read the pipeline specification(s) from the Kabanero CR");
-				}
+				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
 				return Response.status(424).entity(resp).build();
 			}
+			
+			if (foundOneCustomPipeline=false && pipelines.size() == 0) {
+				JSONObject resp = new JSONObject();
+				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
+				return Response.status(424).entity(resp).build();
+			} 
 			
 			
 			
