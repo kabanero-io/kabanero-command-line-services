@@ -100,8 +100,8 @@ public class Login {
         lastTimeJWTissued=System.currentTimeMillis();
         // logout/invalidate the previous JWT
         if (trackJWTs.get(creds.getId())!=null) {
-        	jwt=(String) trackJWTs.get(creds.getId());
-        	JwtTracker.add(jwt);
+        	String jwtOld=(String) trackJWTs.get(creds.getId());
+        	JwtTracker.add(jwtOld);
         }
         // put/replace id:JWT in the hashtable
         trackJWTs.put(creds.getId(), jwt);
