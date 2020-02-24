@@ -37,6 +37,7 @@ public class Authentication {
 
     private final String JWT_BUILDER_ID = "kabsecbuilder";
     private HashSet<String> allKnownTeamNames = new HashSet<String>();
+    public static final long podinstance = System.currentTimeMillis();
 
     /**
      * Build a JWT for the Github user credentials supplied.
@@ -126,6 +127,7 @@ public class Authentication {
                 .jwtId(true)
                 .claim(Claims.SUBJECT, userName)
                 .claim("upn", userName)
+                .claim(Constants.POD_INSTANCE_CLAIM, podinstance)
                 .claim(Constants.PAT_JWT_CLAIM, pat);
         
         if (teams != null && !teams.isEmpty()) {
