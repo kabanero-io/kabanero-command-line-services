@@ -13,9 +13,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.Provider;
 
-import com.google.gson.JsonParser;
 import com.ibm.json.java.JSONObject;
-import com.ibm.websphere.security.jwt.Claims;
 
 @PreMatching
 @Priority(value = 10)
