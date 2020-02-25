@@ -40,12 +40,13 @@ public class KabSecFilter implements ContainerRequestFilter {
             Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
             requestContext.abortWith(response);
         }
-        
-        if (isJWTFromThisPod(jwt)) {
-            ResponseBuilder responseBuilder = Response.serverError();
-            JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT is not from the active pod.").build();
-            Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
-            requestContext.abortWith(response);
+        if (jwt!=null) {
+        	if (isJWTFromThisPod(jwt)) {
+        		ResponseBuilder responseBuilder = Response.serverError();
+        		JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT is not from the active pod.").build();
+        		Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
+        		requestContext.abortWith(response);
+        	}
         }
         
     }
