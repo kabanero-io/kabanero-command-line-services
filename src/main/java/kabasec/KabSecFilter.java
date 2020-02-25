@@ -28,26 +28,30 @@ public class KabSecFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
 
-        String uri = requestContext.getUriInfo().getRequestUri().toString();
-        if (uri.endsWith("/logout") || uri.endsWith("/logout/")) {
-            return;
-        }
-        String jwt = httpUtils.getBearerTokenFromAuthzHeader(requestContext);
-        System.out.println("In KabSecFilter, jwt="+jwt);
-        if (isJwtPreviouslyLoggedOut(jwt)) {
-            ResponseBuilder responseBuilder = Response.serverError();
-            JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT was previously logged out.").build();
-            Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
-            requestContext.abortWith(response);
-        }
-        if (jwt!=null) {
-        	if (isJWTFromThisPod(jwt)) {
-        		ResponseBuilder responseBuilder = Response.serverError();
-        		JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT is not from the active pod.").build();
-        		Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
-        		requestContext.abortWith(response);
-        	}
-        }
+    	try {
+    		String uri = requestContext.getUriInfo().getRequestUri().toString();
+    		if (uri.endsWith("/logout") || uri.endsWith("/logout/")) {
+    			return;
+    		}
+    		String jwt = httpUtils.getBearerTokenFromAuthzHeader(requestContext);
+    		System.out.println("In KabSecFilter, jwt="+jwt);
+    		if (isJwtPreviouslyLoggedOut(jwt)) {
+    			ResponseBuilder responseBuilder = Response.serverError();
+    			JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT was previously logged out.").build();
+    			Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
+    			requestContext.abortWith(response);
+    		}
+    		if (jwt!=null) {
+    			if (isJWTFromThisPod(jwt)) {
+    				ResponseBuilder responseBuilder = Response.serverError();
+    				JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT is not from the active pod.").build();
+    				Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
+    				requestContext.abortWith(response);
+    			}
+    		}
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
         
     }
     
