@@ -33,6 +33,7 @@ public class KabSecFilter implements ContainerRequestFilter {
             return;
         }
         String jwt = httpUtils.getBearerTokenFromAuthzHeader(requestContext);
+        System.out.println("In KabSecFilter, jwt="+jwt);
         if (isJwtPreviouslyLoggedOut(jwt)) {
             ResponseBuilder responseBuilder = Response.serverError();
             JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT was previously logged out.").build();
@@ -51,7 +52,7 @@ public class KabSecFilter implements ContainerRequestFilter {
     
     private boolean isJWTFromThisPod(String jwt) {
     	JSONObject jwt_JSON = null;
-    	
+    	 System.out.println("In isJWTFromThisPod, jwt="+jwt);
         try {
     	    String[] parts = jwt.split("\\.");   
     		String decoded = b64dec(parts[1]);
