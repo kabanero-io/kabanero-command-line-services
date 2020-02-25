@@ -32,14 +32,15 @@ public class KabSecFilter implements ContainerRequestFilter {
         if (uri.endsWith("/logout") || uri.endsWith("/logout/")) {
             return;
         }
-        if (isJwtPreviouslyLoggedOut(requestContext)) {
+        String jwt = httpUtils.getBearerTokenFromAuthzHeader(requestContext);
+        if (isJwtPreviouslyLoggedOut(jwt)) {
             ResponseBuilder responseBuilder = Response.serverError();
             JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT was previously logged out.").build();
             Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
             requestContext.abortWith(response);
         }
         
-        if (isJWTFromThisPod(requestContext)) {
+        if (isJWTFromThisPod(jwt)) {
             ResponseBuilder responseBuilder = Response.serverError();
             JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT is not from the active pod.").build();
             Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
@@ -48,8 +49,7 @@ public class KabSecFilter implements ContainerRequestFilter {
         
     }
     
-    private boolean isJWTFromThisPod(ContainerRequestContext context) {
-    	String jwt = httpUtils.getBearerTokenFromAuthzHeader(context);
+    private boolean isJWTFromThisPod(String jwt) {
     	JSONObject jwt_JSON = null;
     	
         try {
@@ -72,8 +72,7 @@ public class KabSecFilter implements ContainerRequestFilter {
         return new String(Base64.getDecoder().decode(ba));
     }
 
-    private boolean isJwtPreviouslyLoggedOut(ContainerRequestContext context) {
-        String jwt = httpUtils.getBearerTokenFromAuthzHeader(context);
+    private boolean isJwtPreviouslyLoggedOut(String jwt) {
         if (jwt != null) {
             return JwtTracker.isLoggedOut(jwt);
         }
