@@ -56,6 +56,7 @@ public class KabSecFilter implements ContainerRequestFilter {
         
     }
     
+    // Check to see if the JWT on the thread is from this 
     private boolean isJWTFromThisPod(String jwt) {
     	JSONObject jwt_JSON = null;
     	System.out.println("In isJWTFromThisPod, jwt="+jwt);
