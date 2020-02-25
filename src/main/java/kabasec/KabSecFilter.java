@@ -80,8 +80,7 @@ public class KabSecFilter implements ContainerRequestFilter {
     		return false;
     	}
     	System.out.println("<<4>>");
-    	String podInstanceFromJWT = (String) jwt_JSON.get(Constants.POD_INSTANCE_CLAIM);
-    	long podInstanceFromJWTLong = Long.valueOf(podInstanceFromJWT);
+    	long podInstanceFromJWTLong = (long) jwt_JSON.get(Constants.POD_INSTANCE_CLAIM);
     	
     	System.out.println("podInstanceFromJWTLong="+podInstanceFromJWTLong);
     	System.out.println("Authentication.podinstance="+Authentication.podinstance);
