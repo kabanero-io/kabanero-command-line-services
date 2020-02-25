@@ -27,7 +27,7 @@ public class KabSecFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-
+    	System.out.println("Entering KabSecFilter");
     	try {
     		String uri = requestContext.getUriInfo().getRequestUri().toString();
     		if (uri.endsWith("/logout") || uri.endsWith("/logout/")) {
@@ -41,7 +41,9 @@ public class KabSecFilter implements ContainerRequestFilter {
     			Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
     			requestContext.abortWith(response);
     		}
+    		System.out.println("In KabSecFilter, jwt="+jwt);
     		if (jwt!=null) {
+    			System.out.println("<<1>>");
     			if (!isJWTFromThisPod(jwt)) {
     				ResponseBuilder responseBuilder = Response.serverError();
     				System.out.println("The supplied JWT is not from the active pod. JWT="+jwt);
@@ -51,7 +53,14 @@ public class KabSecFilter implements ContainerRequestFilter {
     			}
     		}
     	} catch (Exception e) {
+    		System.out.println("<<2>>");
     		e.printStackTrace();
+    		ResponseBuilder responseBuilder = Response.serverError();
+    		String msg ="Unexpected exception: "+e.getMessage()+", cause: "+e.getCause()+" occurred";
+    		System.out.println(msg);
+			JsonObject responseBody = Json.createObjectBuilder().add("message", msg).build();
+			Response response = responseBuilder.entity(responseBody.toString()).status(500).build();
+			requestContext.abortWith(response);
     	}
         
     }
@@ -59,28 +68,27 @@ public class KabSecFilter implements ContainerRequestFilter {
     // Check to see if the JWT on the thread is from this 
     private boolean isJWTFromThisPod(String jwt) {
     	JSONObject jwt_JSON = null;
+    	System.out.println("<<3>>");
     	System.out.println("In isJWTFromThisPod, jwt="+jwt);
-    	if (jwt!=null) {
-    		try {
-    			String[] parts = jwt.split("\\.");   
-    			String decoded = b64dec(parts[1]);
-    			jwt_JSON = JSONObject.parse(decoded);
-    		} catch (Exception e) {
-    			e.printStackTrace();
-    			return false;
-    		}
 
-    		String podInstanceFromJWT = (String) jwt_JSON.get(Constants.POD_INSTANCE_CLAIM);
-    		long podInstanceFromJWTLong = Long.valueOf(podInstanceFromJWT);
-
-    		boolean isFromThisPod = (podInstanceFromJWTLong == Authentication.podinstance);
-    		System.out.println("It is "+isFromThisPod+" that this JWT is from this pod");
-
-    		return isFromThisPod;
-
-    	} else {
-    		return true;
+    	try {
+    		String[] parts = jwt.split("\\.");   
+    		String decoded = b64dec(parts[1]);
+    		jwt_JSON = JSONObject.parse(decoded);
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		return false;
     	}
+    	System.out.println("<<4>>");
+    	String podInstanceFromJWT = (String) jwt_JSON.get(Constants.POD_INSTANCE_CLAIM);
+    	long podInstanceFromJWTLong = Long.valueOf(podInstanceFromJWT);
+    	
+    	System.out.println("podInstanceFromJWTLong="+podInstanceFromJWTLong);
+    	System.out.println("Authentication.podinstance="+Authentication.podinstance);
+    	
+    	boolean isFromThisPod = (podInstanceFromJWTLong == Authentication.podinstance);
+    	System.out.println("It is "+isFromThisPod+" that this JWT is from this pod");
+    	return isFromThisPod;
     }
 
     private String b64dec(String in) throws UnsupportedEncodingException {
