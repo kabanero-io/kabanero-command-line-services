@@ -27,23 +27,19 @@ public class KabSecFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-    	System.out.println("Entering KabSecFilter");
     	try {
     		String uri = requestContext.getUriInfo().getRequestUri().toString();
     		if (uri.endsWith("/logout") || uri.endsWith("/logout/")) {
     			return;
     		}
     		String jwt = httpUtils.getBearerTokenFromAuthzHeader(requestContext);
-    		System.out.println("In KabSecFilter, jwt="+jwt);
     		if (isJwtPreviouslyLoggedOut(jwt)) {
     			ResponseBuilder responseBuilder = Response.serverError();
     			JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT was previously logged out.").build();
     			Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
     			requestContext.abortWith(response);
     		}
-    		System.out.println("In KabSecFilter, jwt="+jwt);
     		if (jwt!=null) {
-    			System.out.println("<<1>>");
     			if (!isJWTFromThisPod(jwt)) {
     				ResponseBuilder responseBuilder = Response.serverError();
     				System.out.println("The supplied JWT is not from the active pod. JWT="+jwt);
@@ -53,7 +49,6 @@ public class KabSecFilter implements ContainerRequestFilter {
     			}
     		}
     	} catch (Exception e) {
-    		System.out.println("<<2>>");
     		e.printStackTrace();
     		ResponseBuilder responseBuilder = Response.serverError();
     		String msg ="Unexpected exception: "+e.getMessage()+", cause: "+e.getCause()+" occurred";
@@ -68,9 +63,6 @@ public class KabSecFilter implements ContainerRequestFilter {
     // Check to see if the JWT on the thread is from this 
     private boolean isJWTFromThisPod(String jwt) {
     	JSONObject jwt_JSON = null;
-    	System.out.println("<<3>>");
-    	System.out.println("In isJWTFromThisPod, jwt="+jwt);
-
     	try {
     		String[] parts = jwt.split("\\.");   
     		String decoded = b64dec(parts[1]);
@@ -79,13 +71,12 @@ public class KabSecFilter implements ContainerRequestFilter {
     		e.printStackTrace();
     		return false;
     	}
-    	System.out.println("<<4>>");
-    	long podInstanceFromJWTLong = (long) jwt_JSON.get(Constants.POD_INSTANCE_CLAIM);
+    	long podInstanceFromJWT = (long) jwt_JSON.get(Constants.POD_INSTANCE_CLAIM);
     	
-    	System.out.println("podInstanceFromJWTLong="+podInstanceFromJWTLong);
+    	System.out.println("podInstanceFromJWT="+podInstanceFromJWT);
     	System.out.println("Authentication.podinstance="+Authentication.podinstance);
     	
-    	boolean isFromThisPod = (podInstanceFromJWTLong == Authentication.podinstance);
+    	boolean isFromThisPod = (podInstanceFromJWT == Authentication.podinstance);
     	System.out.println("It is "+isFromThisPod+" that this JWT is from this pod");
     	return isFromThisPod;
     }
