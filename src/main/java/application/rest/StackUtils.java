@@ -255,19 +255,38 @@ public class StackUtils {
 				List<Map> status = new ArrayList<Map>();
 				for (StackStatusVersions stackStatusVersion : versions) {
 					HashMap versionMap = new HashMap();
-					versionMap.put("status", stackStatusVersion.getStatus());
+					String statusStr = stackStatusVersion.getStatus();
+					if ("inactive".contentEquals(statusStr)) {
+						if (isStatusPending(s, stackStatusVersion.getVersion())) {
+							statusStr = "active pending";
+						}
+					}
+					versionMap.put("status", statusStr);
 					versionMap.put("version", stackStatusVersion.getVersion());
 					status.add(versionMap);
 				}
 				allMap.put("name", name);
 				allMap.put("status",status);
-				//System.out.println("all map: " + allMap);
 				allStacks.add(allMap);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return allStacks;
+	}
+	
+	private static boolean isStatusPending(Stack stack, String version) {
+		List<StackSpecVersions> versions = stack.getSpec().getVersions();
+		for (StackSpecVersions specVersion : versions) {
+			if (version.contentEquals(specVersion.getVersion())) {
+				if ("active".contentEquals(specVersion.getDesiredState())) {
+					return true;
+				} else {
+					break;
+				}
+			}
+		}
+		return false;
 	}
 	
 	
