@@ -42,8 +42,9 @@ public class KabSecFilter implements ContainerRequestFilter {
     			requestContext.abortWith(response);
     		}
     		if (jwt!=null) {
-    			if (isJWTFromThisPod(jwt)) {
+    			if (!isJWTFromThisPod(jwt)) {
     				ResponseBuilder responseBuilder = Response.serverError();
+    				System.out.println("The supplied JWT is not from the active pod. JWT="+jwt);
     				JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The supplied JWT is not from the active pod.").build();
     				Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
     				requestContext.abortWith(response);
@@ -57,22 +58,30 @@ public class KabSecFilter implements ContainerRequestFilter {
     
     private boolean isJWTFromThisPod(String jwt) {
     	JSONObject jwt_JSON = null;
-    	 System.out.println("In isJWTFromThisPod, jwt="+jwt);
-        try {
-    	    String[] parts = jwt.split("\\.");   
-    		String decoded = b64dec(parts[1]);
-    		jwt_JSON = JSONObject.parse(decoded);
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    		return false;
+    	System.out.println("In isJWTFromThisPod, jwt="+jwt);
+    	if (jwt!=null) {
+    		try {
+    			String[] parts = jwt.split("\\.");   
+    			String decoded = b64dec(parts[1]);
+    			jwt_JSON = JSONObject.parse(decoded);
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    			return false;
+    		}
+
+    		String podInstanceFromJWT = (String) jwt_JSON.get(Constants.POD_INSTANCE_CLAIM);
+    		long podInstanceFromJWTLong = Long.valueOf(podInstanceFromJWT);
+
+    		boolean isFromThisPod = (podInstanceFromJWTLong == Authentication.podinstance);
+    		System.out.println("It is "+isFromThisPod+" that this JWT is from this pod");
+
+    		return isFromThisPod;
+
+    	} else {
+    		return true;
     	}
-        
-        String podInstanceFromJWT = (String) jwt_JSON.get(Constants.POD_INSTANCE_CLAIM);
-        long podInstanceFromJWTLong = Long.valueOf(podInstanceFromJWT);
-        
-        return (podInstanceFromJWTLong == Authentication.podinstance);
     }
-       
+
     private String b64dec(String in) throws UnsupportedEncodingException {
         byte[] ba = in.getBytes("UTF-8");
         return new String(Base64.getDecoder().decode(ba));
