@@ -96,6 +96,7 @@ public class StacksAccess {
 	@Path("/image")
 	public Response versionlist(@Context final HttpServletRequest request) {
 		String image = null;
+		System.out.println("calling getSecret("+namespace+")");
 		KubeUtils.getSecret(namespace);
 		try {
 			image=StackUtils.getImage(namespace);

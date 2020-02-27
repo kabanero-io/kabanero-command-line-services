@@ -510,6 +510,7 @@ type: kubernetes.io/basic-auth
     
     public static String getSecret(String namespace) {
         String route = "";
+        System.out.println("Entering getSecret("+namespace+")");
         try {
             ApiClient apiClient = getApiClient();
             CoreV1Api coreAPI = new CoreV1Api();
