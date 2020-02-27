@@ -29,13 +29,13 @@ import io.kabanero.v1alpha2.models.Stack;
 import io.kabanero.v1alpha2.models.StackList;
 import io.kabanero.v1alpha2.models.StackSpec;
 import io.kabanero.v1alpha2.models.StackSpecImages;
-import io.kabanero.v1alpha2.models.StackSpecPipelines;
 import io.kabanero.v1alpha2.models.StackSpecVersions;
 import io.kabanero.v1alpha2.models.StackStatus;
 import io.kabanero.v1alpha2.models.StackStatusVersions;
 import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroList;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.apis.CoreV1Api;
@@ -565,7 +565,7 @@ public class StackUtils {
 				specVersion.setDesiredState("active");
 				specVersion.setVersion((String) stack.get("version"));
 				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
-				specVersion.setPipelines((List<StackSpecPipelines>) versionedStackMap.get(name));
+				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
 				versions.add(specVersion);
 			} 
 			// creating stack object to add to new stacks List
@@ -583,7 +583,7 @@ public class StackUtils {
 				specVersion.setVersion(version);
 				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
 				
-				specVersion.setPipelines((List<StackSpecPipelines>) versionedStackMap.get(name));
+				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
 				System.out.println("packageStackObjects one specVersion: "+specVersion);
 				versions.add(specVersion);
 				updateStacks.add(stackObj);

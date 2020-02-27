@@ -479,6 +479,55 @@ public class KubeUtils {
         }
         return host;
     }
+    
+    /*
+     * [root@nowyouretalking-inf ~]# oc get secret basic-user-pass -o yaml
+     * 
+apiVersion: v1
+data:
+  password: M2NmNjY1NWNhMDZjZTk2ZWY5OWRlYjA4YWE5OGEyOGU4ZGFmY2M5NA==
+  username: ZGFjb2hlbg==
+kind: Secret
+metadata:
+  annotations:
+    kabanero.io/git-0: https://github.ibm.com
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Secret","metadata":{"annotations":{"kabanero.io/git-0":"https://github.ibm.com"},"name":"basic-user-pass","namespace":"kabanero"},"stringData":{"password":"3cf6655ca06ce96ef99deb08aa98a28e8dafcc94","username":"dacohen"},"type":"kubernetes.io/basic-auth"}
+  creationTimestamp: "2020-02-26T20:54:19Z"
+  name: basic-user-pass
+  namespace: kabanero
+  resourceVersion: "10143372"
+  selfLink: /api/v1/namespaces/kabanero/secrets/basic-user-pass
+  uid: 1deeb1a8-5332-4ac1-9d79-3cbb4afc013f
+type: kubernetes.io/basic-auth
+     * 
+     * 
+     * 
+     */
+    
+    
+   // V1Secret result = apiInstance.readNamespacedSecret(name, namespace, pretty, exact, export);
+    
+    public static String getSecret(String namespace) {
+        String route = "";
+        try {
+            ApiClient apiClient = getApiClient();
+            CoreV1Api coreAPI = new CoreV1Api();
+            V1Secret v1secret = coreAPI.readNamespacedSecret("basic-user-pass", namespace, "",true, true);
+            String value1 = v1secret.getMetadata().getAnnotations().get("kabanero.io/git-0");
+            Map<String,String> m  = v1secret.getStringData();
+            System.out.println("string data map="+m);
+            List<String> values=(List<String>) v1secret.getMetadata().getAnnotations().values();
+            for (String value : values) {
+            	System.out.println("value="+value);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("exception cause: " + e.getCause());
+            System.out.println("exception message: " + e.getMessage());
+        } 
+        return route;
+     }
 
     public static String getTektonDashboardURL() {
         String route = "";

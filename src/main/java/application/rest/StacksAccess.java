@@ -57,14 +57,13 @@ import io.kabanero.v1alpha2.client.apis.StackApi;
 import io.kabanero.v1alpha2.models.Stack;
 import io.kabanero.v1alpha2.models.StackList;
 import io.kabanero.v1alpha2.models.StackSpec;
-import io.kabanero.v1alpha2.models.StackSpecHttps;
 import io.kabanero.v1alpha2.models.StackSpecImages;
-import io.kabanero.v1alpha2.models.StackSpecPipelines;
 import io.kabanero.v1alpha2.models.StackSpecVersions;
 import io.kabanero.v1alpha2.models.StackStatus;
 import io.kabanero.v1alpha2.models.StackStatusVersions;
 import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksHttps;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
 import io.kubernetes.client.models.V1DeleteOptions;
@@ -97,6 +96,7 @@ public class StacksAccess {
 	@Path("/image")
 	public Response versionlist(@Context final HttpServletRequest request) {
 		String image = null;
+		KubeUtils.getSecret(namespace);
 		try {
 			image=StackUtils.getImage(namespace);
 		} catch (Exception e) {
@@ -321,13 +321,13 @@ public class StacksAccess {
 			}
 			
 			
-			ArrayList<StackSpecPipelines> pipelines = new ArrayList<StackSpecPipelines>();
+			ArrayList<KabaneroSpecStacksPipelines> pipelines = new ArrayList<KabaneroSpecStacksPipelines>();
 
 			List<KabaneroSpecStacksPipelines> defaultPipelines = kab.getSpec().getStacks().getPipelines();
 			if (defaultPipelines != null) {
 				for (KabaneroSpecStacksPipelines defaultPipelineElement : defaultPipelines) {
-					StackSpecPipelines pipeline = new StackSpecPipelines();
-					StackSpecHttps https = new StackSpecHttps();
+					KabaneroSpecStacksPipelines pipeline = new KabaneroSpecStacksPipelines();
+					KabaneroSpecStacksHttps https = new KabaneroSpecStacksHttps();
 					https.setUrl(defaultPipelineElement.getHttps().getUrl());
 					pipeline.setHttps(https);
 					pipeline.setSha256(defaultPipelineElement.getSha256());
@@ -351,12 +351,12 @@ public class StacksAccess {
 					List stacksFromRest = (ArrayList) StackUtils.getStackFromGIT(getUser(request), PAT, r);
 					stacks.addAll(stacksFromRest);
 
-					ArrayList<StackSpecPipelines> stackPipelines = new ArrayList<StackSpecPipelines>(); 
-					ArrayList<StackSpecPipelines> tempPipelines = null;
+					ArrayList<KabaneroSpecStacksPipelines> stackPipelines = new ArrayList<KabaneroSpecStacksPipelines>(); 
+					ArrayList<KabaneroSpecStacksPipelines> tempPipelines = null;
 					if (r.getPipelines()!=null && r.getPipelines().size() > 0) {
 						for (KabaneroSpecStacksPipelines pipelineElement : r.getPipelines()) {
-							StackSpecPipelines stackPipeline = new StackSpecPipelines();
-							StackSpecHttps https = new StackSpecHttps();
+							KabaneroSpecStacksPipelines stackPipeline = new KabaneroSpecStacksPipelines();
+							KabaneroSpecStacksHttps https = new KabaneroSpecStacksHttps();
 							https.setUrl(pipelineElement.getHttps().getUrl());
 							stackPipeline.setHttps(https);
 							stackPipeline.setSha256(pipelineElement.getSha256());
@@ -574,7 +574,7 @@ public class StacksAccess {
 							specVersion.setDesiredState("active");
 							specVersion.setVersion(stackSpecVersion.getVersion());
 							specVersion.setImages(stackSpecVersion.getImages());
-							specVersion.setPipelines((List<StackSpecPipelines>) versionedStackPipelineMap.get(kabStack.getSpec().getName()));
+							specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackPipelineMap.get(kabStack.getSpec().getName()));
 							stackSpecVersions.add(specVersion);
 						} else {
 							atLeastOneToDelete=true;
