@@ -756,9 +756,10 @@ public class StacksAccess {
 					}
 				}
 				if (!verMatch) {
-					System.out.println("*** " + "Version: "+version+" not found in Stack name: " + name);
-					msg.put("status", "Version: "+version+" not found in Stack name: " + name);
-					msg.put("message", "Version: "+version+" not found in Stack name: " + name);
+					String msgStr="Stack: "+name+"  does not have version: "+version;
+					System.out.println(msgStr);
+					msg.put("status", msgStr);
+					msg.put("message", msgStr);
 					return Response.status(400).entity(msg).build();
 				}
 			} else {
