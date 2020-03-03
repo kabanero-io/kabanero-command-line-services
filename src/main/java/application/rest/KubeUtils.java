@@ -509,7 +509,7 @@ type: kubernetes.io/basic-auth
    // V1Secret result = apiInstance.readNamespacedSecret(name, namespace, pretty, exact, export);
     
     public static String getSecret(String namespace) {
-        String route = "";
+        String password = null;
         System.out.println("Entering getSecret("+namespace+")");
         try {
             ApiClient apiClient = getApiClient();
@@ -522,16 +522,17 @@ type: kubernetes.io/basic-auth
             System.out.println("string data map="+m);
             Iterator it=v1secret.getMetadata().getAnnotations().values().iterator();
             it.next();
-            Map<String,String> annotationMap = (Map<String,String>)it.next();
-            	System.out.println("Iterator value="+it.next());
-            
-            
-        } catch (Exception e) {
+            String annotationStr = (String)it.next();
+            JSONObject jo = JSONObject.parse(annotationStr);
+            JSONObject stringData = (JSONObject) jo.get("stringData");
+            password=(String) stringData.get("password");
+            System.out.println("password="+password);
+          } catch (Exception e) {
         	e.printStackTrace();
             System.out.println("exception cause: " + e.getCause());
             System.out.println("exception message: " + e.getMessage());
         } 
-        return route;
+        return password;
      }
 
     public static String getTektonDashboardURL() {
