@@ -515,18 +515,12 @@ type: kubernetes.io/basic-auth
             ApiClient apiClient = getApiClient();
             CoreV1Api coreAPI = new CoreV1Api();
             V1Secret v1secret = coreAPI.readNamespacedSecret("basic-user-pass", namespace, "",true, true);
-            System.out.println("v1secret="+v1secret);
-            String value1 = v1secret.getMetadata().getAnnotations().get("kabanero.io/git-0");
-            System.out.println("value1="+value1);
-            Map<String,String> m  = v1secret.getStringData();
-            System.out.println("string data map="+m);
             Iterator it=v1secret.getMetadata().getAnnotations().values().iterator();
             it.next();
             String annotationStr = (String)it.next();
             JSONObject jo = JSONObject.parse(annotationStr);
             JSONObject stringData = (JSONObject) jo.get("stringData");
             password=(String) stringData.get("password");
-            System.out.println("password="+password);
           } catch (Exception e) {
         	e.printStackTrace();
             System.out.println("exception cause: " + e.getCause());
