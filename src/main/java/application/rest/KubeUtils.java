@@ -520,9 +520,9 @@ type: kubernetes.io/basic-auth
             System.out.println("value1="+value1);
             Map<String,String> m  = v1secret.getStringData();
             System.out.println("string data map="+m);
-            List<String> values=(List<String>) v1secret.getMetadata().getAnnotations().values();
-            for (String value : values) {
-            	System.out.println("value="+value);
+            Iterator it=v1secret.getMetadata().getAnnotations().values().iterator();
+            for (;it.hasNext();) {
+            	System.out.println("Iterator value="+it.next());
             }
             
         } catch (Exception e) {
