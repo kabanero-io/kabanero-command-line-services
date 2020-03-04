@@ -479,6 +479,27 @@ public class KubeUtils {
         }
         return host;
     }
+     
+    public static String getSecret(String namespace) {
+        String password = null;
+        System.out.println("Entering getSecret("+namespace+")");
+        try {
+            ApiClient apiClient = getApiClient();
+            CoreV1Api coreAPI = new CoreV1Api();
+            V1Secret v1secret = coreAPI.readNamespacedSecret("basic-user-pass", namespace, "",true, true);
+            Iterator it=v1secret.getMetadata().getAnnotations().values().iterator();
+            it.next();
+            String annotationStr = (String)it.next();
+            JSONObject jo = JSONObject.parse(annotationStr);
+            JSONObject stringData = (JSONObject) jo.get("stringData");
+            password=(String) stringData.get("password");
+          } catch (Exception e) {
+        	e.printStackTrace();
+            System.out.println("exception cause: " + e.getCause());
+            System.out.println("exception message: " + e.getMessage());
+        } 
+        return password;
+     }
 
     public static String getTektonDashboardURL() {
         String route = "";

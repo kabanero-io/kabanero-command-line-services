@@ -11,4 +11,5 @@ public class Constants {
     public static final String ROLESPREFIXOLD = "groupsForTeam_";
     public static final String ROLESPREFIX = "teamsInGroup_";
     public static final String ENVIRONMENT_VARIABLE_NAME_ALLOWED_CHARS="ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789";
+	public static final String POD_INSTANCE_CLAIM = "podinstance";
  }

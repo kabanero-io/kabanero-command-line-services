@@ -57,14 +57,13 @@ import io.kabanero.v1alpha2.client.apis.StackApi;
 import io.kabanero.v1alpha2.models.Stack;
 import io.kabanero.v1alpha2.models.StackList;
 import io.kabanero.v1alpha2.models.StackSpec;
-import io.kabanero.v1alpha2.models.StackSpecHttps;
 import io.kabanero.v1alpha2.models.StackSpecImages;
-import io.kabanero.v1alpha2.models.StackSpecPipelines;
 import io.kabanero.v1alpha2.models.StackSpecVersions;
 import io.kabanero.v1alpha2.models.StackStatus;
 import io.kabanero.v1alpha2.models.StackStatusVersions;
 import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksHttps;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
 import io.kubernetes.client.models.V1DeleteOptions;
@@ -142,10 +141,12 @@ public class StacksAccess {
 			
 			ArrayList stacks = new ArrayList();
 			
+			
+			
 			try {
 				for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
 					stacks.addAll( (ArrayList) StackUtils
-							.getStackFromGIT(getUser(request), PAT, r));
+							.getStackFromGIT(getUser(request), PAT, r, namespace));
 				}
 				String firstElem = stacks.get(0).toString();
 				if (firstElem!=null) {
@@ -155,7 +156,7 @@ public class StacksAccess {
 						return Response.status(429).entity(resp).build();
 					}
 				}
-			} catch (NullPointerException npe) {
+			} catch (RuntimeException ex) {
 				JSONObject resp = new JSONObject();
 				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
 				return Response.status(424).entity(resp).build();
@@ -321,13 +322,13 @@ public class StacksAccess {
 			}
 			
 			
-			ArrayList<StackSpecPipelines> pipelines = new ArrayList<StackSpecPipelines>();
+			ArrayList<KabaneroSpecStacksPipelines> pipelines = new ArrayList<KabaneroSpecStacksPipelines>();
 
 			List<KabaneroSpecStacksPipelines> defaultPipelines = kab.getSpec().getStacks().getPipelines();
 			if (defaultPipelines != null) {
 				for (KabaneroSpecStacksPipelines defaultPipelineElement : defaultPipelines) {
-					StackSpecPipelines pipeline = new StackSpecPipelines();
-					StackSpecHttps https = new StackSpecHttps();
+					KabaneroSpecStacksPipelines pipeline = new KabaneroSpecStacksPipelines();
+					KabaneroSpecStacksHttps https = new KabaneroSpecStacksHttps();
 					https.setUrl(defaultPipelineElement.getHttps().getUrl());
 					pipeline.setHttps(https);
 					pipeline.setSha256(defaultPipelineElement.getSha256());
@@ -348,15 +349,15 @@ public class StacksAccess {
 			if (stackRepos!=null) {
 				for (KabaneroSpecStacksRepositories r : stackRepos) {
 
-					List stacksFromRest = (ArrayList) StackUtils.getStackFromGIT(getUser(request), PAT, r);
+					List stacksFromRest = (ArrayList) StackUtils.getStackFromGIT(getUser(request), PAT, r, namespace);
 					stacks.addAll(stacksFromRest);
 
-					ArrayList<StackSpecPipelines> stackPipelines = new ArrayList<StackSpecPipelines>(); 
-					ArrayList<StackSpecPipelines> tempPipelines = null;
+					ArrayList<KabaneroSpecStacksPipelines> stackPipelines = new ArrayList<KabaneroSpecStacksPipelines>(); 
+					ArrayList<KabaneroSpecStacksPipelines> tempPipelines = null;
 					if (r.getPipelines()!=null && r.getPipelines().size() > 0) {
 						for (KabaneroSpecStacksPipelines pipelineElement : r.getPipelines()) {
-							StackSpecPipelines stackPipeline = new StackSpecPipelines();
-							StackSpecHttps https = new StackSpecHttps();
+							KabaneroSpecStacksPipelines stackPipeline = new KabaneroSpecStacksPipelines();
+							KabaneroSpecStacksHttps https = new KabaneroSpecStacksHttps();
 							https.setUrl(pipelineElement.getHttps().getUrl());
 							stackPipeline.setHttps(https);
 							stackPipeline.setSha256(pipelineElement.getSha256());
@@ -574,7 +575,7 @@ public class StacksAccess {
 							specVersion.setDesiredState("active");
 							specVersion.setVersion(stackSpecVersion.getVersion());
 							specVersion.setImages(stackSpecVersion.getImages());
-							specVersion.setPipelines((List<StackSpecPipelines>) versionedStackPipelineMap.get(kabStack.getSpec().getName()));
+							specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackPipelineMap.get(kabStack.getSpec().getName()));
 							stackSpecVersions.add(specVersion);
 						} else {
 							atLeastOneToDelete=true;
@@ -755,9 +756,10 @@ public class StacksAccess {
 					}
 				}
 				if (!verMatch) {
-					System.out.println("*** " + "Version: "+version+" not found in Stack name: " + name);
-					msg.put("status", "Version: "+version+" not found in Stack name: " + name);
-					msg.put("message", "Version: "+version+" not found in Stack name: " + name);
+					String msgStr="Stack: "+name+"  does not have version: "+version;
+					System.out.println(msgStr);
+					msg.put("status", msgStr);
+					msg.put("message", msgStr);
 					return Response.status(400).entity(msg).build();
 				}
 			} else {

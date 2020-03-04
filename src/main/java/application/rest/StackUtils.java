@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -22,6 +23,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.eclipse.egit.github.core.Repository;
+import org.eclipse.egit.github.core.RepositoryContents;
+import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.ContentsService;
+import org.eclipse.egit.github.core.service.RepositoryService;
 import org.yaml.snakeyaml.Yaml;
 
 import io.kabanero.v1alpha2.client.apis.KabaneroApi;
@@ -29,13 +35,14 @@ import io.kabanero.v1alpha2.models.Stack;
 import io.kabanero.v1alpha2.models.StackList;
 import io.kabanero.v1alpha2.models.StackSpec;
 import io.kabanero.v1alpha2.models.StackSpecImages;
-import io.kabanero.v1alpha2.models.StackSpecPipelines;
 import io.kabanero.v1alpha2.models.StackSpecVersions;
 import io.kabanero.v1alpha2.models.StackStatus;
 import io.kabanero.v1alpha2.models.StackStatusVersions;
 import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroList;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksGitRelease;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.apis.CoreV1Api;
@@ -180,22 +187,65 @@ public class StackUtils {
 	}
 	
 	
+	private static String getGithubFile(String repoOwner, String PAT, String URL, String REPONAME, String FILENAME) {
+		// OAuth2 token authentication
+		GitHubClient client = new GitHubClient(URL);
+		client.setOAuth2Token(PAT);
+		//client.setCredentials(user, getPAT());
+		RepositoryService repoService = new RepositoryService(client);
+		String fileContent = null, valueDecoded = null;
+		try {
+			Repository repo = repoService.getRepository(repoOwner, REPONAME);
+
+			// now contents service
+			ContentsService contentService = new ContentsService(client);
+			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
+					FILENAME);
+			for (RepositoryContents content : test) {
+				fileContent = content.getContent();
+				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return valueDecoded;
+	}
 	
-	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r) {
+	
+	
+	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r,String namespace) {
 		String response = null;
 		String url = r.getHttps().getUrl();
 		try {
-			response = getFromGit(url, user, pw);
-			if (response!=null) {
-				if (response.contains("HTTP Code 429:")) {
-					ArrayList<String> list= new ArrayList();
-					list.add(response);
-					return list;
+			if (url == null) {
+				KabaneroSpecStacksGitRelease kabaneroSpecStacksGitRelease = r.getGitRelease();
+				if (kabaneroSpecStacksGitRelease == null) {
+					System.out.println("No repository URL specified");
+					throw new RuntimeException("No repository URL specified");
 				}
+				String org, project, release, asset;
+				url = kabaneroSpecStacksGitRelease.getHostname();
+				org = kabaneroSpecStacksGitRelease.getOrganization();
+				project = kabaneroSpecStacksGitRelease.getProject();
+				release = kabaneroSpecStacksGitRelease.getRelease();
+				asset = kabaneroSpecStacksGitRelease.getAssetName();
+				response = getGithubFile(org, KubeUtils.getSecret(namespace), url, project, asset);
+			} else {
+				response = getFromGit(url, user, pw);
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
+		}
+		if (response != null) {
+			if (response.contains("HTTP Code 429:")) {
+				ArrayList<String> list = new ArrayList();
+				list.add(response);
+				return list;
+			}
 		}
 		ArrayList<Map> list = null;
 		try {
@@ -255,19 +305,38 @@ public class StackUtils {
 				List<Map> status = new ArrayList<Map>();
 				for (StackStatusVersions stackStatusVersion : versions) {
 					HashMap versionMap = new HashMap();
-					versionMap.put("status", stackStatusVersion.getStatus());
+					String statusStr = stackStatusVersion.getStatus();
+					if ("inactive".contentEquals(statusStr)) {
+						if (isStatusPending(s, stackStatusVersion.getVersion())) {
+							statusStr = "active pending";
+						}
+					}
+					versionMap.put("status", statusStr);
 					versionMap.put("version", stackStatusVersion.getVersion());
 					status.add(versionMap);
 				}
 				allMap.put("name", name);
 				allMap.put("status",status);
-				//System.out.println("all map: " + allMap);
 				allStacks.add(allMap);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return allStacks;
+	}
+	
+	private static boolean isStatusPending(Stack stack, String version) {
+		List<StackSpecVersions> versions = stack.getSpec().getVersions();
+		for (StackSpecVersions specVersion : versions) {
+			if (version.contentEquals(specVersion.getVersion())) {
+				if ("active".contentEquals(specVersion.getDesiredState())) {
+					return true;
+				} else {
+					break;
+				}
+			}
+		}
+		return false;
 	}
 	
 	
@@ -546,7 +615,7 @@ public class StackUtils {
 				specVersion.setDesiredState("active");
 				specVersion.setVersion((String) stack.get("version"));
 				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
-				specVersion.setPipelines((List<StackSpecPipelines>) versionedStackMap.get(name));
+				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
 				versions.add(specVersion);
 			} 
 			// creating stack object to add to new stacks List
@@ -564,7 +633,7 @@ public class StackUtils {
 				specVersion.setVersion(version);
 				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
 				
-				specVersion.setPipelines((List<StackSpecPipelines>) versionedStackMap.get(name));
+				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
 				System.out.println("packageStackObjects one specVersion: "+specVersion);
 				versions.add(specVersion);
 				updateStacks.add(stackObj);
