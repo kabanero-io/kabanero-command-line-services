@@ -96,7 +96,6 @@ public class StacksAccess {
 	@Path("/image")
 	public Response versionlist(@Context final HttpServletRequest request) {
 		String image = null;
-		System.out.println("secret="+KubeUtils.getSecret(namespace, "https://github.ibm.com"));
 		try {
 			image=StackUtils.getImage(namespace);
 		} catch (Exception e) {
