@@ -7,6 +7,7 @@ import io.kubernetes.client.apis.CustomObjectsApi;
 import io.kubernetes.client.util.Config;
 import io.kubernetes.client.models.V1DeleteOptions;
 import io.kubernetes.client.models.V1Secret;
+import io.kubernetes.client.models.V1SecretList;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
@@ -479,20 +480,38 @@ public class KubeUtils {
         }
         return host;
     }
+    
+	private static String locateCorrectSecret(V1Secret v1secret, String gitURL) throws IOException {
+		V1Secret secret = null;
+		Iterator it = v1secret.getMetadata().getAnnotations().values().iterator();
+		String url = (String) it.next();
+		url = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
+		String password = null;
+		if (url.contentEquals(gitURL)) {
+			String annotationStr = (String) it.next();
+			JSONObject jo = JSONObject.parse(annotationStr);
+			JSONObject stringData = (JSONObject) jo.get("stringData");
+			password = (String) stringData.get("password");
+		}
+		return password;
+	}
      
-    public static String getSecret(String namespace) {
+    public static String getSecret(String namespace, String gitURL) {
+    	gitURL = gitURL.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
         String password = null;
         System.out.println("Entering getSecret("+namespace+")");
         try {
             ApiClient apiClient = getApiClient();
             CoreV1Api coreAPI = new CoreV1Api();
-            V1Secret v1secret = coreAPI.readNamespacedSecret("basic-user-pass", namespace, "",true, true);
-            Iterator it=v1secret.getMetadata().getAnnotations().values().iterator();
-            it.next();
-            String annotationStr = (String)it.next();
-            JSONObject jo = JSONObject.parse(annotationStr);
-            JSONObject stringData = (JSONObject) jo.get("stringData");
-            password=(String) stringData.get("password");
+            V1SecretList v1secrets = coreAPI.listNamespacedSecret(namespace, false, null, null, null, null, null, null, 30, null);
+            List<V1Secret> v1secretList = v1secrets.getItems();
+            for (V1Secret v1Secret:v1secretList) {
+            	password=locateCorrectSecret(v1Secret, gitURL);
+            	if (password!=null) {
+            		break;
+            	}
+            }
+            
           } catch (Exception e) {
         	e.printStackTrace();
             System.out.println("exception cause: " + e.getCause());
