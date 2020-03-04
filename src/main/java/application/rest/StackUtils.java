@@ -191,7 +191,6 @@ public class StackUtils {
 		// OAuth2 token authentication
 		GitHubClient client = new GitHubClient(URL);
 		client.setOAuth2Token(PAT);
-		//client.setCredentials(user, getPAT());
 		RepositoryService repoService = new RepositoryService(client);
 		String fileContent = null, valueDecoded = null;
 		try {
@@ -231,7 +230,7 @@ public class StackUtils {
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
 				asset = kabaneroSpecStacksGitRelease.getAssetName();
-				response = getGithubFile(org, KubeUtils.getSecret(namespace), url, project, asset);
+				response = getGithubFile(org, KubeUtils.getSecret(namespace,url), url, project, asset);
 			} else {
 				response = getFromGit(url, user, pw);
 
