@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -22,6 +23,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.eclipse.egit.github.core.Repository;
+import org.eclipse.egit.github.core.RepositoryContents;
+import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.ContentsService;
+import org.eclipse.egit.github.core.service.RepositoryService;
 import org.yaml.snakeyaml.Yaml;
 
 import io.kabanero.v1alpha2.client.apis.KabaneroApi;
@@ -35,6 +41,7 @@ import io.kabanero.v1alpha2.models.StackStatusVersions;
 import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroList;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksGitRelease;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
 import io.kubernetes.client.ApiClient;
@@ -180,22 +187,61 @@ public class StackUtils {
 	}
 	
 	
+	private static String getGithubFile(String repoOwner, String PAT, String URL, String REPONAME, String FILENAME) {
+		// OAuth2 token authentication
+		GitHubClient client = new GitHubClient(URL);
+		client.setOAuth2Token(PAT);
+		//client.setCredentials(user, getPAT());
+		RepositoryService repoService = new RepositoryService(client);
+		String fileContent = null, valueDecoded = null;
+		try {
+			Repository repo = repoService.getRepository(repoOwner, REPONAME);
+
+			// now contents service
+			ContentsService contentService = new ContentsService(client);
+			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
+					FILENAME);
+			for (RepositoryContents content : test) {
+				fileContent = content.getContent();
+				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return valueDecoded;
+	}
 	
-	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r) {
+	
+	
+	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r,String namespace) {
 		String response = null;
 		String url = r.getHttps().getUrl();
 		try {
-			response = getFromGit(url, user, pw);
-			if (response!=null) {
-				if (response.contains("HTTP Code 429:")) {
-					ArrayList<String> list= new ArrayList();
-					list.add(response);
-					return list;
-				}
+			if (url == null) {
+				KabaneroSpecStacksGitRelease kabaneroSpecStacksGitRelease = r.getGitRelease();
+				String org, project, release, asset;
+				url = kabaneroSpecStacksGitRelease.getHostname();
+				org = kabaneroSpecStacksGitRelease.getOrganization();
+				project = kabaneroSpecStacksGitRelease.getProject();
+				release = kabaneroSpecStacksGitRelease.getRelease();
+				asset = kabaneroSpecStacksGitRelease.getAssetName();
+				response = getGithubFile(org, KubeUtils.getSecret(namespace), url, project, asset);
+			} else {
+				response = getFromGit(url, user, pw);
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
+		}
+		if (response != null) {
+			if (response.contains("HTTP Code 429:")) {
+				ArrayList<String> list = new ArrayList();
+				list.add(response);
+				return list;
+			}
 		}
 		ArrayList<Map> list = null;
 		try {
