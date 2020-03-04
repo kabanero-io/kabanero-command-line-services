@@ -217,6 +217,7 @@ public class StackUtils {
 	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r,String namespace) {
 		String response = null;
 		String url = r.getHttps().getUrl();
+		System.out.println("public git url="+url);
 		try {
 			if (url == null) {
 				KabaneroSpecStacksGitRelease kabaneroSpecStacksGitRelease = r.getGitRelease();
@@ -226,6 +227,7 @@ public class StackUtils {
 				}
 				String org, project, release, asset;
 				url = kabaneroSpecStacksGitRelease.getHostname();
+				System.out.println("GHE git url="+url);
 				org = kabaneroSpecStacksGitRelease.getOrganization();
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
