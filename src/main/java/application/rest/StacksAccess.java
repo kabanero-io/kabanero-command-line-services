@@ -156,7 +156,7 @@ public class StacksAccess {
 						return Response.status(429).entity(resp).build();
 					}
 				}
-			} catch (NullPointerException npe) {
+			} catch (RuntimeException ex) {
 				JSONObject resp = new JSONObject();
 				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
 				return Response.status(424).entity(resp).build();
