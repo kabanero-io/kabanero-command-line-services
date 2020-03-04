@@ -106,6 +106,21 @@ public class StacksAccess {
 		msg.put("image", image);
 		return Response.ok(msg).build();
 	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/operator")
+	public Response operatorStatus(@Context final HttpServletRequest request) {
+		Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
+		String msg = "The kabanero operator is not ready";
+		if (trueStr.contentEquals(k.getStatus().getKabaneroInstance().getReady())) {
+			msg = "The kabanero operator is ready";
+		}
+		JSONObject resp = new JSONObject();
+		resp.put("message",
+				msg + ", The Kabanero operator status is: " + k.getStatus().getKabaneroInstance().getMessage());
+		return Response.ok(msg).entity(resp).build();
+	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -113,20 +128,8 @@ public class StacksAccess {
 	public Response listStacks(@Context final HttpServletRequest request) {
 		JSONObject msg = new JSONObject();
 		try {
-			
 			System.out.println("Entering listStacks, namespace =" + namespace);
-			
 			Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
-			
-//			System.out.println("Operator ready: "+k.getStatus().getKabaneroInstance().getReady());
-//			System.out.println("Operator error msg: "+k.getStatus().getKabaneroInstance().getMessage());
-//			
-//			if (!trueStr.contentEquals(k.getStatus().getKabaneroInstance().getReady())) {
-//				JSONObject resp = new JSONObject();
-//				resp.put("message", "The Kabanero operator is not ready, error message: "+k.getStatus().getKabaneroInstance().getMessage());
-//				return Response.status(503).entity(resp).build();
-//			}
-			
 			System.out.println("entering LIST function");
 			String user = getUser(request);
 			System.out.println("user=" + user);
@@ -268,19 +271,7 @@ public class StacksAccess {
 		
 		System.out.println("Entering syncStacks, namespace =" + namespace);
 		
-		Kabanero kab = null;
-		
-		kab = StackUtils.getKabaneroForNamespace(namespace);
-		
-//		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
-//		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getMessage());
-//		
-//		if (!trueStr.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
-//			JSONObject resp = new JSONObject();
-//			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getMessage());
-//			return Response.status(503).entity(resp).build();
-//		}
-		
+		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
 		// kube call to sync collection
 		ApiClient apiClient = null;
 		try {
