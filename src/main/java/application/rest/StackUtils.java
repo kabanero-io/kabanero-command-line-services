@@ -549,13 +549,14 @@ public class StackUtils {
 						versions.add(versionMap);
 					}
 				}
+				if (versions.size() > 0) {
+					kabStack.getSpec().setVersions(stackSpecVersions);
+					m.put("name", kabStack.getSpec().getName());
 
-				kabStack.getSpec().setVersions(stackSpecVersions);
-				m.put("name", kabStack.getSpec().getName());
+					m.put("versions", versions);
 
-				m.put("versions", versions);
-
-				deletedStacks.add(m);
+					deletedStacks.add(m);
+				}
 			}
 		} catch (Exception e) {
 			System.out.println("exception cause: " + e.getCause());
