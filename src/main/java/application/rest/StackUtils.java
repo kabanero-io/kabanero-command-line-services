@@ -221,6 +221,7 @@ public class StackUtils {
 		try {
 			if (url == null) {
 				KabaneroSpecStacksGitRelease kabaneroSpecStacksGitRelease = r.getGitRelease();
+				System.out.println("kabaneroSpecStacksGitRelease="+kabaneroSpecStacksGitRelease);
 				if (kabaneroSpecStacksGitRelease == null) {
 					System.out.println("No repository URL specified");
 					throw new RuntimeException("No repository URL specified");
