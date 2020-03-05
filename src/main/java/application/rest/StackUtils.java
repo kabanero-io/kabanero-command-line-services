@@ -566,58 +566,7 @@ public class StackUtils {
 		return deletedStacks;
 	}
 
-	public static List filterDeletedStacks(List<Map> fromGit, StackList fromKabanero) {
-		ArrayList<Map> stacksToDelete = new ArrayList<Map>();
-		String name = null;
-		String version = null;
-		boolean stackInGit;
-		boolean match;
-		try {
-			for (Stack kabStack: fromKabanero.getItems()) {
-				Map kabMap = new HashMap();
-				match = false;
-				List<StackSpecVersions> stackSpecVersions = kabStack.getSpec().getVersions();
-				String kabName = kabStack.getSpec().getName();
-				for (StackSpecVersions stackSpecVersion:stackSpecVersions) {
-					String kabVersion=stackSpecVersion.getVersion();
-					for (Map map1 : fromGit) {
-						String gitName = (String) map1.get("id");
-						gitName = gitName.trim();
-						String gitVersion = (String) map1.get("version");
-						name = (String) kabStack.getSpec().getName();
-						if (gitName.contentEquals(kabName)) {
-							stackInGit=true;
-							// If this Kabanero Stack version does not match GIT hub stack version, add it for deletion 
-							// if this version is 
-							if (kabVersion.equals(gitVersion)) {
-								version=gitVersion;
-								match=true;
-								break;
-							}
-						} 
-					}
-					String stat=" is not";
-					if (match) {
-						stat=" is";
-					} 
-					System.out.println("Kab Stack name: "+kabName+" version number: "+kabVersion+stat+" found in list of GIT versions");
-					System.out.println("Version list is: "+stackSpecVersions);
-					if (!match) {
-						kabMap.put("name", kabName);
-						kabMap.put("version",kabVersion);
-						stacksToDelete.add(kabMap);
-					}
-				}
 
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return stacksToDelete;
-	}
-	
-	
-	
 	public static List<Map> packageStackMaps(List<Map> stacks) {
 		ArrayList<Map> updatedStacks = new ArrayList<Map>();
 		ArrayList<Map> versions = null;

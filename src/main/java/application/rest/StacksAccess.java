@@ -552,6 +552,11 @@ public class StacksAccess {
 		// iterate over collections to delete
 		System.out.println("Starting DELETE processing");
 		try {
+			fromKabanero = api.listStacks(namespace, null, null, null);
+		} catch (ApiException e) {
+			e.printStackTrace();
+		}
+		try {
 			deletedStacks = new ArrayList<Map>();
 			for (Stack kabStack : fromKabanero.getItems()) {
 				ArrayList<Map> versions= new ArrayList<Map>();
