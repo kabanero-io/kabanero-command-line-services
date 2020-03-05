@@ -713,16 +713,6 @@ public class StacksAccess {
 		
 		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
 		
-		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
-		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getMessage());
-		
-		if (!trueStr.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
-			JSONObject resp = new JSONObject();
-			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getMessage());
-			return Response.status(503).entity(resp).build();
-		}
-		
-		
 		ApiClient apiClient = KubeUtils.getApiClient();
 		StackApi api = new StackApi(apiClient);
 		String plural = "stacks";
