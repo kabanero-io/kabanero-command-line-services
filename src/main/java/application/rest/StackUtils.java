@@ -239,6 +239,7 @@ public class StackUtils {
 				release = kabaneroSpecStacksGitRelease.getRelease();
 				asset = kabaneroSpecStacksGitRelease.getAssetName();
 				response = getGithubFile(org, KubeUtils.getSecret(namespace,url), url, project, asset);
+				System.out.println("GHE response="+response);
 			} else {
 				response = getFromGit(url, user, pw);
 
