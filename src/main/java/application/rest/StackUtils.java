@@ -215,7 +215,7 @@ public class StackUtils {
 	
 	
 	
-	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r,String namespace) {
+	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r,String namespace) throws Exception {
 		String response = null;
 		String url = null;
 		KabaneroSpecStacksHttps kabaneroSpecStacksHttps = r.getHttps();
