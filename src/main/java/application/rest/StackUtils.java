@@ -518,6 +518,52 @@ public class StackUtils {
 		}
 		return false;
 	}
+	
+	public static ArrayList<Map> obsoleteStacks(StackList fromKabanero, List curatedStacks) {
+		// iterate over collections to delete
+		System.out.println("Starting DELETE processing");
+		ArrayList<Map> deletedStacks = new ArrayList<Map>();
+		try {
+
+			for (Stack kabStack : fromKabanero.getItems()) {
+				ArrayList<Map> versions = new ArrayList<Map>();
+				HashMap m = new HashMap();
+				
+
+				List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
+
+				List<StackSpecVersions> kabStackVersions = kabStack.getSpec().getVersions();
+				
+
+				
+				for (StackSpecVersions stackSpecVersion : kabStackVersions) {
+					System.out.println("statusStackVersion: " + stackSpecVersion.getVersion() + " name: "
+							+ kabStack.getSpec().getName());
+
+					boolean isVersionInGitStack = StackUtils.isStackVersionInGit(curatedStacks,
+							stackSpecVersion.getVersion(), kabStack.getSpec().getName());
+					System.out.println("isVersionInGitStack: " + isVersionInGitStack);
+					if (!isVersionInGitStack) {
+						HashMap versionMap = new HashMap();
+						versionMap.put("version", stackSpecVersion.getVersion());
+						versions.add(versionMap);
+					}
+				}
+
+				kabStack.getSpec().setVersions(stackSpecVersions);
+				m.put("name", kabStack.getSpec().getName());
+
+				m.put("versions", versions);
+
+				deletedStacks.add(m);
+			}
+		} catch (Exception e) {
+			System.out.println("exception cause: " + e.getCause());
+			System.out.println("exception message: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return deletedStacks;
+	}
 
 	public static List filterDeletedStacks(List<Map> fromGit, StackList fromKabanero) {
 		ArrayList<Map> stacksToDelete = new ArrayList<Map>();

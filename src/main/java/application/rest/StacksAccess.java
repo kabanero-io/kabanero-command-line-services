@@ -215,10 +215,12 @@ public class StacksAccess {
 				
 				newStacks = StackUtils.packageStackMaps(newStacks);
 				
-				List deleletedStacks = (List<Map>) StackUtils
-						.filterDeletedStacks(stacks, fromKabanero);
-				Collections.sort(deleletedStacks, mapComparator);
-				deleletedStacks = StackUtils.packageStackMaps(deleletedStacks);
+//				List deleletedStacks = (List<Map>) StackUtils
+//						.filterDeletedStacks(stacks, fromKabanero);
+//				Collections.sort(deleletedStacks, mapComparator);
+//				deleletedStacks = StackUtils.packageStackMaps(deleletedStacks);
+				List deleletedStacks = StackUtils.obsoleteStacks(fromKabanero, curatedStacksMaps);
+				
 
 				ja = convertMapToJSON(newStacks);
 				System.out.println("*** new curated stacks: " + ja);
@@ -244,6 +246,9 @@ public class StacksAccess {
 		}
 		return Response.ok(msg).build();
 	}
+	
+	
+	
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
