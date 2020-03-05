@@ -160,11 +160,13 @@ public class StacksAccess {
 					}
 				}
 			} catch (RuntimeException ex) {
+				ex.printStackTrace();
 				JSONObject resp = new JSONObject();
 				System.out.println("Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause());
 				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
 				return Response.status(424).entity(resp).build();
 			} catch (Exception ex) {
+				ex.printStackTrace();
 				JSONObject resp = new JSONObject();
 				String message = "Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause();
 				System.out.println(message);
