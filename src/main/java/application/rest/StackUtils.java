@@ -42,6 +42,7 @@ import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroList;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksGitRelease;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksHttps;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
 import io.kubernetes.client.ApiClient;
@@ -216,7 +217,11 @@ public class StackUtils {
 	
 	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r,String namespace) {
 		String response = null;
-		String url = r.getHttps().getUrl();
+		String url = null;
+		KabaneroSpecStacksHttps kabaneroSpecStacksHttps = r.getHttps();
+		if (kabaneroSpecStacksHttps != null) {
+			url = kabaneroSpecStacksHttps.getUrl();
+		}
 		System.out.println("public git url="+url);
 		try {
 			if (url == null) {
