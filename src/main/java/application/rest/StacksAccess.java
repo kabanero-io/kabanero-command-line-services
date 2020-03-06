@@ -215,10 +215,6 @@ public class StacksAccess {
 				
 				newStacks = StackUtils.packageStackMaps(newStacks);
 				
-//				List deleletedStacks = (List<Map>) StackUtils
-//						.filterDeletedStacks(stacks, fromKabanero);
-//				Collections.sort(deleletedStacks, mapComparator);
-//				deleletedStacks = StackUtils.packageStackMaps(deleletedStacks);
 				List deleletedStacks = StackUtils.obsoleteStacks(fromKabanero, curatedStacksMaps);
 				
 
