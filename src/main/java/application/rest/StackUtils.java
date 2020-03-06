@@ -520,8 +520,7 @@ public class StackUtils {
 	}
 	
 	public static ArrayList<Map> obsoleteStacks(StackList fromKabanero, List curatedStacks) {
-		// iterate over collections to delete
-		System.out.println("Starting DELETE processing");
+		// iterate over collections to see if they need to be deleted
 		ArrayList<Map> deletedStacks = new ArrayList<Map>();
 		try {
 
@@ -564,6 +563,50 @@ public class StackUtils {
 			e.printStackTrace();
 		}
 		return deletedStacks;
+	}
+	
+	public static ArrayList<Map> newlyAddedStacks(StackList fromKabanero, List<Map> curatedStacks) {
+		// iterate over collections to see if they are new
+		ArrayList<Map> newStacks = new ArrayList<Map>();
+		try {
+
+			for (Map curatedStack : curatedStacks) {
+				HashMap m = new HashMap();
+
+				String name = (String) curatedStack.get("name");
+				String version = (String) curatedStack.get("version");
+				ArrayList<Map> versions = new ArrayList<Map>();
+				for (Stack kabStack : fromKabanero.getItems()) {
+					
+					String kabName = kabStack.getSpec().getName();
+					if (name.contentEquals(kabName)) {
+
+						List<StackSpecVersions> kabStackVersions = kabStack.getSpec().getVersions();
+						boolean match = false;
+
+						for (StackSpecVersions stackSpecVersion : kabStackVersions) {
+							if (version.contentEquals(stackSpecVersion.getVersion())) {
+								match = true;
+							}
+						}
+						if (!match) {
+							HashMap versionMap = new HashMap();
+							versionMap.put("version", version);
+							versions.add(versionMap);
+						}
+					}
+
+				}
+				m.put("name", name);
+				m.put("versions", versions);
+				newStacks.add(m);
+			}
+		} catch (Exception e) {
+			System.out.println("exception cause: " + e.getCause());
+			System.out.println("exception message: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return newStacks;
 	}
 
 
@@ -611,36 +654,39 @@ public class StackUtils {
 		for (Map stack : stacks) {
 			System.out.println("packageStackObjects one stack: "+stack);
 			String name = (String) stack.get("name");
-			String version = (String) stack.get("version");
-			System.out.println("packageStackObjects version="+version);
-			// append versions and desiredStates to stack
-			if (name.contentEquals(saveName)) {
-				StackSpecVersions specVersion = new StackSpecVersions();
-				specVersion.setDesiredState("active");
-				specVersion.setVersion((String) stack.get("version"));
-				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
-				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
-				versions.add(specVersion);
-			} 
-			// creating stack object to add to new stacks List
-			else {
-				saveName = name;
-				versions = new ArrayList<StackSpecVersions>();
-				stackSpec = new StackSpec();
-				stackSpec.setVersions(versions);
-				stackSpec.setName(name);
-				Stack stackObj = new Stack();
-				stackObj.setKind("Stack");
-				stackObj.setSpec(stackSpec);
-				StackSpecVersions specVersion = new StackSpecVersions();
-				specVersion.setDesiredState("active");
-				specVersion.setVersion(version);
-				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
-				
-				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
-				System.out.println("packageStackObjects one specVersion: "+specVersion);
-				versions.add(specVersion);
-				updateStacks.add(stackObj);
+			List<Map> versionsList = (List<Map>) stack.get("versions");
+			for (Map versionMap:versionsList) {
+				String version = (String) versionMap.get("version");
+				System.out.println("packageStackObjects version="+version);
+				// append versions and desiredStates to stack
+				if (name.contentEquals(saveName)) {
+					StackSpecVersions specVersion = new StackSpecVersions();
+					specVersion.setDesiredState("active");
+					specVersion.setVersion(version);
+					specVersion.setImages((List<StackSpecImages>) stack.get("images"));
+					specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
+					versions.add(specVersion);
+				} 
+				// creating stack object to add to new stacks List
+				else {
+					saveName = name;
+					versions = new ArrayList<StackSpecVersions>();
+					stackSpec = new StackSpec();
+					stackSpec.setVersions(versions);
+					stackSpec.setName(name);
+					Stack stackObj = new Stack();
+					stackObj.setKind("Stack");
+					stackObj.setSpec(stackSpec);
+					StackSpecVersions specVersion = new StackSpecVersions();
+					specVersion.setDesiredState("active");
+					specVersion.setVersion(version);
+					specVersion.setImages((List<StackSpecImages>) stack.get("images"));
+
+					specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
+					System.out.println("packageStackObjects one specVersion: "+specVersion);
+					versions.add(specVersion);
+					updateStacks.add(stackObj);
+				}
 			}
 		}
 		return updateStacks;

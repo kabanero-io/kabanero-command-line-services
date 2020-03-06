@@ -209,11 +209,13 @@ public class StacksAccess {
 			
 			
 			try {
-				List newStacks = (List<Map>) StackUtils.filterNewStacks(stacks,
-						fromKabanero);
-				Collections.sort(newStacks, mapComparator);
+//				List newStacks = (List<Map>) StackUtils.filterNewStacks(stacks,
+//						fromKabanero);
 				
-				newStacks = StackUtils.packageStackMaps(newStacks);
+				
+//				newStacks = StackUtils.packageStackMaps(newStacks);
+				List newStacks = StackUtils.newlyAddedStacks(fromKabanero, curatedStacksMaps);
+				Collections.sort(newStacks, mapComparator);
 				
 				List deleletedStacks = StackUtils.obsoleteStacks(fromKabanero, curatedStacksMaps);
 				
@@ -416,13 +418,12 @@ public class StacksAccess {
 			System.out.println(" ");
 			System.out.println(" ");
 
-			newStacks = (List<Map>) StackUtils.filterNewStacks(stacks, fromKabanero);
+			//newStacks = (List<Map>) StackUtils.filterNewStacks(stacks, fromKabanero);
+			newStacks = (List<Map>) StackUtils.newlyAddedStacks(fromKabanero, curatedStacks);
 			Collections.sort(newStacks, mapComparator);
 			System.out.println("*** new curated stacks=" + newStacks);
 			System.out.println(" ");
 			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, versionedStackPipelineMap);
-			newStacks = (List<Map>) StackUtils.packageStackMaps(newStacks);
-			 
 			
 			
 		} catch (Exception e) {
