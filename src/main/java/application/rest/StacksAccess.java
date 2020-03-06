@@ -106,6 +106,21 @@ public class StacksAccess {
 		msg.put("image", image);
 		return Response.ok(msg).build();
 	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/operator")
+	public Response operatorStatus(@Context final HttpServletRequest request) {
+		Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
+		String msg = "The kabanero operator is not ready";
+		if (trueStr.contentEquals(k.getStatus().getKabaneroInstance().getReady())) {
+			msg = "The kabanero operator is ready";
+		}
+		JSONObject resp = new JSONObject();
+		resp.put("message",
+				msg + ", The Kabanero operator status is: " + k.getStatus().getKabaneroInstance().getMessage());
+		return Response.ok(msg).entity(resp).build();
+	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -113,20 +128,8 @@ public class StacksAccess {
 	public Response listStacks(@Context final HttpServletRequest request) {
 		JSONObject msg = new JSONObject();
 		try {
-			
 			System.out.println("Entering listStacks, namespace =" + namespace);
-			
 			Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
-			
-			System.out.println("Operator ready: "+k.getStatus().getKabaneroInstance().getReady());
-			System.out.println("Operator error msg: "+k.getStatus().getKabaneroInstance().getMessage());
-			
-			if (!trueStr.contentEquals(k.getStatus().getKabaneroInstance().getReady())) {
-				JSONObject resp = new JSONObject();
-				resp.put("message", "The Kabanero operator is not ready, error message: "+k.getStatus().getKabaneroInstance().getMessage());
-				return Response.status(503).entity(resp).build();
-			}
-			
 			System.out.println("entering LIST function");
 			String user = getUser(request);
 			System.out.println("user=" + user);
@@ -157,8 +160,17 @@ public class StacksAccess {
 					}
 				}
 			} catch (RuntimeException ex) {
+				ex.printStackTrace();
 				JSONObject resp = new JSONObject();
+				System.out.println("Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause());
 				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
+				return Response.status(424).entity(resp).build();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				JSONObject resp = new JSONObject();
+				String message = "Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause();
+				System.out.println(message);
+				resp.put("message", message);
 				return Response.status(424).entity(resp).build();
 			}
 			
@@ -203,10 +215,8 @@ public class StacksAccess {
 				
 				newStacks = StackUtils.packageStackMaps(newStacks);
 				
-				List deleletedStacks = (List<Map>) StackUtils
-						.filterDeletedStacks(stacks, fromKabanero);
-				Collections.sort(deleletedStacks, mapComparator);
-				deleletedStacks = StackUtils.packageStackMaps(deleletedStacks);
+				List deleletedStacks = StackUtils.obsoleteStacks(fromKabanero, curatedStacksMaps);
+				
 
 				ja = convertMapToJSON(newStacks);
 				System.out.println("*** new curated stacks: " + ja);
@@ -232,6 +242,9 @@ public class StacksAccess {
 		}
 		return Response.ok(msg).build();
 	}
+	
+	
+	
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -268,19 +281,7 @@ public class StacksAccess {
 		
 		System.out.println("Entering syncStacks, namespace =" + namespace);
 		
-		Kabanero kab = null;
-		
-		kab = StackUtils.getKabaneroForNamespace(namespace);
-		
-		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
-		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getMessage());
-		
-		if (!trueStr.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
-			JSONObject resp = new JSONObject();
-			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getMessage());
-			return Response.status(503).entity(resp).build();
-		}
-		
+		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
 		// kube call to sync collection
 		ApiClient apiClient = null;
 		try {
@@ -482,67 +483,6 @@ public class StacksAccess {
 			System.out.println("exception message: " + e.getMessage());
 			e.printStackTrace();
 		}
-		
-		// iterate over collections to activate
-		try {
-			try {
-				fromKabanero = api.listStacks(namespace, null, null, null);
-			} catch (ApiException e) {
-				e.printStackTrace();
-			}
-			for (Stack s : fromKabanero.getItems()) {
-				ArrayList<Map> versions= new ArrayList<Map>();
-				HashMap m = new HashMap();
-				ApiResponse apiResponse = null;
-				Stack stack=null;
-				try {
-	
-					List<StackSpecVersions> kabStackSpecVersions=s.getSpec().getVersions();
-					boolean atLeastOneVersionToActivate=false;
-					
-					
-					for (StackSpecVersions kabStackSpecVersion: kabStackSpecVersions) {
-						System.out.println("statusStackVersion: "+kabStackSpecVersion+" name: "+s.getSpec().getName());
-			
-						if ("inactive".equals(kabStackSpecVersion.getDesiredState())) {
-							atLeastOneVersionToActivate=true;
-							HashMap versionMap = new HashMap();
-							versionMap.put("version", kabStackSpecVersion.getVersion());
-							versions.add(versionMap);
-							System.out.println("name: "+s.getSpec().getName()+" version="+kabStackSpecVersion.getVersion()+", setting to active");
-							kabStackSpecVersion.setDesiredState("active");
-						}
-					}
-					System.out.println("name: "+s.getSpec().getName()+" atLeastOneVersionToActivate="+atLeastOneVersionToActivate);
-					s.getSpec().setVersions(kabStackSpecVersions);
-					if (atLeastOneVersionToActivate) {
-						m.put("versions", versions); 
-						m.put("name", s.getSpec().getName());
-						activateStacks.add(m);
-						System.out.println(s.getSpec().getName()+", activate with stack: " + s.toString());
-						stack=api.updateStack(namespace, s.getMetadata().getName(), s);
-					    m.put("status", s.getSpec().getName() + " activated");
-						System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
-					}
-				} catch (Exception e) {
-					System.out.println("exception cause: " + e.getCause());
-					System.out.println("exception message: " + e.getMessage());
-					System.out.println("*** stack " + s.getSpec().getName() + " failed to activate, organization "+group);
-					System.out.println("*** stack object: "+s.toString());
-					e.printStackTrace();
-					m.put("status", "failed to activate");
-					String message = "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause();
-					System.out.println("stack status message="+stack.getStatus().getStatusMessage());
-					System.out.println("message="+message);
-					m.put("exception message", message);
-				}
-				
-			}
-		} catch (Exception e) {
-			System.out.println("exception cause: " + e.getCause());
-			System.out.println("exception message: " + e.getMessage());
-			e.printStackTrace();
-		}
 
 		// iterate over collections to delete
 		System.out.println("Starting DELETE processing");
@@ -613,6 +553,7 @@ public class StacksAccess {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
 					System.out.println("*** stack " + kabStack.getSpec().getName() + " failed to delete, organization "+group);
+					System.out.println("*** stack status message: "+stack.getStatus().getStatusMessage());
 					System.out.println("*** stack object: "+kabStack.toString());
 					e.printStackTrace();
 					m.put("status", "failed to delete");
@@ -632,6 +573,73 @@ public class StacksAccess {
 			e.printStackTrace();
 		}
 
+
+		// iterate over collections to activate
+		try {
+			try {
+				fromKabanero = api.listStacks(namespace, null, null, null);
+			} catch (ApiException e) {
+				e.printStackTrace();
+			}
+			for (Stack s : fromKabanero.getItems()) {
+				ArrayList<Map> versions= new ArrayList<Map>();
+				HashMap m = new HashMap();
+				ApiResponse apiResponse = null;
+				Stack stack=null;
+				try {
+	
+					List<StackSpecVersions> kabStackSpecVersions=s.getSpec().getVersions();
+					boolean atLeastOneVersionToActivate=false;
+					
+					
+					for (StackSpecVersions kabStackSpecVersion: kabStackSpecVersions) {
+						System.out.println("statusStackVersion: "+kabStackSpecVersion+" name: "+s.getSpec().getName());
+						
+						if ("inactive".equals(kabStackSpecVersion.getDesiredState())) {
+							if (!StackUtils.isStackVersionDeleted(deletedStacks, s.getSpec().getName(),
+									kabStackSpecVersion.getVersion())) {
+								atLeastOneVersionToActivate = true;
+								HashMap versionMap = new HashMap();
+								versionMap.put("version", kabStackSpecVersion.getVersion());
+								versions.add(versionMap);
+								System.out.println("name: " + s.getSpec().getName() + " version="
+										+ kabStackSpecVersion.getVersion() + ", setting to active");
+								kabStackSpecVersion.setDesiredState("active");
+							}
+						}
+					}
+					System.out.println("name: "+s.getSpec().getName()+" atLeastOneVersionToActivate="+atLeastOneVersionToActivate);
+					s.getSpec().setVersions(kabStackSpecVersions);
+					if (atLeastOneVersionToActivate) {
+						m.put("versions", versions); 
+						m.put("name", s.getSpec().getName());
+						activateStacks.add(m);
+						System.out.println(s.getSpec().getName()+", activate with stack: " + s.toString());
+						stack=api.updateStack(namespace, s.getMetadata().getName(), s);
+					    m.put("status", s.getSpec().getName() + " activated");
+						System.out.println("*** status: "+s.getMetadata().getName()+" versions(s): "+versions + " activated");
+					}
+				} catch (Exception e) {
+					System.out.println("exception cause: " + e.getCause());
+					System.out.println("exception message: " + e.getMessage());
+					System.out.println("*** stack " + s.getSpec().getName() + " failed to activate, organization "+group);
+					System.out.println("*** stack object: "+s.toString());
+					e.printStackTrace();
+					m.put("status", "failed to activate");
+					String message = "stack name: "+s.getSpec().getName()+", "+e.getMessage()+", cause: "+e.getCause();
+					System.out.println("stack status message="+stack.getStatus().getStatusMessage());
+					System.out.println("message="+message);
+					m.put("exception message", message);
+				}
+				
+			}
+		} catch (Exception e) {
+			System.out.println("exception cause: " + e.getCause());
+			System.out.println("exception message: " + e.getMessage());
+			e.printStackTrace();
+		}
+
+		
 
 		JSONArray newStacksJA = convertMapToJSON(newStacks);
 		JSONArray activateStacksJA = convertMapToJSON(activateStacks);
@@ -712,16 +720,6 @@ public class StacksAccess {
 		// make call to kabanero to delete collection
 		
 		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
-		
-		System.out.println("Operator ready: "+kab.getStatus().getKabaneroInstance().getReady());
-		System.out.println("Operator error msg: "+kab.getStatus().getKabaneroInstance().getMessage());
-		
-		if (!trueStr.contentEquals(kab.getStatus().getKabaneroInstance().getReady())) {
-			JSONObject resp = new JSONObject();
-			resp.put("message", "The Kabanero operator is not ready, error message: "+kab.getStatus().getKabaneroInstance().getMessage());
-			return Response.status(503).entity(resp).build();
-		}
-		
 		
 		ApiClient apiClient = KubeUtils.getApiClient();
 		StackApi api = new StackApi(apiClient);

@@ -42,6 +42,7 @@ import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroList;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksGitRelease;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksHttps;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
 import io.kubernetes.client.ApiClient;
@@ -214,23 +215,31 @@ public class StackUtils {
 	
 	
 	
-	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r,String namespace) {
+	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r,String namespace) throws Exception {
 		String response = null;
-		String url = r.getHttps().getUrl();
+		String url = null;
+		KabaneroSpecStacksHttps kabaneroSpecStacksHttps = r.getHttps();
+		if (kabaneroSpecStacksHttps != null) {
+			url = kabaneroSpecStacksHttps.getUrl();
+		}
+		System.out.println("public git url="+url);
 		try {
 			if (url == null) {
 				KabaneroSpecStacksGitRelease kabaneroSpecStacksGitRelease = r.getGitRelease();
+				System.out.println("kabaneroSpecStacksGitRelease="+kabaneroSpecStacksGitRelease);
 				if (kabaneroSpecStacksGitRelease == null) {
 					System.out.println("No repository URL specified");
 					throw new RuntimeException("No repository URL specified");
 				}
 				String org, project, release, asset;
 				url = kabaneroSpecStacksGitRelease.getHostname();
+				System.out.println("GHE git url="+url);
 				org = kabaneroSpecStacksGitRelease.getOrganization();
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
 				asset = kabaneroSpecStacksGitRelease.getAssetName();
 				response = getGithubFile(org, KubeUtils.getSecret(namespace,url), url, project, asset);
+				System.out.println("GHE response="+response);
 			} else {
 				response = getFromGit(url, user, pw);
 
@@ -509,59 +518,55 @@ public class StackUtils {
 		}
 		return false;
 	}
-
-	public static List filterDeletedStacks(List<Map> fromGit, StackList fromKabanero) {
-		ArrayList<Map> stacksToDelete = new ArrayList<Map>();
-		String name = null;
-		String version = null;
-		boolean stackInGit;
-		boolean match;
+	
+	public static ArrayList<Map> obsoleteStacks(StackList fromKabanero, List curatedStacks) {
+		// iterate over collections to delete
+		System.out.println("Starting DELETE processing");
+		ArrayList<Map> deletedStacks = new ArrayList<Map>();
 		try {
-			for (Stack kabStack: fromKabanero.getItems()) {
-				Map kabMap = new HashMap();
-				match = false;
-				List<StackSpecVersions> stackSpecVersions = kabStack.getSpec().getVersions();
-				String kabName = kabStack.getSpec().getName();
-				for (StackSpecVersions stackSpecVersion:stackSpecVersions) {
-					String kabVersion=stackSpecVersion.getVersion();
-					for (Map map1 : fromGit) {
-						String gitName = (String) map1.get("id");
-						gitName = gitName.trim();
-						String gitVersion = (String) map1.get("version");
-						name = (String) kabStack.getSpec().getName();
-						if (gitName.contentEquals(kabName)) {
-							stackInGit=true;
-							// If this Kabanero Stack version does not match GIT hub stack version, add it for deletion 
-							// if this version is 
-							if (kabVersion.equals(gitVersion)) {
-								version=gitVersion;
-								match=true;
-								break;
-							}
-						} 
-					}
-					String stat=" is not";
-					if (match) {
-						stat=" is";
-					} 
-					System.out.println("Kab Stack name: "+kabName+" version number: "+kabVersion+stat+" found in list of GIT versions");
-					System.out.println("Version list is: "+stackSpecVersions);
-					if (!match) {
-						kabMap.put("name", kabName);
-						kabMap.put("version",kabVersion);
-						stacksToDelete.add(kabMap);
+
+			for (Stack kabStack : fromKabanero.getItems()) {
+				ArrayList<Map> versions = new ArrayList<Map>();
+				HashMap m = new HashMap();
+				
+
+				List<StackSpecVersions> stackSpecVersions = new ArrayList<StackSpecVersions>();
+
+				List<StackSpecVersions> kabStackVersions = kabStack.getSpec().getVersions();
+				
+
+				
+				for (StackSpecVersions stackSpecVersion : kabStackVersions) {
+					System.out.println("statusStackVersion: " + stackSpecVersion.getVersion() + " name: "
+							+ kabStack.getSpec().getName());
+
+					boolean isVersionInGitStack = StackUtils.isStackVersionInGit(curatedStacks,
+							stackSpecVersion.getVersion(), kabStack.getSpec().getName());
+					System.out.println("isVersionInGitStack: " + isVersionInGitStack);
+					if (!isVersionInGitStack) {
+						HashMap versionMap = new HashMap();
+						versionMap.put("version", stackSpecVersion.getVersion());
+						versions.add(versionMap);
 					}
 				}
+				if (versions.size() > 0) {
+					kabStack.getSpec().setVersions(stackSpecVersions);
+					m.put("name", kabStack.getSpec().getName());
 
+					m.put("versions", versions);
+
+					deletedStacks.add(m);
+				}
 			}
 		} catch (Exception e) {
+			System.out.println("exception cause: " + e.getCause());
+			System.out.println("exception message: " + e.getMessage());
 			e.printStackTrace();
 		}
-		return stacksToDelete;
+		return deletedStacks;
 	}
-	
-	
-	
+
+
 	public static List<Map> packageStackMaps(List<Map> stacks) {
 		ArrayList<Map> updatedStacks = new ArrayList<Map>();
 		ArrayList<Map> versions = null;
@@ -639,6 +644,26 @@ public class StackUtils {
 			}
 		}
 		return updateStacks;
+	}
+
+	public static boolean isStackVersionDeleted(List<Map> deletedStacks, String name, String version) {
+		boolean match=false;
+		for (Map deletedStack:deletedStacks) {
+			String stackName = (String) deletedStack.get("name");
+			stackName = stackName.trim();
+			if (name.contentEquals(stackName)) {
+				List<Map> versions=(List<Map>)deletedStack.get("versions");
+				for (Map versionMap:versions) {
+					String versionStr=(String)versionMap.get("version");
+					versionStr = versionStr.trim();
+					if (version.contentEquals(versionStr)) {
+						System.out.println("name="+name+", version="+version+" has been deleted, so skip activate");
+						match=true;
+					}
+				}
+			}
+		}
+		return match;
 	}
 
 

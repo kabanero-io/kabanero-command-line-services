@@ -496,7 +496,7 @@ public class KubeUtils {
 		return password;
 	}
      
-    public static String getSecret(String namespace, String gitURL) {
+    public static String getSecret(String namespace, String gitURL) throws ApiException {
     	gitURL = gitURL.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
         String password = null;
         System.out.println("Entering getSecret("+namespace+")");
@@ -516,6 +516,7 @@ public class KubeUtils {
         	e.printStackTrace();
             System.out.println("exception cause: " + e.getCause());
             System.out.println("exception message: " + e.getMessage());
+            throw new ApiException("Error retrieving kubernetes secret for GHE processing, error message: "+e.getMessage()+", cause: "+e.getCause());
         } 
         return password;
      }
