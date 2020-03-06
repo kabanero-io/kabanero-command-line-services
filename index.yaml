@@ -1,9 +1,61 @@
 apiVersion: v2
 stacks:
+- default-template: default
+  description: Open Liberty & OpenJ9 using Maven
+  id: java-openliberty
+  image: docker.io/kabanerobeta/java-openliberty:0.2.2
+  language: java
+  license: Apache-2.0
+  maintainers:
+  - email: andrasak@us.ibm.com
+    github-id: uberskigeek
+    name: Mike Andrasak
+  - email: ajmauer@us.ibm.com
+    github-id: ajm01
+    name: Andy Mauer
+  - email: skurz@us.ibm.com
+    github-id: ""
+    name: Scott Kurz
+  - email: awisniew@us.ibm.com
+    github-id: ""
+    name: Adam Wisniewski
+  name: Open Liberty
+  requirements:
+    appsody-version: '>= 0.5.0'
+    docker-version: '>= 17.09.0'
+  src: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/java-openliberty.v0.2.2.source.tar.gz
+  templates:
+  - id: default
+    url: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/java-openliberty.v0.2.2.templates.default.tar.gz
+  version: 0.2.3
+- default-template: default
+  description: Spring Boot using OpenJ9 and Maven
+  id: java-spring-boot2
+  image: docker.io/kabanerobeta/java-spring-boot2:0.3.23
+  language: java
+  license: Apache-2.0
+  maintainers:
+  - email: schnabel@us.ibm.com
+    github-id: ebullient
+    name: Erin Schnabel
+  - email: ozzy@ca.ibm.com
+    github-id: bardweller
+    name: Ozzy Osborne
+  name: Spring Boot®
+  requirements:
+    appsody-version: '>= 0.5.0'
+    docker-version: '>= 17.09.0'
+  src: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/java-spring-boot2.v0.3.23.source.tar.gz
+  templates:
+  - id: default
+    url: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/java-spring-boot2.v0.3.23.templates.default.tar.gz
+  - id: kotlin
+    url: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/java-spring-boot2.v0.3.23.templates.kotlin.tar.gz
+  version: 0.3.24
 - default-template: simple
   description: Runtime for Node.js applications
   id: nodejs
-  image: docker.io/kabanero/nodejs:0.3.2
+  image: docker.io/kabanerobeta/nodejs:0.3.2
   language: nodejs
   license: Apache-2.0
   maintainers:
@@ -11,24 +63,53 @@ stacks:
     github-id: sam-github
     name: Sam Roberts
   name: Node.js
-  src: https://github.com/kabanero-io/collections/releases/download/0.6.0/nodejs.v0.3.2.source.tar.gz
+  src: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/nodejs.v0.3.2.source.tar.gz
   templates:
   - id: simple
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.0/nodejs.v0.3.2.templates.simple.tar.gz
+    url: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/nodejs.v0.3.2.templates.simple.tar.gz
   version: 0.3.3
 - default-template: simple
-  description: Runtime for Node.js applications
-  id: nodejs
-  image: docker.io/kabanero/nodejs:0.3.2
+  description: Express web framework for Node.js
+  id: nodejs-express
+  image: docker.io/kabanerobeta/nodejs-express:0.2.9
   language: nodejs
   license: Apache-2.0
   maintainers:
-  - email: vieuxtech@gmail.com
-    github-id: sam-github
-    name: Sam Roberts
-  name: Node.js
-  src: https://github.com/kabanero-io/collections/releases/download/0.6.0/nodejs.v0.3.2.source.tar.gz
+  - email: cnbailey@gmail.com
+    github-id: seabaylea
+    name: Chris Bailey
+  - email: neeraj.laad@gmail.com
+    github-id: neeraj-laad
+    name: Neeraj Laad
+  name: Node.js Express
+  src: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/nodejs-express.v0.2.9.source.tar.gz
   templates:
+  - id: scaffold
+    url: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/nodejs-express.v0.2.9.templates.scaffold.tar.gz
   - id: simple
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.0/nodejs.v0.3.2.templates.simple.tar.gz
-  version: 0.3.4
+    url: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/nodejs-express.v0.2.9.templates.simple.tar.gz
+  version: 0.2.10
+- default-template: default
+  description: Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
+  id: java-microprofile
+  image: docker.io/kabanerobeta/java-microprofile:0.2.25
+  language: java
+  license: Apache-2.0
+  maintainers:
+  - email: emijiang6@googlemail.com
+    github-id: Emily-Jiang
+    name: Emily Jiang
+  - email: neeraj.laad@gmail.com
+    github-id: neeraj-laad
+    name: Neeraj Laad
+  - email: ozzy@ca.ibm.com
+    github-id: BarDweller
+    name: Ozzy
+  name: Eclipse MicroProfile®
+  requirements:
+    appsody-version: '>= 0.5.0'
+  src: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/java-microprofile.v0.2.25.source.tar.gz
+  templates:
+  - id: default
+    url: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/java-microprofile.v0.2.25.templates.default.tar.gz
+  version: 0.2.26
