@@ -557,6 +557,7 @@ public class StacksAccess {
 					System.out.println("exception cause: " + e.getCause());
 					System.out.println("exception message: " + e.getMessage());
 					System.out.println("*** stack " + kabStack.getSpec().getName() + " failed to delete, organization "+group);
+					System.out.println("*** stack status message: "+stack.getStatus().getStatusMessage());
 					System.out.println("*** stack object: "+kabStack.toString());
 					e.printStackTrace();
 					m.put("status", "failed to delete");
