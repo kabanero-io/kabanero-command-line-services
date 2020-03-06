@@ -646,5 +646,25 @@ public class StackUtils {
 		return updateStacks;
 	}
 
+	public static boolean isStackVersionDeleted(List<Map> deletedStacks, String name, String version) {
+		boolean match=false;
+		for (Map deletedStack:deletedStacks) {
+			String stackName = (String) deletedStack.get("name");
+			stackName = stackName.trim();
+			if (name.contentEquals(stackName)) {
+				List<Map> versions=(List<Map>)deletedStack.get("versions");
+				for (Map versionMap:versions) {
+					String versionStr=(String)versionMap.get("version");
+					versionStr = versionStr.trim();
+					if (version.contentEquals(versionStr)) {
+						System.out.println("name="+name+", version="+version+" has been deleted, so skip activate");
+						match=true;
+					}
+				}
+			}
+		}
+		return match;
+	}
+
 
 }
