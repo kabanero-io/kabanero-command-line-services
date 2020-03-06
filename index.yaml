@@ -1,29 +1,5 @@
 apiVersion: v2
 stacks:
-- default-template: default
-  description: Spring Boot using OpenJ9 and Maven
-  id: java-spring-boot2
-  image: docker.io/kabanero/java-spring-boot2:0.3.24
-  language: java
-  license: Apache-2.0
-  maintainers:
-  - email: schnabel@us.ibm.com
-    github-id: ebullient
-    name: Erin Schnabel
-  - email: ozzy@ca.ibm.com
-    github-id: bardweller
-    name: Ozzy Osborne
-  name: Spring Boot®
-  requirements:
-    appsody-version: '>= 0.5.0'
-    docker-version: '>= 17.09.0'
-  src: https://github.com/kabanero-io/collections/releases/download/0.6.0/java-spring-boot2.v0.3.24.source.tar.gz
-  templates:
-  - id: kotlin
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.0/java-spring-boot2.v0.3.24.templates.kotlin.tar.gz
-  - id: default
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.0/java-spring-boot2.v0.3.24.templates.default.tar.gz
-  version: 0.3.25
 - default-template: simple
   description: Runtime for Node.js applications
   id: nodejs
