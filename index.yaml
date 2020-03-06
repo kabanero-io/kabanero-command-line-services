@@ -88,7 +88,7 @@ stacks:
     url: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/nodejs-express.v0.2.9.templates.scaffold.tar.gz
   - id: simple
     url: https://github.com/kabanero-io/collections/releases/download/0.6.0-rc.3/nodejs-express.v0.2.9.templates.simple.tar.gz
-  version: 0.2.10
+  version: 0.2.11
 - default-template: default
   description: Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
   id: java-microprofile
