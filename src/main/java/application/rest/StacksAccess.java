@@ -199,7 +199,7 @@ public class StacksAccess {
 			
 			
 			List kabStacks=StackUtils.allStacks(fromKabanero);
-			System.out.println("kabanero stacks:"+fromKabanero);
+			System.out.println("kabanero stacks:"+kabStacks);
 			
 			Collections.sort(kabStacks, mapComparator);
 			JSONArray allKabStacksJSON = convertMapToJSON(kabStacks);
