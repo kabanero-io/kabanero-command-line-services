@@ -92,6 +92,27 @@ stacks:
   - id: scaffold
     url: https://github.com/kabanero-io/collections/releases/download/0.6.1/nodejs-express.v0.2.10.templates.scaffold.tar.gz
   version: 0.2.11
+- default-template: simple
+  description: Express web framework for Node.js
+  id: nodejs-express
+  image: docker.io/kabanero/nodejs-express:0.2.10
+  language: nodejs
+  license: Apache-2.0
+  maintainers:
+  - email: cnbailey@gmail.com
+    github-id: seabaylea
+    name: Chris Bailey
+  - email: neeraj.laad@gmail.com
+    github-id: neeraj-laad
+    name: Neeraj Laad
+  name: Node.js Express
+  src: https://github.com/kabanero-io/collections/releases/download/0.6.1/nodejs-express.v0.2.10.source.tar.gz
+  templates:
+  - id: simple
+    url: https://github.com/kabanero-io/collections/releases/download/0.6.1/nodejs-express.v0.2.10.templates.simple.tar.gz
+  - id: scaffold
+    url: https://github.com/kabanero-io/collections/releases/download/0.6.1/nodejs-express.v0.2.10.templates.scaffold.tar.gz
+  version: 0.2.12
 - default-template: default
   description: Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
   id: java-microprofile
