@@ -174,13 +174,14 @@ public class StacksAccess {
 				return Response.status(424).entity(resp).build();
 			}
 			
-			System.out.println("stacks: "+stacks);
+			
 			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
+			System.out.println("curated stacks: "+curatedStacks);
 			Collections.sort(curatedStacks, mapComparator);
 			List<Map> curatedStacksMaps = StackUtils.packageStackMaps(curatedStacks);
 			
 			JSONArray ja = convertMapToJSON(curatedStacksMaps);
-			System.out.println("curated stack for namespace: "+namespace+" kab group: " + group +"="+ ja);
+			//System.out.println("curated stack for namespace: "+namespace+" kab group: " + group +"="+ ja);
 			msg.put("curated stacks", ja);
 
 			// make call to kabanero to get current collection
@@ -195,9 +196,10 @@ public class StacksAccess {
 				e.printStackTrace();
 			}
 			
-			System.out.println("kabanero instance stacks:"+fromKabanero);
+			
 			
 			List kabStacks=StackUtils.allStacks(fromKabanero);
+			System.out.println("kabanero stacks:"+fromKabanero);
 			
 			Collections.sort(kabStacks, mapComparator);
 			JSONArray allKabStacksJSON = convertMapToJSON(kabStacks);
