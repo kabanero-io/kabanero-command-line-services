@@ -585,6 +585,9 @@ public class StackUtils {
 						boolean match = false;
 
 						for (StackSpecVersions stackSpecVersion : kabStackVersions) {
+							System.out.println("newlyAddedStacks, version="+version);
+							System.out.println("newlyAddedStacks, stackSpecVersion="+stackSpecVersion);
+							System.out.println("newlyAddedStacks, stackSpecVersion.getVersion()="+stackSpecVersion.getVersion());
 							if (version.contentEquals(stackSpecVersion.getVersion())) {
 								match = true;
 							}
