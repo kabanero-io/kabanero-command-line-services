@@ -32,6 +32,12 @@ public class KabSecFilter implements ContainerRequestFilter {
     		if (uri.endsWith("/logout") || uri.endsWith("/logout/")) {
     			return;
     		}
+    		if (uri.endsWith("/login") || uri.endsWith("/login/")) {
+    			if (uri.startsWith("https:")) {
+    				System.out.println("uri starts with https:");
+    			}
+    			System.out.println("uri="+uri);
+    		}
     		String jwt = httpUtils.getBearerTokenFromAuthzHeader(requestContext);
     		if (isJwtPreviouslyLoggedOut(jwt)) {
     			ResponseBuilder responseBuilder = Response.serverError();
