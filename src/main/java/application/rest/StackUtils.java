@@ -622,7 +622,7 @@ public class StackUtils {
 
 	public static List<Map> packageStackMaps(List<Map> stacks) {
 		ArrayList<Map> updatedStacks = new ArrayList<Map>();
-		ArrayList<Map> versions = null;
+		ArrayList versions = null;
 		String saveName = "";
 		for (Map stack : stacks) {
 			System.out.println("packageStackMaps one stack: "+stack.toString());
@@ -647,6 +647,7 @@ public class StackUtils {
 				versionMap.put("images", stack.get("images"));
 				versionMap.put("reponame", stack.get("reponame"));
 				versions.add(versionMap);
+				Collections.sort(versions, mapComparator2);
 				updatedStacks.add(map);
 			}
 		}
