@@ -65,6 +65,12 @@ public class StackUtils {
 	    }
 	};
 	
+	public static Comparator<Map<String, String>> mapComparator2 = new Comparator<Map<String, String>>() {
+	    public int compare(Map<String, String> m1, Map<String, String> m2) {
+	        return m1.get("version").compareTo(m2.get("version"));
+	    }
+	};
+	
 	
 
 	private static Map readYaml(String response) {
@@ -310,7 +316,7 @@ public class StackUtils {
 				String name = s.getMetadata().getName();
 				name = name.trim();
 				List<StackStatusVersions> versions = s.getStatus().getVersions();
-				List<Map> status = new ArrayList<Map>();
+				List status = new ArrayList<Map>();
 				for (StackStatusVersions stackStatusVersion : versions) {
 					HashMap versionMap = new HashMap();
 					String statusStr = stackStatusVersion.getStatus();
@@ -324,6 +330,7 @@ public class StackUtils {
 					status.add(versionMap);
 				}
 				allMap.put("name", name);
+				Collections.sort(status, mapComparator2);
 				allMap.put("status",status);
 				allStacks.add(allMap);
 			}
@@ -569,7 +576,7 @@ public class StackUtils {
 
 	public static List<Map> packageStackMaps(List<Map> stacks) {
 		ArrayList<Map> updatedStacks = new ArrayList<Map>();
-		ArrayList<Map> versions = null;
+		ArrayList versions = null;
 		String saveName = "";
 		for (Map stack : stacks) {
 			System.out.println("packageStackMaps one stack: "+stack.toString());
@@ -594,6 +601,7 @@ public class StackUtils {
 				versionMap.put("images", stack.get("images"));
 				versionMap.put("reponame", stack.get("reponame"));
 				versions.add(versionMap);
+				Collections.sort(versions, mapComparator2);
 				updatedStacks.add(map);
 			}
 		}
