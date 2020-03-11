@@ -33,10 +33,14 @@ public class KabSecFilter implements ContainerRequestFilter {
     			return;
     		}
     		if (uri.endsWith("/login") || uri.endsWith("/login/")) {
-    			if (uri.startsWith("https:")) {
-    				System.out.println("uri starts with https:");
+    			if (!uri.startsWith("https:")) {
+    				System.out.println("uri does not start with https:");
+    				System.out.println("uri ="+uri);
+    				ResponseBuilder responseBuilder = Response.serverError();
+        			JsonObject responseBody = Json.createObjectBuilder().add("message", "401: The request URI did not start with https").build();
+        			Response response = responseBuilder.entity(responseBody.toString()).status(401).build();
+        			requestContext.abortWith(response);
     			}
-    			System.out.println("uri="+uri);
     		}
     		String jwt = httpUtils.getBearerTokenFromAuthzHeader(requestContext);
     		if (isJwtPreviouslyLoggedOut(jwt)) {
