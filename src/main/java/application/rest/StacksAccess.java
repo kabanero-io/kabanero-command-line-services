@@ -174,16 +174,13 @@ public class StacksAccess {
 				return Response.status(424).entity(resp).build();
 			}
 			
-			
+			System.out.println("stacks: "+stacks);
 			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
-			//System.out.println("curated stacks: "+curatedStacks);
-			
-			List curatedStacksMaps = StackUtils.packageStackMaps(curatedStacks);
-			Collections.sort(curatedStacksMaps, mapComparator);
-			System.out.println("curated stacks: "+curatedStacksMaps);
+			Collections.sort(curatedStacks, mapComparator);
+			List<Map> curatedStacksMaps = StackUtils.packageStackMaps(curatedStacks);
 			
 			JSONArray ja = convertMapToJSON(curatedStacksMaps);
-			//System.out.println("curated stack for namespace: "+namespace+" kab group: " + group +"="+ ja);
+			System.out.println("curated stack for namespace: "+namespace+" kab group: " + group +"="+ ja);
 			msg.put("curated stacks", ja);
 
 			// make call to kabanero to get current collection
@@ -198,10 +195,9 @@ public class StacksAccess {
 				e.printStackTrace();
 			}
 			
-			
+			System.out.println("kabanero instance stacks:"+fromKabanero);
 			
 			List kabStacks=StackUtils.allStacks(fromKabanero);
-			System.out.println("kabanero stacks:"+kabStacks);
 			
 			Collections.sort(kabStacks, mapComparator);
 			JSONArray allKabStacksJSON = convertMapToJSON(kabStacks);
@@ -213,8 +209,11 @@ public class StacksAccess {
 			
 			
 			try {
-				List newStacks = StackUtils.newlyAddedStacks(fromKabanero, curatedStacksMaps);
+				List newStacks = (List<Map>) StackUtils.filterNewStacks(stacks,
+						fromKabanero);
 				Collections.sort(newStacks, mapComparator);
+				
+				newStacks = StackUtils.packageStackMaps(newStacks);
 				
 				List deleletedStacks = StackUtils.obsoleteStacks(fromKabanero, curatedStacksMaps);
 				
@@ -417,12 +416,13 @@ public class StacksAccess {
 			System.out.println(" ");
 			System.out.println(" ");
 
-			//newStacks = (List<Map>) StackUtils.filterNewStacks(stacks, fromKabanero);
-			newStacks = (List<Map>) StackUtils.newlyAddedStacks(fromKabanero, curatedStacks);
+			newStacks = (List<Map>) StackUtils.filterNewStacks(stacks, fromKabanero);
 			Collections.sort(newStacks, mapComparator);
 			System.out.println("*** new curated stacks=" + newStacks);
 			System.out.println(" ");
 			multiVersionNewStacks=(List<Stack>) StackUtils.packageStackObjects(newStacks, versionedStackPipelineMap);
+			newStacks = (List<Map>) StackUtils.packageStackMaps(newStacks);
+			 
 			
 			
 		} catch (Exception e) {
