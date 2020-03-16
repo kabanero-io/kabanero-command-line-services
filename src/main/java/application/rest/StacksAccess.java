@@ -698,7 +698,7 @@ public class StacksAccess {
 			if (kabaneroSpecStacksHttps!=null) {
 				url = repo.getHttps().getUrl();
 			} else {
-				url = repo.getGitRelease().getHostname();
+				url = "https://"+repo.getGitRelease().getHostname()+"/"+repo.getGitRelease().getOrganization()+"/"+repo.getGitRelease().getProject()+"/"+repo.getGitRelease().getAssetName();
 			}
 			jo.put("url", url);
 			repoJA.add(jo);
