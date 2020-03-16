@@ -693,7 +693,14 @@ public class StacksAccess {
 		for (KabaneroSpecStacksRepositories repo: kab.getSpec().getStacks().getRepositories()) {
 			JSONObject jo = new JSONObject();
 			jo.put("name", repo.getName());
-			jo.put("url", repo.getHttps().getUrl());
+			String url="";
+			KabaneroSpecStacksHttps kabaneroSpecStacksHttps = repo.getHttps();
+			if (kabaneroSpecStacksHttps!=null) {
+				url = repo.getHttps().getUrl();
+			} else {
+				url = repo.getGitRelease().getHostname();
+			}
+			jo.put("url", url);
 			repoJA.add(jo);
 		}
 		return repoJA;
