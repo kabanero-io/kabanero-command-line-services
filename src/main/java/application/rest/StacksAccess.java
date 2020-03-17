@@ -691,6 +691,7 @@ public class StacksAccess {
 	private JSONArray getRepositories(Kabanero kab) {
 		JSONArray repoJA = new JSONArray();
 		System.out.println("entering getRepositories(Kabanero kab) ");
+		System.out.println("kab.getSpec().getStacks().getRepositories().toString(): "+kab.getSpec().getStacks().getRepositories().toString());
 		for (KabaneroSpecStacksRepositories repo: kab.getSpec().getStacks().getRepositories()) {
 			System.out.println("iterating in for loop in getRepositories(Kabanero kab)");
 			JSONObject jo = new JSONObject();
