@@ -201,12 +201,12 @@ public class StackUtils {
 		RepositoryService repoService = new RepositoryService(client);
 		String fileContent = null, valueDecoded = null;
 		try {
-			Repository repo = repoService.getRepository(repoOwner, REPONAME);
+			//Repository repo = repoService.getRepository(repoOwner, REPONAME);
 			
 			// now contents service
 			ContentsService contentService = new ContentsService(client);
 			
-			
+			System.out.println("attempting to download GHE asset with path: "+FILENAME);
 			
 			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
 					FILENAME);
