@@ -690,24 +690,40 @@ public class StacksAccess {
 	
 	private JSONArray getRepositories(Kabanero kab) {
 		JSONArray repoJA = new JSONArray();
+		System.out.println("entering getRepositories(Kabanero kab) ");
 		for (KabaneroSpecStacksRepositories repo: kab.getSpec().getStacks().getRepositories()) {
+			System.out.println("iterating in for loop in getRepositories(Kabanero kab)");
 			JSONObject jo = new JSONObject();
+			System.out.println("<<1>>");
 			jo.put("name", repo.getName());
+			System.out.println("<<2>>");
 			String url="x";
+			System.out.println("<<3>>");
 			KabaneroSpecStacksHttps kabaneroSpecStacksHttps = repo.getHttps();
+			System.out.println("<<4>>");
 			if (kabaneroSpecStacksHttps!=null) {
+				System.out.println("<<5>>");
 				url = repo.getHttps().getUrl();
 			} else {
+				System.out.println("<<6>>");
 				KabaneroSpecStacksGitRelease gitRelease= repo.getGitRelease();
 				System.out.println("repo.getGitRelease()="+repo.getGitRelease());
+				System.out.println("<<7>>");
 				if (gitRelease!=null) {
+					System.out.println("<<8>>");
 					url = "https://"+repo.getGitRelease().getHostname()+"/"+repo.getGitRelease().getOrganization()+"/"+repo.getGitRelease().getProject()+"/"+repo.getGitRelease().getAssetName();
 				} 
-				else url="not resolved";
+				else {
+					System.out.println("<<9>>");
+					url="not resolved";
+				}
 			}
+			System.out.println("<<10>>");
 			jo.put("url", url);
+			System.out.println("<<11>>");
 			repoJA.add(jo);
 		}
+		System.out.println("<<12>>");
 		return repoJA;
 	}
 	
