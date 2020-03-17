@@ -216,7 +216,7 @@ public class StacksAccess {
 				
 				newStacks = StackUtils.packageStackMaps(newStacks);
 				
-				List deleletedStacks = StackUtils.obsoleteStacks(fromKabanero, curatedStacksMaps);
+				List deleletedStacks = StackUtils.obsoleteStacks(fromKabanero, curatedStacks);
 				
 
 				ja = convertMapToJSON(newStacks);
