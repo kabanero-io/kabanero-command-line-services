@@ -179,6 +179,7 @@ public class StacksAccess {
 			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
 			Collections.sort(curatedStacks, mapComparator);
 			List<Map> curatedStacksMaps = StackUtils.packageStackMaps(curatedStacks);
+			System.out.println("curatedStacksMaps: "+curatedStacksMaps);
 			
 			JSONArray ja = convertMapToJSON(curatedStacksMaps);
 			System.out.println("curated stack for namespace: "+namespace+" kab group: " + group +"="+ ja);
@@ -216,7 +217,7 @@ public class StacksAccess {
 				
 				newStacks = StackUtils.packageStackMaps(newStacks);
 				
-				List deleletedStacks = StackUtils.obsoleteStacks(fromKabanero, curatedStacks);
+				List deleletedStacks = StackUtils.obsoleteStacks(fromKabanero, curatedStacksMaps);
 				
 
 				ja = convertMapToJSON(newStacks);
