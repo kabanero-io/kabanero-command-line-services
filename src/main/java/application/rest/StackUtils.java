@@ -201,10 +201,13 @@ public class StackUtils {
 		RepositoryService repoService = new RepositoryService(client);
 		String fileContent = null, valueDecoded = null;
 		try {
-			Repository repo = repoService.getRepository(repoOwner, REPONAME);
-
+			//Repository repo = repoService.getRepository(repoOwner, REPONAME);
+			
 			// now contents service
 			ContentsService contentService = new ContentsService(client);
+			
+			System.out.println("attempting to download GHE asset with path: "+FILENAME);
+			
 			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
 					FILENAME);
 			for (RepositoryContents content : test) {
@@ -238,15 +241,18 @@ public class StackUtils {
 					throw new RuntimeException("No repository URL specified");
 				}
 				String org, project, release, asset;
-				url = kabaneroSpecStacksGitRelease.getHostname();
+				String secret_url = url = kabaneroSpecStacksGitRelease.getHostname();
 				System.out.println("GHE git url="+url);
 				org = kabaneroSpecStacksGitRelease.getOrganization();
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
-				asset = kabaneroSpecStacksGitRelease.getAssetName();
-				response = getGithubFile(org, KubeUtils.getSecret(namespace,url), url, project, asset);
+				asset = "/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
+				// https://github.com/kabanero-io/kabanero-stack-hub/releases/download/0.7.0-rc.1/kabanero-stack-hub-index.yaml
+				System.out.println("in getStackFromGIT, reading from GHE index: "+"https://"+url+"/"+org+"/"+project+"/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName());
+				response = getGithubFile(org, KubeUtils.getSecret(namespace,secret_url), url, project, asset);
 				System.out.println("GHE response="+response);
 			} else {
+				System.out.println("in getStackFromGIT, reading from github public index: "+url);
 				response = getFromGit(url, user, pw);
 
 			}

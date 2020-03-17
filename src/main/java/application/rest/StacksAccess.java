@@ -63,6 +63,7 @@ import io.kabanero.v1alpha2.models.StackStatus;
 import io.kabanero.v1alpha2.models.StackStatusVersions;
 import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksGitRelease;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksHttps;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
@@ -178,6 +179,7 @@ public class StacksAccess {
 			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
 			Collections.sort(curatedStacks, mapComparator);
 			List<Map> curatedStacksMaps = StackUtils.packageStackMaps(curatedStacks);
+			System.out.println("curatedStacksMaps: "+curatedStacksMaps);
 			
 			JSONArray ja = convertMapToJSON(curatedStacksMaps);
 			System.out.println("curated stack for namespace: "+namespace+" kab group: " + group +"="+ ja);
@@ -689,12 +691,30 @@ public class StacksAccess {
 	
 	private JSONArray getRepositories(Kabanero kab) {
 		JSONArray repoJA = new JSONArray();
-		
+		System.out.println("entering getRepositories(Kabanero kab) ");
+		System.out.println("kab.getSpec().getStacks().getRepositories().toString(): "+kab.getSpec().getStacks().getRepositories().toString());
 		for (KabaneroSpecStacksRepositories repo: kab.getSpec().getStacks().getRepositories()) {
+			System.out.println("iterating in for loop in getRepositories(Kabanero kab)");
 			JSONObject jo = new JSONObject();
-			jo.put("name", repo.getName());
-			jo.put("url", repo.getHttps().getUrl());
-			repoJA.add(jo);
+			String url="not resolved";
+			KabaneroSpecStacksHttps kabaneroSpecStacksHttps = repo.getHttps();
+			if (kabaneroSpecStacksHttps!=null) {
+				url = repo.getHttps().getUrl();
+			} else {
+				KabaneroSpecStacksGitRelease gitRelease= repo.getGitRelease();
+				System.out.println("repo.getGitRelease()="+repo.getGitRelease());
+				if (gitRelease!=null) {
+					url = "https://"+repo.getGitRelease().getHostname()+"/"+repo.getGitRelease().getOrganization()+"/"+repo.getGitRelease().getProject()+"/"+repo.getGitRelease().getAssetName();
+				} 
+				else {
+					url="not resolved";
+				}
+			}
+			if (!"not resolved".contentEquals(url)) {
+				jo.put("name", repo.getName());
+				jo.put("url", url);
+				repoJA.add(jo);
+			}
 		}
 		return repoJA;
 	}
