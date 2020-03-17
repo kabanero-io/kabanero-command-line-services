@@ -63,6 +63,7 @@ import io.kabanero.v1alpha2.models.StackStatus;
 import io.kabanero.v1alpha2.models.StackStatusVersions;
 import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksGitRelease;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksHttps;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
@@ -689,16 +690,20 @@ public class StacksAccess {
 	
 	private JSONArray getRepositories(Kabanero kab) {
 		JSONArray repoJA = new JSONArray();
-		
 		for (KabaneroSpecStacksRepositories repo: kab.getSpec().getStacks().getRepositories()) {
 			JSONObject jo = new JSONObject();
 			jo.put("name", repo.getName());
-			String url="";
+			String url="x";
 			KabaneroSpecStacksHttps kabaneroSpecStacksHttps = repo.getHttps();
 			if (kabaneroSpecStacksHttps!=null) {
 				url = repo.getHttps().getUrl();
 			} else {
-				url = "https://"+repo.getGitRelease().getHostname()+"/"+repo.getGitRelease().getOrganization()+"/"+repo.getGitRelease().getProject()+"/"+repo.getGitRelease().getAssetName();
+				KabaneroSpecStacksGitRelease gitRelease= repo.getGitRelease();
+				System.out.println("repo.getGitRelease()="+repo.getGitRelease());
+				if (gitRelease!=null) {
+					url = "https://"+repo.getGitRelease().getHostname()+"/"+repo.getGitRelease().getOrganization()+"/"+repo.getGitRelease().getProject()+"/"+repo.getGitRelease().getAssetName();
+				} 
+				else url="not resolved";
 			}
 			jo.put("url", url);
 			repoJA.add(jo);
