@@ -206,10 +206,14 @@ public class StackUtils {
 			// now contents service
 			ContentsService contentService = new ContentsService(client);
 			
+			System.out.println("URL: "+URL);
 			System.out.println("attempting to download GHE asset with path: "+FILENAME);
+			System.out.println("repoOwner: "+repoOwner);
+			System.out.println("REPONAME: "+REPONAME);
 			
 			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
 					FILENAME);
+			
 			for (RepositoryContents content : test) {
 				fileContent = content.getContent();
 				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
