@@ -244,9 +244,11 @@ public class StackUtils {
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
 				asset = kabaneroSpecStacksGitRelease.getAssetName();
+				System.out.println("in getStackFromGIT, reading from GHE index: "+"https://"+kabaneroSpecStacksGitRelease.getHostname()+"/"+kabaneroSpecStacksGitRelease.getOrganization()+"/"+kabaneroSpecStacksGitRelease.getProject()+"/"+kabaneroSpecStacksGitRelease.getAssetName());
 				response = getGithubFile(org, KubeUtils.getSecret(namespace,url), url, project, asset);
 				System.out.println("GHE response="+response);
 			} else {
+				System.out.println("in getStackFromGIT, reading from github public index: "+url);
 				response = getFromGit(url, user, pw);
 
 			}
