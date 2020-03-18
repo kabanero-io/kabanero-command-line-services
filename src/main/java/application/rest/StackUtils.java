@@ -246,7 +246,10 @@ public class StackUtils {
 //			    }
 //			}
 			
+			
+			
 			Repository repo = repoService.getRepository(repoOwner, REPONAME);
+			
 			
 			// now contents service
 			ContentsService contentService = new ContentsService(client);
@@ -261,14 +264,12 @@ public class StackUtils {
 //			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
 //					FILENAME);
 			
-			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME));
+			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),FILENAME);
 
 			
 			
 			
 			for (RepositoryContents content : test) {
-				System.out.println("name: "+content.getName());
-				System.out.println("path: "+content.getPath());
 				fileContent = content.getContent();
 				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
 			}
@@ -306,8 +307,8 @@ public class StackUtils {
 				release = kabaneroSpecStacksGitRelease.getRelease();
 				
 				// https://github.ibm.com/dacohen/stacks/releases/download/0.1.0/kabanero-index.yaml
-				
-				asset = "/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
+				// /repos/$REPO/releases/assets/$asset_id
+				asset = "/releases/assets/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
 				//asset = "/releases/tag/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
 				// https://github.com/kabanero-io/kabanero-stack-hub/releases/download/0.7.0-rc.1/kabanero-stack-hub-index.yaml
 				// https://github.ibm.com/dacohen/stacks/releases/tag/0.1.0/kabanero-index.yaml
