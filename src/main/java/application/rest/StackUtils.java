@@ -206,7 +206,7 @@ public class StackUtils {
 		try {
 			
 			GitHubRequest request = new GitHubRequest();
-			String requestURL=URL+"/"+repoOwner+"/"+REPONAME+"/"+FILENAME;
+			String requestURL="https://"+URL+"/"+repoOwner+"/"+REPONAME+"/"+FILENAME;
 			System.out.println("requestURL="+requestURL);
 			request.setUri(requestURL);
 			
