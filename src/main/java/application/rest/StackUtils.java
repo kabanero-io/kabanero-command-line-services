@@ -205,34 +205,34 @@ public class StackUtils {
 		String fileContent = null, valueDecoded = null;
 		try {
 			
-			GitHubRequest request = new GitHubRequest();
-			String requestURL="https://"+URL+"/"+repoOwner+"/"+REPONAME+"/"+FILENAME;
-			System.out.println("requestURL="+requestURL);
-			request.setUri(requestURL);
+//			GitHubRequest request = new GitHubRequest();
+//			String requestURL="https://"+URL+"/"+repoOwner+"/"+REPONAME+"/"+FILENAME;
+//			System.out.println("requestURL="+requestURL);
+//			request.setUri(requestURL);
+//			
+//			GitHubResponse response = client.get(request);
+//			valueDecoded = response.toString();
+//			System.out.println("valueDecoded="+valueDecoded);
 			
-			GitHubResponse response = client.get(request);
-			valueDecoded = response.toString();
-			System.out.println("valueDecoded="+valueDecoded);
 			
 			
-//			GitHubRequest req
-//			//Repository repo = repoService.getRepository(repoOwner, REPONAME);
-//			
-//			// now contents service
-//			ContentsService contentService = new ContentsService(client);
-//			
-//			System.out.println("URL: "+URL);
-//			System.out.println("attempting to download GHE asset with path: "+FILENAME);
-//			System.out.println("repoOwner: "+repoOwner);
-//			System.out.println("REPONAME: "+REPONAME);
-//			
-//			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
-//					FILENAME);
-//			
-//			for (RepositoryContents content : test) {
-//				fileContent = content.getContent();
-//				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
-//			}
+			Repository repo = repoService.getRepository(repoOwner, REPONAME);
+			
+			// now contents service
+			ContentsService contentService = new ContentsService(client);
+			
+			System.out.println("URL: "+URL);
+			System.out.println("attempting to download GHE asset with path: "+FILENAME);
+			System.out.println("repoOwner: "+repoOwner);
+			System.out.println("REPONAME: "+REPONAME);
+			
+			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
+					FILENAME);
+			
+			for (RepositoryContents content : test) {
+				fileContent = content.getContent();
+				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
+			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -265,8 +265,11 @@ public class StackUtils {
 				org = kabaneroSpecStacksGitRelease.getOrganization();
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
-				asset = "releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
+				//asset = "/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
+				asset = "/releases/tag/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
 				// https://github.com/kabanero-io/kabanero-stack-hub/releases/download/0.7.0-rc.1/kabanero-stack-hub-index.yaml
+				// https://github.ibm.com/dacohen/stacks/releases/tag/0.1.0/kabanero-index.yaml
+
 				System.out.println("in getStackFromGIT, reading from GHE index: "+"https://"+url+"/"+org+"/"+project+"/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName());
 				response = getGithubFile(org, KubeUtils.getSecret(namespace,secret_url), url, project, asset);
 				System.out.println("GHE response="+response);
