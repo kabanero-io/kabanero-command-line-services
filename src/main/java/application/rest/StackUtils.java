@@ -249,20 +249,17 @@ public class StackUtils {
 //			    }
 //			}
 			
-			Repository repo = repoService.getRepository(repoOwner, REPONAME);
-			
-			// now contents service
-			ContentsService contentService = new ContentsService(client);
-			
-			// https://github.ibm.com/dacohen/stacks/releases/download/0.1.0/kabanero-index.yaml
-			
 			System.out.println("URL: "+URL);
 			System.out.println("attempting to download GHE asset with path: "+FILENAME);
 			System.out.println("repoOwner: "+repoOwner);
 			System.out.println("REPONAME: "+REPONAME);
 			
-//			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
-//					FILENAME);
+//			Repository repo = repoService.getRepository(repoOwner, REPONAME);
+			
+			// now contents service
+			ContentsService contentService = new ContentsService(client);
+			
+			
 			
 			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),FILENAME);
 			
