@@ -25,7 +25,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryContents;
+import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.client.GitHubRequest;
+import org.eclipse.egit.github.core.client.GitHubResponse;
 import org.eclipse.egit.github.core.service.ContentsService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.yaml.snakeyaml.Yaml;
@@ -201,23 +204,34 @@ public class StackUtils {
 		RepositoryService repoService = new RepositoryService(client);
 		String fileContent = null, valueDecoded = null;
 		try {
-			//Repository repo = repoService.getRepository(repoOwner, REPONAME);
 			
-			// now contents service
-			ContentsService contentService = new ContentsService(client);
+			GitHubRequest request = new GitHubRequest();
+			String requestURL=URL+"/"+repoOwner+"/"+REPONAME+"/"+FILENAME;
+			request.setUri(requestURL);
 			
-			System.out.println("URL: "+URL);
-			System.out.println("attempting to download GHE asset with path: "+FILENAME);
-			System.out.println("repoOwner: "+repoOwner);
-			System.out.println("REPONAME: "+REPONAME);
+			GitHubResponse response = client.get(request);
+			valueDecoded = response.toString();
+			System.out.println("valueDecoded="+valueDecoded);
 			
-			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
-					FILENAME);
 			
-			for (RepositoryContents content : test) {
-				fileContent = content.getContent();
-				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
-			}
+//			GitHubRequest req
+//			//Repository repo = repoService.getRepository(repoOwner, REPONAME);
+//			
+//			// now contents service
+//			ContentsService contentService = new ContentsService(client);
+//			
+//			System.out.println("URL: "+URL);
+//			System.out.println("attempting to download GHE asset with path: "+FILENAME);
+//			System.out.println("repoOwner: "+repoOwner);
+//			System.out.println("REPONAME: "+REPONAME);
+//			
+//			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
+//					FILENAME);
+//			
+//			for (RepositoryContents content : test) {
+//				fileContent = content.getContent();
+//				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
+//			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
