@@ -138,6 +138,8 @@ public class StackUtils {
 			readGitSuccess=false;
 			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url, savedEx);
 		}
+		System.out.println("response.toString(): "+ response.toString());
+		
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 		if (response.getStatusLine().getStatusCode()==429) {
 			return "HTTP Code 429: GitHub retry limit exceeded, please try again in 2 minutes";
