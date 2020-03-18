@@ -313,7 +313,7 @@ public class StackUtils {
 				//asset = "/releases/tag/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
 				// https://github.com/kabanero-io/kabanero-stack-hub/releases/download/0.7.0-rc.1/kabanero-stack-hub-index.yaml
 				// https://github.ibm.com/dacohen/stacks/releases/tag/0.1.0/kabanero-index.yaml
-				url = "https://"+org+"/"+project+"/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
+				url = "https://"+url+"/"+org+"/"+project+"/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
 				System.out.println("in getStackFromGIT, reading from GHE index: "+"https://"+url+"/"+org+"/"+project+"/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName());
 				response = getFromGit(url, "", KubeUtils.getSecret(namespace,secret_url));
 				//response = getGithubFile(org, KubeUtils.getSecret(namespace,secret_url), url, project, asset);
