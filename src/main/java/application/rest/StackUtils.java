@@ -225,14 +225,15 @@ public class StackUtils {
 			System.out.println("requestURL="+requestURL);
 			
 			
-//			GitHubBuilder ghb = new GitHubBuilder();
-//			ghb.withOAuthToken(PAT);
-//			
-//			ghb.withRateLimitHandler(RateLimitHandler.WAIT).
-//            withAbuseLimitHandler(AbuseLimitHandler.WAIT);
-//			GitHub gitHub = ghb.build();
+			GitHubBuilder ghb = new GitHubBuilder();
+			ghb.withEndpoint(URL);
+			ghb.withOAuthToken(PAT);
 			
-			GitHub gitHub = new GitHubBuilder().withOAuthToken(PAT).build();
+			ghb.withRateLimitHandler(RateLimitHandler.WAIT).
+            withAbuseLimitHandler(AbuseLimitHandler.WAIT);
+			GitHub gitHub = ghb.build();
+			
+//			GitHub gitHub = new GitHubBuilder().withOAuthToken(PAT).build();
 			
 			
 			GHRepository repository = gitHub.getRepository(requestURL);
