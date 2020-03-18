@@ -227,13 +227,13 @@ public class StackUtils {
 			System.out.println ("PAT="+PAT);
 			
 			
-			GitHubBuilder ghb = new GitHubBuilder();
-			ghb.withEndpoint("https://"+URL);
-			ghb=ghb.withOAuthToken(PAT);
+			GitHub gitHub = new GitHubBuilder().withOAuthToken(PAT).withEndpoint("https://"+URL).build();
+//			ghb.withEndpoint("https://"+URL);
+//			ghb=ghb.withOAuthToken(PAT);
 			
-			ghb.withRateLimitHandler(RateLimitHandler.WAIT).
-            withAbuseLimitHandler(AbuseLimitHandler.WAIT);
-			GitHub gitHub = ghb.build();
+//			ghb.withRateLimitHandler(RateLimitHandler.WAIT).
+//            withAbuseLimitHandler(AbuseLimitHandler.WAIT);
+//			GitHub gitHub = ghb.build();
 			
 //			GitHub gitHub = new GitHubBuilder().withOAuthToken(PAT).build();
 			
