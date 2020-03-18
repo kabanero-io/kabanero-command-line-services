@@ -207,6 +207,7 @@ public class StackUtils {
 			
 			GitHubRequest request = new GitHubRequest();
 			String requestURL=URL+"/"+repoOwner+"/"+REPONAME+"/"+FILENAME;
+			System.out.println("requestURL="+requestURL);
 			request.setUri(requestURL);
 			
 			GitHubResponse response = client.get(request);
