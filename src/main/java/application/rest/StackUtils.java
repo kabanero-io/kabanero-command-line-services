@@ -31,6 +31,13 @@ import org.eclipse.egit.github.core.client.GitHubRequest;
 import org.eclipse.egit.github.core.client.GitHubResponse;
 import org.eclipse.egit.github.core.service.ContentsService;
 import org.eclipse.egit.github.core.service.RepositoryService;
+import org.kohsuke.github.AbuseLimitHandler;
+import org.kohsuke.github.GHAsset;
+import org.kohsuke.github.GHRelease;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.RateLimitHandler;
 import org.yaml.snakeyaml.Yaml;
 
 import io.kabanero.v1alpha2.client.apis.KabaneroApi;
@@ -214,27 +221,45 @@ public class StackUtils {
 //			valueDecoded = response.toString();
 //			System.out.println("valueDecoded="+valueDecoded);
 			
+			String requestURL=URL+"/"+repoOwner+"/"+REPONAME;
+			System.out.println("requestURL="+requestURL);
 			
 			
-			Repository repo = repoService.getRepository(repoOwner, REPONAME);
+			GitHubBuilder ghb = new GitHubBuilder();
+			ghb.withOAuthToken(PAT);
 			
-			// now contents service
-			ContentsService contentService = new ContentsService(client);
+			ghb.withRateLimitHandler(RateLimitHandler.WAIT).
+            withAbuseLimitHandler(AbuseLimitHandler.WAIT);
+			GitHub gitHub = ghb.build();
 			
-			System.out.println("URL: "+URL);
-			System.out.println("attempting to download GHE asset with path: "+FILENAME);
-			System.out.println("repoOwner: "+repoOwner);
-			System.out.println("REPONAME: "+REPONAME);
 			
-			String asset = "/"+ repoOwner + "/" +  REPONAME + "/" + FILENAME;
-			
-			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
-					asset);
-			
-			for (RepositoryContents content : test) {
-				fileContent = content.getContent();
-				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
+			GHRepository repository = gitHub.getRepository(requestURL);
+			for (GHRelease release : repository.listReleases()) {
+			    System.out.println(release.getName());
+			    for (GHAsset a : release.getAssets()) {
+			        System.out.println("  -> " + a.getName());
+			    }
 			}
+			
+//			Repository repo = repoService.getRepository(repoOwner, REPONAME);
+//			
+//			// now contents service
+//			ContentsService contentService = new ContentsService(client);
+//			
+//			System.out.println("URL: "+URL);
+//			System.out.println("attempting to download GHE asset with path: "+FILENAME);
+//			System.out.println("repoOwner: "+repoOwner);
+//			System.out.println("REPONAME: "+REPONAME);
+//			
+//			String asset = "/"+ repoOwner + "/" +  REPONAME + "/" + FILENAME;
+//			
+//			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
+//					asset);
+//			
+//			for (RepositoryContents content : test) {
+//				fileContent = content.getContent();
+//				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
+//			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
