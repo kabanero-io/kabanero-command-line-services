@@ -226,7 +226,7 @@ public class StackUtils {
 			
 			
 			GitHubBuilder ghb = new GitHubBuilder();
-			ghb.withEndpoint(URL);
+			ghb.withEndpoint("https://"+URL);
 			ghb.withOAuthToken(PAT);
 			
 			ghb.withRateLimitHandler(RateLimitHandler.WAIT).
