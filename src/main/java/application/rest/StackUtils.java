@@ -229,7 +229,7 @@ public class StackUtils {
 			
 			GitHubBuilder ghb = new GitHubBuilder();
 			ghb.withEndpoint("https://"+URL);
-			ghb.withOAuthToken(PAT);
+			ghb=ghb.withOAuthToken(PAT);
 			
 			ghb.withRateLimitHandler(RateLimitHandler.WAIT).
             withAbuseLimitHandler(AbuseLimitHandler.WAIT);
