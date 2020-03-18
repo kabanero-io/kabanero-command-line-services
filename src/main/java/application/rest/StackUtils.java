@@ -224,6 +224,8 @@ public class StackUtils {
 			String requestURL=URL+"/"+repoOwner+"/"+REPONAME;
 			System.out.println("requestURL="+requestURL);
 			
+			System.out.println ("PAT="+PAT);
+			
 			
 			GitHubBuilder ghb = new GitHubBuilder();
 			ghb.withEndpoint("https://"+URL);
