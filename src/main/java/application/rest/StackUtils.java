@@ -227,7 +227,7 @@ public class StackUtils {
 			System.out.println ("PAT="+PAT);
 			
 			
-			GitHub gitHub = new GitHubBuilder().withOAuthToken(PAT).withEndpoint("https://"+URL).build();
+//			GitHub gitHub = new GitHubBuilder().withOAuthToken(PAT).withEndpoint("https://"+URL).build();
 //			ghb.withEndpoint("https://"+URL);
 //			ghb=ghb.withOAuthToken(PAT);
 			
@@ -238,33 +238,40 @@ public class StackUtils {
 //			GitHub gitHub = new GitHubBuilder().withOAuthToken(PAT).build();
 			
 			
-			GHRepository repository = gitHub.getRepository(requestURL);
-			for (GHRelease release : repository.listReleases()) {
-			    System.out.println(release.getName());
-			    for (GHAsset a : release.getAssets()) {
-			        System.out.println("  -> " + a.getName());
-			    }
-			}
-			
-//			Repository repo = repoService.getRepository(repoOwner, REPONAME);
-//			
-//			// now contents service
-//			ContentsService contentService = new ContentsService(client);
-//			
-//			System.out.println("URL: "+URL);
-//			System.out.println("attempting to download GHE asset with path: "+FILENAME);
-//			System.out.println("repoOwner: "+repoOwner);
-//			System.out.println("REPONAME: "+REPONAME);
-//			
-//			String asset = "/"+ repoOwner + "/" +  REPONAME + "/" + FILENAME;
-//			
-//			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
-//					asset);
-//			
-//			for (RepositoryContents content : test) {
-//				fileContent = content.getContent();
-//				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
+//			GHRepository repository = gitHub.getRepository(requestURL);
+//			for (GHRelease release : repository.listReleases()) {
+//			    System.out.println(release.getName());
+//			    for (GHAsset a : release.getAssets()) {
+//			        System.out.println("  -> " + a.getName());
+//			    }
 //			}
+			
+			Repository repo = repoService.getRepository(repoOwner, REPONAME);
+			
+			// now contents service
+			ContentsService contentService = new ContentsService(client);
+			
+			// https://github.ibm.com/dacohen/stacks/releases/download/0.1.0/kabanero-index.yaml
+			
+			System.out.println("URL: "+URL);
+			System.out.println("attempting to download GHE asset with path: "+FILENAME);
+			System.out.println("repoOwner: "+repoOwner);
+			System.out.println("REPONAME: "+REPONAME);
+			
+//			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
+//					FILENAME);
+			
+			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME));
+
+			
+			
+			
+			for (RepositoryContents content : test) {
+				System.out.println("name: "+content.getName());
+				System.out.println("path: "+content.getPath());
+				fileContent = content.getContent();
+				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
+			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -297,7 +304,10 @@ public class StackUtils {
 				org = kabaneroSpecStacksGitRelease.getOrganization();
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
-				asset = "releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
+				
+				// https://github.ibm.com/dacohen/stacks/releases/download/0.1.0/kabanero-index.yaml
+				
+				asset = "/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
 				//asset = "/releases/tag/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
 				// https://github.com/kabanero-io/kabanero-stack-hub/releases/download/0.7.0-rc.1/kabanero-stack-hub-index.yaml
 				// https://github.ibm.com/dacohen/stacks/releases/tag/0.1.0/kabanero-index.yaml
