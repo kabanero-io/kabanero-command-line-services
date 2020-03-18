@@ -265,7 +265,7 @@ public class StackUtils {
 				org = kabaneroSpecStacksGitRelease.getOrganization();
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
-				asset = "/releases/download/"+release+"/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
+				asset = "/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
 				//asset = "/releases/tag/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
 				// https://github.com/kabanero-io/kabanero-stack-hub/releases/download/0.7.0-rc.1/kabanero-stack-hub-index.yaml
 				// https://github.ibm.com/dacohen/stacks/releases/tag/0.1.0/kabanero-index.yaml
