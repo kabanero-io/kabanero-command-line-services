@@ -110,12 +110,14 @@ public class StackUtils {
 	public static String getFromGit(String url, String user, String pw) {
 		HttpClientBuilder clientBuilder = HttpClients.custom();
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
-		credsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(user, pw));
+		//credsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(user, pw));
 		clientBuilder.setDefaultCredentialsProvider(credsProvider);
 		HttpClient client = clientBuilder.create().build();
+		System.out.println("PAT="+pw);
 		System.out.println("getFromGit url="+url);
 		HttpGet request = new HttpGet(url);
 		request.addHeader("accept", "application/octet=stream");
+		request.addHeader("Authorization", "token "+pw);
 		//request.addHeader("accept", "application/yaml");
 		// add request header
 
