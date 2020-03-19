@@ -330,13 +330,8 @@ public class StacksAccess {
 			List<KabaneroSpecStacksPipelines> defaultPipelines = kab.getSpec().getStacks().getPipelines();
 			if (defaultPipelines != null) {
 				for (KabaneroSpecStacksPipelines defaultPipelineElement : defaultPipelines) {
-					KabaneroSpecStacksPipelines pipeline = new KabaneroSpecStacksPipelines();
-					KabaneroSpecStacksHttps https = new KabaneroSpecStacksHttps();
-					https.setUrl(defaultPipelineElement.getHttps().getUrl());
-					pipeline.setHttps(https);
-					pipeline.setSha256(defaultPipelineElement.getSha256());
-					pipeline.setId(defaultPipelineElement.getId());
-					pipelines.add(pipeline);
+					System.out.println("defaultPipelineElement: "+defaultPipelineElement.toString());
+					pipelines.add(defaultPipelineElement);
 				}
 			}
 			
