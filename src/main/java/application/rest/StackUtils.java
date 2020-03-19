@@ -107,7 +107,7 @@ public class StackUtils {
         return false;
     }
 
-	public static String getFromGit(String url, String user, String pw) {
+	public static String getFromGit(String url, String user, String pw, String contentType) {
 		HttpClientBuilder clientBuilder = HttpClients.custom();
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
 		//credsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(user, pw));
@@ -116,7 +116,8 @@ public class StackUtils {
 		System.out.println("PAT="+pw);
 		System.out.println("getFromGit url="+url);
 		HttpGet request = new HttpGet(url);
-		request.addHeader("accept", "application/octet-stream");
+		request.addHeader("accept", "application/"+contentType);
+		//request.addHeader("accept", "application/octet-stream");
 		request.addHeader("Authorization", "token "+pw);
 		//request.addHeader("accept", "application/yaml");
 		//request.addHeader("accept", "application/json");
@@ -316,28 +317,28 @@ public class StackUtils {
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
 				
-				// https://github.ibm.com/dacohen/stacks/releases/download/0.1.0/kabanero-index.yaml
-				// /repos/$REPO/releases/assets/$asset_id
 				
-				// https://github.ibm.com/api/v3/repos/dacohen/stacks/releases/assets/261367
+				// https://api.github.ibm.com/repos/dacohen/stacks/releases/tags/0.1.0
+				String get_release_url = "https://api."+url+"/repos/"+org+"/"+project+"/releases/"+release;
+				
+				response = getFromGit(get_release_url, "", KubeUtils.getSecret(namespace,secret_url),"json");
+				
+				System.out.println("json response="+response);
+				
+				
 				asset = "/repos/"+org+"/"+project+"/releases/assets/261367";
-				//asset = "/releases/assets/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
-				//asset = "/releases/tag/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
-				// https://github.com/kabanero-io/kabanero-stack-hub/releases/download/0.7.0-rc.1/kabanero-stack-hub-index.yaml
-				// https://github.ibm.com/dacohen/stacks/releases/tag/0.1.0/kabanero-index.yaml
 				
-				//https://github.ibm.com/api/v3/repos/dacohen/stacks/releases/assets/261367
 
-				url = "https://"+url+"/api/v3/repos/"+org+"/"+project+"/releases/assets/261367";
+				String get_asset_url = "https://"+url+"/api/v3/repos/"+org+"/"+project+"/releases/assets/261367";
 				//System.out.println("in getStackFromGIT, reading from GHE index: "+"https://"+url+"/"+org+"/"+project+"/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName());
-				response = getFromGit(url, "", KubeUtils.getSecret(namespace,secret_url));
-				//url=url+"/api/v3";
+				response = getFromGit(get_asset_url, "", KubeUtils.getSecret(namespace,secret_url),"octet-stream");
+				
 				
 				//response = getGithubFile(org, KubeUtils.getSecret(namespace,secret_url), url, project, asset);
 				System.out.println("GHE response="+response);
 			} else {
 				System.out.println("in getStackFromGIT, reading from github public index: "+url);
-				response = getFromGit(url, user, pw);
+				response = getFromGit(url, user, pw, "yaml");
 
 			}
 		} catch (Exception e) {
