@@ -357,7 +357,6 @@ public class StacksAccess {
 								System.out.println("pipelineElement: "+pipelineElement.toString());
 								stackPipelines.add(pipelineElement);
 								foundOneCustomPipeline=true;
-							
 						}
 						tempPipelines = stackPipelines;
 					} else {
@@ -367,7 +366,8 @@ public class StacksAccess {
 					for (Object o:stacksFromRest) {
 						Map m = (Map)o;
 						String name = (String) m.get("id");
-						versionedStackPipelineMap.put(name, tempPipelines);
+						String version = (String) m.get("version");
+						versionedStackPipelineMap.put(name+"-"+version, tempPipelines);
 					}
 					
 				}

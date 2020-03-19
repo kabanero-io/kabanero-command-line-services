@@ -661,7 +661,7 @@ public class StackUtils {
 				specVersion.setDesiredState("active");
 				specVersion.setVersion((String) stack.get("version"));
 				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
-				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
+				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name+"-"+version));
 				versions.add(specVersion);
 			} 
 			// creating stack object to add to new stacks List
@@ -679,7 +679,7 @@ public class StackUtils {
 				specVersion.setVersion(version);
 				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
 				
-				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
+				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name+"-"+version));
 				System.out.println("packageStackObjects one specVersion: "+specVersion);
 				versions.add(specVersion);
 				updateStacks.add(stackObj);
