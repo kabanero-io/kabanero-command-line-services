@@ -39,11 +39,6 @@
 </repositories>
 
 	<dependencies>
-	<dependency>
-		<groupId>org.kohsuke</groupId>
-		<artifactId>github-api</artifactId>
-		<version>1.108</version>
-	</dependency>
 	<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
 	<dependency>
       <groupId>io.kabanero</groupId>
