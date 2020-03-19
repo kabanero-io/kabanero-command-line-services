@@ -27,6 +27,34 @@ stacks:
   templates:
   - id: default
     url: https://github.com/kabanero-io/collections/releases/download/0.6.1/java-openliberty.v0.2.2.templates.default.tar.gz
+  version: 0.2.13
+- default-template: default
+  description: Open Liberty & OpenJ9 using Maven
+  id: java-openliberty
+  image: docker.io/kabanero/java-openliberty:0.2.2
+  language: java
+  license: Apache-2.0
+  maintainers:
+  - email: andrasak@us.ibm.com
+    github-id: uberskigeek
+    name: Mike Andrasak
+  - email: ajmauer@us.ibm.com
+    github-id: ajm01
+    name: Andy Mauer
+  - email: skurz@us.ibm.com
+    github-id: ""
+    name: Scott Kurz
+  - email: awisniew@us.ibm.com
+    github-id: ""
+    name: Adam Wisniewski
+  name: Open Liberty
+  requirements:
+    appsody-version: '>= 0.5.0'
+    docker-version: '>= 17.09.0'
+  src: https://github.com/kabanero-io/collections/releases/download/0.6.1/java-openliberty.v0.2.2.source.tar.gz
+  templates:
+  - id: default
+    url: https://github.com/kabanero-io/collections/releases/download/0.6.1/java-openliberty.v0.2.2.templates.default.tar.gz
   version: 0.2.4
 - default-template: default
   description: Spring Boot using OpenJ9 and Maven
