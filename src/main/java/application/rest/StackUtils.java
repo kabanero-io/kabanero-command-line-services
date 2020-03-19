@@ -118,7 +118,8 @@ public class StackUtils {
 		HttpGet request = new HttpGet(url);
 		//request.addHeader("accept", "application/octet=stream");
 		request.addHeader("Authorization", "token "+pw);
-		request.addHeader("accept", "application/yaml");
+		//request.addHeader("accept", "application/yaml");
+		request.addHeader("accept", "application/json");
 		// add request header
 
 		HttpResponse response = null;
