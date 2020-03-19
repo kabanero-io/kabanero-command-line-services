@@ -52,6 +52,7 @@ import io.kabanero.v1alpha2.models.KabaneroSpecStacksHttps;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
 import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.ApiException;
 import io.kubernetes.client.apis.CoreV1Api;
 import io.kubernetes.client.models.V1ContainerStatus;
 import io.kubernetes.client.models.V1Pod;
@@ -212,6 +213,28 @@ public class StackUtils {
 	}
 	
 	
+	public static long getAssetId(String url, String org, String project, String release, String namespace, String assetName) throws ApiException, IOException {
+		
+		String get_release_url = "https://api."+url+"/repos/"+org+"/"+project+"/releases/tags/"+release;
+		
+		String response = getFromGit(get_release_url, null, KubeUtils.getSecret(namespace, url),"json");
+		
+		JSONObject asset_metadata=new JSONObject();
+		
+		asset_metadata = JSONObject.parse(response);
+		
+		JSONArray assets = (JSONArray) asset_metadata.get("assets");
+		long asset_id=0;
+		
+		for (Object obj:assets) {
+			JSONObject assetObj = (JSONObject) obj;
+			if (assetName.contentEquals((String)assetObj.get("name"))) {
+				asset_id=(Long)assetObj.get("id");
+			}
+		}
+		return asset_id;
+	}
+	
 	
 	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r,String namespace) throws Exception {
 		String response = null;
@@ -236,21 +259,8 @@ public class StackUtils {
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
 				
-				String get_release_url = "https://api."+url+"/repos/"+org+"/"+project+"/releases/tags/"+release;
+				long asset_id=getAssetId(url, org, project, release, namespace, kabaneroSpecStacksGitRelease.getAssetName());
 				
-				response = getFromGit(get_release_url, null, KubeUtils.getSecret(namespace,secret_url),"json");
-				
-				JSONObject asset_metadata = JSONObject.parse(response);
-				JSONArray assets = (JSONArray) asset_metadata.get("assets");
-				long asset_id=0;
-				
-				for (Object obj:assets) {
-					JSONObject assetObj = (JSONObject) obj;
-					if (kabaneroSpecStacksGitRelease.getAssetName().contentEquals((String)assetObj.get("name"))) {
-						asset_id=(Long)assetObj.get("id");
-					}
-				}
-
 				String get_asset_url = "https://"+url+"/api/v3/repos/"+org+"/"+project+"/releases/assets/"+asset_id;
 				
 				response = getFromGit(get_asset_url, null, KubeUtils.getSecret(namespace,secret_url),"octet-stream");
@@ -636,7 +646,7 @@ public class StackUtils {
 				specVersion.setDesiredState("active");
 				specVersion.setVersion((String) stack.get("version"));
 				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
-				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
+				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name+"-"+version));
 				versions.add(specVersion);
 			} 
 			// creating stack object to add to new stacks List
@@ -654,7 +664,7 @@ public class StackUtils {
 				specVersion.setVersion(version);
 				specVersion.setImages((List<StackSpecImages>) stack.get("images"));
 				
-				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name));
+				specVersion.setPipelines((List<KabaneroSpecStacksPipelines>) versionedStackMap.get(name+"-"+version));
 				System.out.println("packageStackObjects one specVersion: "+specVersion);
 				versions.add(specVersion);
 				updateStacks.add(stackObj);
