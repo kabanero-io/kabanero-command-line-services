@@ -40,6 +40,9 @@ import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.RateLimitHandler;
 import org.yaml.snakeyaml.Yaml;
 
+import com.ibm.json.java.JSONArray;
+import com.ibm.json.java.JSONObject;
+
 import io.kabanero.v1alpha2.client.apis.KabaneroApi;
 import io.kabanero.v1alpha2.models.Stack;
 import io.kabanero.v1alpha2.models.StackList;
@@ -110,17 +113,21 @@ public class StackUtils {
 	public static String getFromGit(String url, String user, String pw, String contentType) {
 		HttpClientBuilder clientBuilder = HttpClients.custom();
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
-		//credsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(user, pw));
+		
+		if (user!=null) {
+			credsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(user, pw));
+		}
+		
 		clientBuilder.setDefaultCredentialsProvider(credsProvider);
 		HttpClient client = clientBuilder.create().build();
-		System.out.println("PAT="+pw);
-		System.out.println("getFromGit url="+url);
+		
 		HttpGet request = new HttpGet(url);
 		request.addHeader("accept", "application/"+contentType);
-		//request.addHeader("accept", "application/octet-stream");
-		request.addHeader("Authorization", "token "+pw);
-		//request.addHeader("accept", "application/yaml");
-		//request.addHeader("accept", "application/json");
+		
+		if (user==null) { 
+			request.addHeader("Authorization", "token "+pw);
+		}
+		
 		// add request header
 
 		HttpResponse response = null;
@@ -310,32 +317,31 @@ public class StackUtils {
 					System.out.println("No repository URL specified");
 					throw new RuntimeException("No repository URL specified");
 				}
-				String org, project, release, asset;
+				String org, project, release;
 				String secret_url = url = kabaneroSpecStacksGitRelease.getHostname();
 				System.out.println("GHE git url="+url);
 				org = kabaneroSpecStacksGitRelease.getOrganization();
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
 				
-				
-				// https://api.github.ibm.com/repos/dacohen/stacks/releases/tags/0.1.0
 				String get_release_url = "https://api."+url+"/repos/"+org+"/"+project+"/releases/tags/"+release;
 				
-				response = getFromGit(get_release_url, "", KubeUtils.getSecret(namespace,secret_url),"json");
+				response = getFromGit(get_release_url, null, KubeUtils.getSecret(namespace,secret_url),"json");
 				
-				System.out.println("json response="+response);
+				JSONObject asset_metadata = JSONObject.parse(response);
+				JSONArray assets = (JSONArray) asset_metadata.get("assets");
+				String asset_id = null;
 				
-				
-				asset = "/repos/"+org+"/"+project+"/releases/assets/261367";
-				
+				for (Object obj:assets) {
+					JSONObject assetObj = (JSONObject) obj;
+					if (kabaneroSpecStacksGitRelease.getAssetName().contentEquals((String)assetObj.get("name"))) {
+						asset_id=(String)assetObj.get("id");
+					}
+				}
 
-				String get_asset_url = "https://"+url+"/api/v3/repos/"+org+"/"+project+"/releases/assets/261367";
-				//System.out.println("in getStackFromGIT, reading from GHE index: "+"https://"+url+"/"+org+"/"+project+"/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName());
-				response = getFromGit(get_asset_url, "", KubeUtils.getSecret(namespace,secret_url),"octet-stream");
+				String get_asset_url = "https://"+url+"/api/v3/repos/"+org+"/"+project+"/releases/assets/"+asset_id;
 				
-				
-				//response = getGithubFile(org, KubeUtils.getSecret(namespace,secret_url), url, project, asset);
-				System.out.println("GHE response="+response);
+				response = getFromGit(get_asset_url, null, KubeUtils.getSecret(namespace,secret_url),"octet-stream");
 			} else {
 				System.out.println("in getStackFromGIT, reading from github public index: "+url);
 				response = getFromGit(url, user, pw, "yaml");
