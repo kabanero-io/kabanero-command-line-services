@@ -261,21 +261,6 @@ public class StackUtils {
 				
 				long asset_id=getAssetId(url, org, project, release, namespace, kabaneroSpecStacksGitRelease.getAssetName());
 				
-//				String get_release_url = "https://api."+url+"/repos/"+org+"/"+project+"/releases/tags/"+release;
-//				
-//				response = getFromGit(get_release_url, null, KubeUtils.getSecret(namespace,secret_url),"json");
-//				
-//				JSONObject asset_metadata = JSONObject.parse(response);
-//				JSONArray assets = (JSONArray) asset_metadata.get("assets");
-//				//long asset_id=0;
-//				
-//				for (Object obj:assets) {
-//					JSONObject assetObj = (JSONObject) obj;
-//					if (kabaneroSpecStacksGitRelease.getAssetName().contentEquals((String)assetObj.get("name"))) {
-//						asset_id=(Long)assetObj.get("id");
-//					}
-//				}
-
 				String get_asset_url = "https://"+url+"/api/v3/repos/"+org+"/"+project+"/releases/assets/"+asset_id;
 				
 				response = getFromGit(get_asset_url, null, KubeUtils.getSecret(namespace,secret_url),"octet-stream");
