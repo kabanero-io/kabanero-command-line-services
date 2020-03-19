@@ -25,10 +25,16 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryContents;
+import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.client.GitHubRequest;
+import org.eclipse.egit.github.core.client.GitHubResponse;
 import org.eclipse.egit.github.core.service.ContentsService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.yaml.snakeyaml.Yaml;
+
+import com.ibm.json.java.JSONArray;
+import com.ibm.json.java.JSONObject;
 
 import io.kabanero.v1alpha2.client.apis.KabaneroApi;
 import io.kabanero.v1alpha2.models.Stack;
@@ -97,14 +103,24 @@ public class StackUtils {
         return false;
     }
 
-	public static String getFromGit(String url, String user, String pw) {
+	public static String getFromGit(String url, String user, String pw, String contentType) {
 		HttpClientBuilder clientBuilder = HttpClients.custom();
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
-		credsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(user, pw));
+		
+		if (user!=null) {
+			credsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(user, pw));
+		}
+		
 		clientBuilder.setDefaultCredentialsProvider(credsProvider);
 		HttpClient client = clientBuilder.create().build();
+		
 		HttpGet request = new HttpGet(url);
-		request.addHeader("accept", "application/yaml");
+		request.addHeader("accept", "application/"+contentType);
+		
+		if (user==null) { 
+			request.addHeader("Authorization", "token "+pw);
+		}
+		
 		// add request header
 
 		HttpResponse response = null;
@@ -127,6 +143,8 @@ public class StackUtils {
 			readGitSuccess=false;
 			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url, savedEx);
 		}
+		System.out.println("response.toString(): "+ response.toString());
+		
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 		if (response.getStatusLine().getStatusCode()==429) {
 			return "HTTP Code 429: GitHub retry limit exceeded, please try again in 2 minutes";
@@ -194,35 +212,6 @@ public class StackUtils {
 	}
 	
 	
-	private static String getGithubFile(String repoOwner, String PAT, String URL, String REPONAME, String FILENAME) {
-		// OAuth2 token authentication
-		GitHubClient client = new GitHubClient(URL);
-		client.setOAuth2Token(PAT);
-		RepositoryService repoService = new RepositoryService(client);
-		String fileContent = null, valueDecoded = null;
-		try {
-			//Repository repo = repoService.getRepository(repoOwner, REPONAME);
-			
-			// now contents service
-			ContentsService contentService = new ContentsService(client);
-			
-			System.out.println("attempting to download GHE asset with path: "+FILENAME);
-			
-			List<RepositoryContents> test = contentService.getContents(repoService.getRepository(repoOwner, REPONAME),
-					FILENAME);
-			for (RepositoryContents content : test) {
-				fileContent = content.getContent();
-				valueDecoded = new String(Base64.decodeBase64(fileContent.getBytes()));
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return valueDecoded;
-	}
-	
-	
 	
 	public static List getStackFromGIT(String user, String pw, KabaneroSpecStacksRepositories r,String namespace) throws Exception {
 		String response = null;
@@ -240,20 +229,34 @@ public class StackUtils {
 					System.out.println("No repository URL specified");
 					throw new RuntimeException("No repository URL specified");
 				}
-				String org, project, release, asset;
+				String org, project, release;
 				String secret_url = url = kabaneroSpecStacksGitRelease.getHostname();
 				System.out.println("GHE git url="+url);
 				org = kabaneroSpecStacksGitRelease.getOrganization();
 				project = kabaneroSpecStacksGitRelease.getProject();
 				release = kabaneroSpecStacksGitRelease.getRelease();
-				asset = "/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName();
-				// https://github.com/kabanero-io/kabanero-stack-hub/releases/download/0.7.0-rc.1/kabanero-stack-hub-index.yaml
-				System.out.println("in getStackFromGIT, reading from GHE index: "+"https://"+url+"/"+org+"/"+project+"/releases/download/"+release+"/"+kabaneroSpecStacksGitRelease.getAssetName());
-				response = getGithubFile(org, KubeUtils.getSecret(namespace,secret_url), url, project, asset);
-				System.out.println("GHE response="+response);
+				
+				String get_release_url = "https://api."+url+"/repos/"+org+"/"+project+"/releases/tags/"+release;
+				
+				response = getFromGit(get_release_url, null, KubeUtils.getSecret(namespace,secret_url),"json");
+				
+				JSONObject asset_metadata = JSONObject.parse(response);
+				JSONArray assets = (JSONArray) asset_metadata.get("assets");
+				long asset_id=0;
+				
+				for (Object obj:assets) {
+					JSONObject assetObj = (JSONObject) obj;
+					if (kabaneroSpecStacksGitRelease.getAssetName().contentEquals((String)assetObj.get("name"))) {
+						asset_id=(Long)assetObj.get("id");
+					}
+				}
+
+				String get_asset_url = "https://"+url+"/api/v3/repos/"+org+"/"+project+"/releases/assets/"+asset_id;
+				
+				response = getFromGit(get_asset_url, null, KubeUtils.getSecret(namespace,secret_url),"octet-stream");
 			} else {
 				System.out.println("in getStackFromGIT, reading from github public index: "+url);
-				response = getFromGit(url, user, pw);
+				response = getFromGit(url, user, pw, "yaml");
 
 			}
 		} catch (Exception e) {
