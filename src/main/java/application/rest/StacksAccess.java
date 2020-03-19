@@ -359,14 +359,10 @@ public class StacksAccess {
 					ArrayList<KabaneroSpecStacksPipelines> tempPipelines = null;
 					if (r.getPipelines()!=null && r.getPipelines().size() > 0) {
 						for (KabaneroSpecStacksPipelines pipelineElement : r.getPipelines()) {
-							KabaneroSpecStacksPipelines stackPipeline = new KabaneroSpecStacksPipelines();
-							KabaneroSpecStacksHttps https = new KabaneroSpecStacksHttps();
-							https.setUrl(pipelineElement.getHttps().getUrl());
-							stackPipeline.setHttps(https);
-							stackPipeline.setSha256(pipelineElement.getSha256());
-							stackPipeline.setId(pipelineElement.getId());
-							stackPipelines.add(stackPipeline);
-							foundOneCustomPipeline=true;
+								System.out.println("pipelineElement: "+pipelineElement.toString());
+								stackPipelines.add(pipelineElement);
+								foundOneCustomPipeline=true;
+							
 						}
 						tempPipelines = stackPipelines;
 					} else {
