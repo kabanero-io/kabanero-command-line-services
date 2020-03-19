@@ -116,3 +116,27 @@ stacks:
   - id: default
     url: https://github.com/kabanero-io/collections/releases/download/0.6.1/java-microprofile.v0.2.25.templates.default.tar.gz
   version: 0.2.29
+  - default-template: default
+  description: Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
+  id: java-microprofile
+  image: docker.io/kabanero/java-microprofile:0.2.25
+  language: java
+  license: Apache-2.0
+  maintainers:
+  - email: emijiang6@googlemail.com
+    github-id: Emily-Jiang
+    name: Emily Jiang
+  - email: neeraj.laad@gmail.com
+    github-id: neeraj-laad
+    name: Neeraj Laad
+  - email: ozzy@ca.ibm.com
+    github-id: BarDweller
+    name: Ozzy
+  name: Eclipse MicroProfile®
+  requirements:
+    appsody-version: '>= 0.5.0'
+  src: https://github.com/kabanero-io/collections/releases/download/0.6.1/java-microprofile.v0.2.25.source.tar.gz
+  templates:
+  - id: default
+    url: https://github.com/kabanero-io/collections/releases/download/0.6.1/java-microprofile.v0.2.25.templates.default.tar.gz
+  version: 0.2.33
