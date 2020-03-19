@@ -27,7 +27,7 @@ stacks:
   templates:
   - id: default
     url: https://github.com/kabanero-io/collections/releases/download/0.6.1/java-openliberty.v0.2.2.templates.default.tar.gz
-  version: 0.2.3
+  version: 0.2.9
 - default-template: default
   description: Spring Boot using OpenJ9 and Maven
   id: java-spring-boot2
@@ -51,7 +51,7 @@ stacks:
     url: https://github.com/kabanero-io/collections/releases/download/0.6.1/java-spring-boot2.v0.3.24.templates.kotlin.tar.gz
   - id: default
     url: https://github.com/kabanero-io/collections/releases/download/0.6.1/java-spring-boot2.v0.3.24.templates.default.tar.gz
-  version: 0.3.25
+  version: 0.3.29
 - default-template: simple
   description: Runtime for Node.js applications
   id: nodejs
@@ -70,7 +70,7 @@ stacks:
   templates:
   - id: simple
     url: https://github.com/kabanero-io/collections/releases/download/0.6.1/nodejs.v0.3.3.templates.simple.tar.gz
-  version: 0.3.4
+  version: 0.3.9
 - default-template: simple
   description: Express web framework for Node.js
   id: nodejs-express
@@ -91,7 +91,7 @@ stacks:
     url: https://github.com/kabanero-io/collections/releases/download/0.6.1/nodejs-express.v0.2.10.templates.simple.tar.gz
   - id: scaffold
     url: https://github.com/kabanero-io/collections/releases/download/0.6.1/nodejs-express.v0.2.10.templates.scaffold.tar.gz
-  version: 0.2.12
+  version: 0.2.19
 - default-template: default
   description: Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
   id: java-microprofile
@@ -115,4 +115,4 @@ stacks:
   templates:
   - id: default
     url: https://github.com/kabanero-io/collections/releases/download/0.6.1/java-microprofile.v0.2.25.templates.default.tar.gz
-  version: 0.2.26
+  version: 0.2.29
