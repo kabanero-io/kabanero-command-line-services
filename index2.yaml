@@ -116,7 +116,7 @@ stacks:
   - id: default
     url: https://github.com/kabanero-io/collections/releases/download/0.6.1/java-microprofile.v0.2.25.templates.default.tar.gz
   version: 0.2.29
-  - default-template: default
+- default-template: default
   description: Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
   id: java-microprofile
   image: docker.io/kabanero/java-microprofile:0.2.25
