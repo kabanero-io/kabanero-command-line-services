@@ -330,12 +330,12 @@ public class StackUtils {
 				
 				JSONObject asset_metadata = JSONObject.parse(response);
 				JSONArray assets = (JSONArray) asset_metadata.get("assets");
-				String asset_id = null;
+				long asset_id=0;
 				
 				for (Object obj:assets) {
 					JSONObject assetObj = (JSONObject) obj;
 					if (kabaneroSpecStacksGitRelease.getAssetName().contentEquals((String)assetObj.get("name"))) {
-						asset_id=(String)assetObj.get("id");
+						asset_id=(Long)assetObj.get("id");
 					}
 				}
 
