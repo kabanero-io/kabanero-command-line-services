@@ -319,7 +319,7 @@ public class StackUtils {
 				
 				
 				// https://api.github.ibm.com/repos/dacohen/stacks/releases/tags/0.1.0
-				String get_release_url = "https://api."+url+"/repos/"+org+"/"+project+"/releases/"+release;
+				String get_release_url = "https://api."+url+"/repos/"+org+"/"+project+"/releases/tags/"+release;
 				
 				response = getFromGit(get_release_url, "", KubeUtils.getSecret(namespace,secret_url),"json");
 				
