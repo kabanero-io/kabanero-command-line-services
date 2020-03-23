@@ -177,9 +177,8 @@ public class StacksAccess {
 			
 			System.out.println("stacks: "+stacks);
 			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
-			List<Map> curatedStacksMaps = StackUtils.packageStackMaps(curatedStacks);
-			System.out.println("curated stacks before sort: "+stacks);
 			Collections.sort(curatedStacks, mapComparator);
+			List<Map> curatedStacksMaps = StackUtils.packageStackMaps(curatedStacks);
 			System.out.println("curatedStacksMaps: "+curatedStacksMaps);
 			
 			JSONArray ja = convertMapToJSON(curatedStacksMaps);
