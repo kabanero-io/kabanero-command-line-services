@@ -177,6 +177,7 @@ public class StacksAccess {
 			
 			System.out.println("stacks: "+stacks);
 			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
+			System.out.println("curated stacks before sort: "+stacks);
 			Collections.sort(curatedStacks, mapComparator);
 			List<Map> curatedStacksMaps = StackUtils.packageStackMaps(curatedStacks);
 			System.out.println("curatedStacksMaps: "+curatedStacksMaps);
@@ -197,9 +198,11 @@ public class StacksAccess {
 				e.printStackTrace();
 			}
 			
-			System.out.println("kabanero instance stacks:"+fromKabanero);
+			
 			
 			List kabStacks=StackUtils.allStacks(fromKabanero);
+			
+			System.out.println("kabanero instance stacks before sort:"+kabStacks);
 			
 			Collections.sort(kabStacks, mapComparator);
 			JSONArray allKabStacksJSON = convertMapToJSON(kabStacks);
