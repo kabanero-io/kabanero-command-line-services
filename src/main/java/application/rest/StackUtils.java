@@ -33,6 +33,7 @@ import org.eclipse.egit.github.core.service.ContentsService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.yaml.snakeyaml.Yaml;
 
+import com.github.zafarkhaja.semver.Version;
 import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
 
@@ -74,7 +75,9 @@ public class StackUtils {
 	
 	public static Comparator<Map<String, String>> mapComparator2 = new Comparator<Map<String, String>>() {
 	    public int compare(Map<String, String> m1, Map<String, String> m2) {
-	        return m1.get("version").compareTo(m2.get("version"));
+	    	Version v1 = Version.valueOf(m1.get("version"));
+	    	Version v2 = Version.valueOf(m2.get("version"));
+	    	return v1.compareTo(v2);
 	    }
 	};
 	
