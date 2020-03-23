@@ -610,6 +610,7 @@ public class StackUtils {
 				versionMap.put("images", stack.get("images"));
 				versionMap.put("reponame", stack.get("reponame"));
 				versions.add(versionMap);
+				Collections.sort(versions, mapComparator2);
 			} 
 			// creating stack object to add to new stacks List
 			else {
@@ -623,7 +624,6 @@ public class StackUtils {
 				versionMap.put("images", stack.get("images"));
 				versionMap.put("reponame", stack.get("reponame"));
 				versions.add(versionMap);
-				Collections.sort(versions, mapComparator2);
 				updatedStacks.add(map);
 			}
 		}
