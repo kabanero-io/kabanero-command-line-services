@@ -39,12 +39,17 @@
 </repositories>
 
 	<dependencies>
+	<dependency>
+		<groupId>com.github.zafarkhaja</groupId>
+		<artifactId>java-semver</artifactId>
+		<version>0.9.0</version>
+	</dependency>
 	<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
 	<dependency>
-      <groupId>io.kabanero</groupId>
-      <artifactId>operator-java-bindings</artifactId>
-      <version>0.7.0-SNAPSHOT</version>
-    </dependency>
+		<groupId>io.kabanero</groupId>
+		<artifactId>operator-java-bindings</artifactId>
+		<version>0.7.0-SNAPSHOT</version>
+	</dependency>
 	<dependency>
     	<groupId>javax.xml.bind</groupId>
     	<artifactId>jaxb-api</artifactId>
