@@ -48,3 +48,5 @@ The application exposes the following endpoints:
 
 ( `<cli-route>` can be obtained by running the `oc get routes` command )
 
+Postman collection to call CLI Service endpoints: `https://github.com/kabanero-io/kabanero-command-line-services/tree/master/test`
+
