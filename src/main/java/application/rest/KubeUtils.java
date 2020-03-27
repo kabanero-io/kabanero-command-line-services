@@ -496,8 +496,8 @@ public class KubeUtils {
 		return password;
 	}
      
-    public static String getSecret(String namespace, String gitURL) throws ApiException {
-    	gitURL = gitURL.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
+    public static String getSecret(String namespace, String secret_url) throws ApiException {
+    	secret_url = secret_url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
         String password = null;
         System.out.println("Entering getSecret("+namespace+")");
         try {
@@ -506,7 +506,7 @@ public class KubeUtils {
             V1SecretList v1secrets = coreAPI.listNamespacedSecret(namespace, false, null, null, null, null, null, null, 30, null);
             List<V1Secret> v1secretList = v1secrets.getItems();
             for (V1Secret v1Secret:v1secretList) {
-            	password=locateCorrectSecret(v1Secret, gitURL);
+            	password=locateCorrectSecret(v1Secret, secret_url);
             	if (password!=null) {
             		break;
             	}
