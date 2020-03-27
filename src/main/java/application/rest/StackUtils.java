@@ -123,7 +123,7 @@ public class StackUtils {
 		
 		clientBuilder.setDefaultCredentialsProvider(credsProvider);
 		HttpClient client = clientBuilder.create().build();
-		
+		System.out.print("REST get with URL: "+url);
 		HttpGet request = new HttpGet(url);
 		request.addHeader("accept", "application/"+contentType);
 		
