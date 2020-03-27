@@ -81,6 +81,10 @@ public class StackUtils {
 		String token = "PRIVATE-TOKEN "+KubeUtils.getSecret(namespace, "https://docker.io");
 		String digest=null;
 		
+		System.out.println("stackName="+stackName);
+		System.out.println("versionNumber="+versionNumber);
+		System.out.println("namespace="+namespace);
+		
 		String url="https://registry.hub.docker.com/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
 		String response=getWithREST(url, null, token, "json");
 		
@@ -390,8 +394,8 @@ public class StackUtils {
 					versionMap.put("version", versionNum);
 					Map imageMap = getKabStackDigest(s, versionNum);
 					String kabDigest = (String) imageMap.get("digest");
-					String imageName = (String) imageMap.get("imageName");
-					String imageDigest = getImageDigestFromRegistry(imageName, versionNum, namespace);
+					
+					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace);
 					
 					versionMap.put("digest check passed", kabDigest.contentEquals(imageDigest));
 					versionMap.put("kabanero digest", kabDigest);
