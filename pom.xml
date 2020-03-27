@@ -11,9 +11,9 @@
 
 	<!-- contains default pluginManagement configuration for liberty-maven-plugin -->
 	<parent>
-		<groupId>io.openliberty.tools</groupId>
+		<groupId>net.wasdev.wlp.maven.parent</groupId>
 		<artifactId>liberty-maven-app-parent</artifactId>
-		<version>3.2</version>
+		<version>2.7</version>
 	</parent>
 
 	<properties>
@@ -58,7 +58,7 @@
 	<dependency>
   		<groupId>org.apache.httpcomponents</groupId>
   		<artifactId>httpclient</artifactId>
-  		<version>4.5.10</version>
+  		<version>4.3.6</version>
 	</dependency>
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml -->
 	<dependency>

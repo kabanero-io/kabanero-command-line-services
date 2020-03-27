@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,12 +15,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.SSLContext;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -70,7 +77,7 @@ public class StackUtils {
 	    }
 	};
 	
-	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace) throws ApiException, IOException {
+	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		String token = "PRIVATE-TOKEN "+KubeUtils.getSecret(namespace, "https://docker.io");
 		String digest=null;
 		
@@ -113,24 +120,34 @@ public class StackUtils {
 	
 	
 
-	public static String getWithREST(String url, String user, String pw, String contentType) {
+	public static String getWithREST(String url, String user, String pw, String contentType) throws KeyManagementException, NoSuchAlgorithmException {
 		HttpClientBuilder clientBuilder = HttpClients.custom();
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
-		
+
 		if (user!=null) {
 			credsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(user, pw));
 		}
-		
+
 		clientBuilder.setDefaultCredentialsProvider(credsProvider);
-		HttpClient client = clientBuilder.create().build();
+
+		SSLContext sslContext = SSLContexts.custom()
+				.useTLS()
+				.build();
+
+		SSLConnectionSocketFactory f = new SSLConnectionSocketFactory(
+				sslContext,
+				new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"},   
+				null,
+				SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+		HttpClient client = clientBuilder.create().setSSLSocketFactory(f).build();
 		System.out.print("REST get with URL: "+url);
 		HttpGet request = new HttpGet(url);
 		request.addHeader("accept", "application/"+contentType);
-		
+
 		if (user==null) { 
 			request.addHeader("Authorization", pw);
 		}
-		
+
 		// add request header
 
 		HttpResponse response = null;
@@ -154,7 +171,7 @@ public class StackUtils {
 			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url, savedEx);
 		}
 		System.out.println("response.toString(): "+ response.toString());
-		
+
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 		if (response.getStatusLine().getStatusCode()==429) {
 			return "HTTP Code 429: GitHub retry limit exceeded, please try again in 2 minutes";
@@ -167,7 +184,7 @@ public class StackUtils {
 		}
 		StringBuffer result = new StringBuffer();
 		String line = "";
-  
+
 		try {
 			while ((line = rd.readLine()) != null) {
 				result.append(line + "\n");
@@ -175,7 +192,7 @@ public class StackUtils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return result.toString();
 	}
 	
@@ -222,7 +239,7 @@ public class StackUtils {
 	}
 	
 	
-	public static long getAssetId(String url, String org, String project, String release, String namespace, String assetName) throws ApiException, IOException {
+	public static long getAssetId(String url, String org, String project, String release, String namespace, String assetName) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		
 		String get_release_url = "https://api."+url+"/repos/"+org+"/"+project+"/releases/tags/"+release;
 		
