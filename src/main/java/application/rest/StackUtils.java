@@ -359,6 +359,7 @@ public class StackUtils {
 		HashMap<String,String> imageMetaData = new HashMap<String,String>();
 		
 		List<StackStatusVersions> versions=s.getStatus().getVersions();
+		// note eventually we may have multiple images, potentially for multiple architectures
 		for (StackStatusVersions version:versions) {
 			digest=version.getImages().get(0).getDigest().getActivation();
 			imageName=version.getImages().get(0).getImage();
