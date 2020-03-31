@@ -534,9 +534,12 @@ public class KubeUtils {
 			user = (String) stringData.get("username");
 			password = (String) stringData.get("password");
 		}
-		HashMap m = new HashMap();
-		m.put("user", user);
-		m.put("password", password);
+		HashMap m = null;
+		if (user!=null && password!=null) {
+			m = new HashMap();
+			m.put("user", user);
+			m.put("password", password);
+		}
 		return m;
 	}
     
@@ -551,8 +554,9 @@ public class KubeUtils {
             V1SecretList v1secrets = coreAPI.listNamespacedSecret(namespace, false, null, null, null, null, null, null, 30, null);
             List<V1Secret> v1secretList = v1secrets.getItems();
             for (V1Secret v1Secret:v1secretList) {
+            	System.out.println("v1Secret="+v1Secret);
             	m=locateCorrectSecretUserAndPass(v1Secret, secret_url);
-            	if (password!=null) {
+            	if (m!=null) {
             		break;
             	}
             }
