@@ -554,7 +554,6 @@ public class KubeUtils {
             V1SecretList v1secrets = coreAPI.listNamespacedSecret(namespace, false, null, null, null, null, null, null, 30, null);
             List<V1Secret> v1secretList = v1secrets.getItems();
             for (V1Secret v1Secret:v1secretList) {
-            	System.out.println("v1Secret="+v1Secret);
             	m=locateCorrectSecretUserAndPass(v1Secret, secret_url);
             	if (m!=null) {
             		break;
