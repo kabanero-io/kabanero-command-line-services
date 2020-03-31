@@ -78,7 +78,8 @@ public class StackUtils {
 	};
 	
 	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
-		String token = "PRIVATE-TOKEN "+KubeUtils.getSecret(namespace, "https://docker.io");
+		//String token = "PRIVATE-TOKEN "+KubeUtils.getSecret(namespace, "https://docker.io");
+		Map m = KubeUtils.getUserAndPasswordFromSecret(namespace, "https://docker.io");
 		String digest=null;
 		
 		System.out.println("stackName="+stackName);
@@ -86,7 +87,7 @@ public class StackUtils {
 		System.out.println("namespace="+namespace);
 		
 		String url="https://registry.hub.docker.com/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
-		String response=getWithREST(url, null, token, "json");
+		String response=getWithREST(url, (String) m.get("user"), (String) m.get("password"), "json");
 		
 		JSONObject jo = JSONObject.parse(response);
 		JSONArray images = (JSONArray) jo.get("images");
@@ -398,7 +399,12 @@ public class StackUtils {
 					
 					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace);
 					
-					versionMap.put("digest check passed", kabDigest.contentEquals(imageDigest));
+					boolean match=false;
+					if (kabDigest!=null && imageDigest!=null) {
+						match=kabDigest.contentEquals(imageDigest);
+					}
+					
+					versionMap.put("digest check passed", match);
 					versionMap.put("kabanero digest", kabDigest);
 					versionMap.put("image digest", imageDigest);
 					status.add(versionMap);

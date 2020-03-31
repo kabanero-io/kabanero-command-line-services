@@ -520,6 +520,51 @@ public class KubeUtils {
         } 
         return password;
      }
+    
+    private static Map locateCorrectSecretUserAndPass(V1Secret v1secret, String gitURL) throws IOException {
+		V1Secret secret = null;
+		Iterator it = v1secret.getMetadata().getAnnotations().values().iterator();
+		String url = (String) it.next();
+		url = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
+		String user=null, password = null;
+		if (url.contentEquals(gitURL)) {
+			String annotationStr = (String) it.next();
+			JSONObject jo = JSONObject.parse(annotationStr);
+			JSONObject stringData = (JSONObject) jo.get("stringData");
+			user = (String) stringData.get("username");
+			password = (String) stringData.get("password");
+		}
+		HashMap m = new HashMap();
+		m.put("user", user);
+		m.put("password", password);
+		return m;
+	}
+    
+    public static Map getUserAndPasswordFromSecret(String namespace, String secret_url) throws ApiException {
+    	secret_url = secret_url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
+        String password = null;
+        System.out.println("Entering getSecret("+namespace+")");
+        Map m = null;
+        try {
+            ApiClient apiClient = getApiClient();
+            CoreV1Api coreAPI = new CoreV1Api();
+            V1SecretList v1secrets = coreAPI.listNamespacedSecret(namespace, false, null, null, null, null, null, null, 30, null);
+            List<V1Secret> v1secretList = v1secrets.getItems();
+            for (V1Secret v1Secret:v1secretList) {
+            	m=locateCorrectSecretUserAndPass(v1Secret, secret_url);
+            	if (password!=null) {
+            		break;
+            	}
+            }
+            
+          } catch (Exception e) {
+        	e.printStackTrace();
+            System.out.println("exception cause: " + e.getCause());
+            System.out.println("exception message: " + e.getMessage());
+            throw new ApiException("Error retrieving kubernetes secret for GHE processing, error message: "+e.getMessage()+", cause: "+e.getCause());
+        } 
+        return m;
+     }
 
     public static String getTektonDashboardURL() {
         String route = "";
