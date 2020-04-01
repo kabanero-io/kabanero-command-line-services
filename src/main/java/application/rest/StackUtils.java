@@ -62,6 +62,10 @@ public class StackUtils {
 	// this value needs to start out as true, otherwise the liveness probe can't come up 
 	// as healthy initially
 	public static boolean readGitSuccess=true;
+	static HashMap<String, String> containerRegistries = new HashMap<String, String>();
+	static {
+		containerRegistries.put("docker.io", "registry.hub.docker.com");
+	}
 	
 	public static Comparator<Map<String, String>> mapComparator = new Comparator<Map<String, String>>() {
 	    public int compare(Map<String, String> m1, Map<String, String> m2) {
@@ -77,16 +81,19 @@ public class StackUtils {
 	    }
 	};
 	
-	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
+	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		//String token = "PRIVATE-TOKEN "+KubeUtils.getSecret(namespace, "https://docker.io");
-		Map m = KubeUtils.getUserAndPasswordFromSecret(namespace, "https://docker.io");
+		System.out.println("containerRegistryURL"+containerRegistryURL);
+		Map m = KubeUtils.getUserAndPasswordFromSecret(namespace, containerRegistryURL);
 		String digest=null;
+		
+		String crURL=(String) containerRegistries.get(containerRegistryURL);
 		
 		System.out.println("stackName="+stackName);
 		System.out.println("versionNumber="+versionNumber);
 		System.out.println("namespace="+namespace);
 		
-		String url="https://registry.hub.docker.com/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
+		String url="https://"+crURL+"/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
 		String response=getWithREST(url, (String) m.get("user"), (String) m.get("password"), "json");
 		
 		JSONObject jo = JSONObject.parse(response);
@@ -396,15 +403,21 @@ public class StackUtils {
 					versionMap.put("version", versionNum);
 					Map imageMap = getKabStackDigest(s, versionNum);
 					String kabDigest = (String) imageMap.get("digest");
+					String image = (String) imageMap.get("imageName"); // docker.io/kabanero/nodejs
+					String containerRegistryURL = image.substring(0,image.indexOf("/"));
 					
-					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace);
+					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, containerRegistryURL);
 					
-					boolean match=false;
+					String digestCheck="failed";
 					if (kabDigest!=null && imageDigest!=null) {
-						match=kabDigest.contentEquals(imageDigest);
+						if (kabDigest.contentEquals(imageDigest)) {
+							digestCheck="passed";
+						}
+					} else {
+						digestCheck="unknown";
 					}
 					
-					versionMap.put("digest check passed", match);
+					versionMap.put("digest check", digestCheck);
 					versionMap.put("kabanero digest", kabDigest);
 					versionMap.put("image digest", imageDigest);
 					status.add(versionMap);
