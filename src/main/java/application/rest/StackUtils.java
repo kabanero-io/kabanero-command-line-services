@@ -408,12 +408,16 @@ public class StackUtils {
 					
 					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, containerRegistryURL);
 					
-					boolean match=false;
+					String digestCheck="failed";
 					if (kabDigest!=null && imageDigest!=null) {
-						match=kabDigest.contentEquals(imageDigest);
+						if (kabDigest.contentEquals(imageDigest)) {
+							digestCheck="passed";
+						}
+					} else {
+						digestCheck="unknown";
 					}
 					
-					versionMap.put("digest check passed", match);
+					versionMap.put("digest check", digestCheck);
 					versionMap.put("kabanero digest", kabDigest);
 					versionMap.put("image digest", imageDigest);
 					status.add(versionMap);
