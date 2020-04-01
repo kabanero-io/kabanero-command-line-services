@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,24 +15,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
+import javax.net.ssl.SSLContext;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.eclipse.egit.github.core.Repository;
-import org.eclipse.egit.github.core.RepositoryContents;
-import org.eclipse.egit.github.core.RepositoryId;
-import org.eclipse.egit.github.core.client.GitHubClient;
-import org.eclipse.egit.github.core.client.GitHubRequest;
-import org.eclipse.egit.github.core.client.GitHubResponse;
-import org.eclipse.egit.github.core.service.ContentsService;
-import org.eclipse.egit.github.core.service.RepositoryService;
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.zafarkhaja.semver.Version;
@@ -38,6 +36,12 @@ import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
 
 import io.kabanero.v1alpha2.client.apis.KabaneroApi;
+import io.kabanero.v1alpha2.models.Kabanero;
+import io.kabanero.v1alpha2.models.KabaneroList;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksGitRelease;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksHttps;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
+import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
 import io.kabanero.v1alpha2.models.Stack;
 import io.kabanero.v1alpha2.models.StackList;
 import io.kabanero.v1alpha2.models.StackSpec;
@@ -45,13 +49,6 @@ import io.kabanero.v1alpha2.models.StackSpecImages;
 import io.kabanero.v1alpha2.models.StackSpecVersions;
 import io.kabanero.v1alpha2.models.StackStatus;
 import io.kabanero.v1alpha2.models.StackStatusVersions;
-import io.kabanero.v1alpha2.models.Kabanero;
-import io.kabanero.v1alpha2.models.KabaneroList;
-import io.kabanero.v1alpha2.models.KabaneroSpecStacks;
-import io.kabanero.v1alpha2.models.KabaneroSpecStacksGitRelease;
-import io.kabanero.v1alpha2.models.KabaneroSpecStacksHttps;
-import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
-import io.kabanero.v1alpha2.models.KabaneroSpecStacksRepositories;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import io.kubernetes.client.apis.CoreV1Api;
@@ -59,7 +56,6 @@ import io.kubernetes.client.models.V1ContainerStatus;
 import io.kubernetes.client.models.V1Pod;
 import io.kubernetes.client.models.V1PodList;
 import io.kubernetes.client.models.V1PodStatus;
-import io.kubernetes.client.proto.Meta.Status;
 
 public class StackUtils {
 	
@@ -80,6 +76,26 @@ public class StackUtils {
 	    	return v1.compareTo(v2);
 	    }
 	};
+	
+	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
+		//String token = "PRIVATE-TOKEN "+KubeUtils.getSecret(namespace, "https://docker.io");
+		Map m = KubeUtils.getUserAndPasswordFromSecret(namespace, "https://docker.io");
+		String digest=null;
+		
+		System.out.println("stackName="+stackName);
+		System.out.println("versionNumber="+versionNumber);
+		System.out.println("namespace="+namespace);
+		
+		String url="https://registry.hub.docker.com/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
+		String response=getWithREST(url, (String) m.get("user"), (String) m.get("password"), "json");
+		
+		JSONObject jo = JSONObject.parse(response);
+		JSONArray images = (JSONArray) jo.get("images");
+		JSONObject image = (JSONObject)images.get(0);
+		digest = (String) image.get("digest");
+		digest = digest.substring(digest.lastIndexOf(":")+1);
+		return digest;
+	}
 	
 	
 
@@ -106,25 +122,37 @@ public class StackUtils {
         }
         return false;
     }
+	
+	
 
-	public static String getFromGit(String url, String user, String pw, String contentType) {
+	public static String getWithREST(String url, String user, String pw, String contentType) throws KeyManagementException, NoSuchAlgorithmException {
 		HttpClientBuilder clientBuilder = HttpClients.custom();
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
-		
+
 		if (user!=null) {
 			credsProvider.setCredentials(new AuthScope(null, -1), new UsernamePasswordCredentials(user, pw));
 		}
-		
+
 		clientBuilder.setDefaultCredentialsProvider(credsProvider);
-		HttpClient client = clientBuilder.create().build();
-		
+
+		SSLContext sslContext = SSLContexts.custom()
+				.useTLS()
+				.build();
+
+		SSLConnectionSocketFactory f = new SSLConnectionSocketFactory(
+				sslContext,
+				new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"},   
+				null,
+				SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+		HttpClient client = clientBuilder.create().setSSLSocketFactory(f).build();
+		System.out.print("REST get with URL: "+url);
 		HttpGet request = new HttpGet(url);
 		request.addHeader("accept", "application/"+contentType);
-		
+
 		if (user==null) { 
-			request.addHeader("Authorization", "token "+pw);
+			request.addHeader("Authorization", pw);
 		}
-		
+
 		// add request header
 
 		HttpResponse response = null;
@@ -148,7 +176,7 @@ public class StackUtils {
 			throw new RuntimeException("Exception connecting or executing REST command to Git url: "+url, savedEx);
 		}
 		System.out.println("response.toString(): "+ response.toString());
-		
+
 		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 		if (response.getStatusLine().getStatusCode()==429) {
 			return "HTTP Code 429: GitHub retry limit exceeded, please try again in 2 minutes";
@@ -161,7 +189,7 @@ public class StackUtils {
 		}
 		StringBuffer result = new StringBuffer();
 		String line = "";
-  
+
 		try {
 			while ((line = rd.readLine()) != null) {
 				result.append(line + "\n");
@@ -169,7 +197,7 @@ public class StackUtils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return result.toString();
 	}
 	
@@ -216,11 +244,11 @@ public class StackUtils {
 	}
 	
 	
-	public static long getAssetId(String url, String org, String project, String release, String namespace, String assetName) throws ApiException, IOException {
+	public static long getAssetId(String url, String org, String project, String release, String namespace, String assetName) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		
 		String get_release_url = "https://api."+url+"/repos/"+org+"/"+project+"/releases/tags/"+release;
 		
-		String response = getFromGit(get_release_url, null, KubeUtils.getSecret(namespace, url),"json");
+		String response = getWithREST(get_release_url, null, "token "+KubeUtils.getSecret(namespace, url),"json");
 		
 		JSONObject asset_metadata=new JSONObject();
 		
@@ -266,10 +294,10 @@ public class StackUtils {
 				
 				String get_asset_url = "https://"+url+"/api/v3/repos/"+org+"/"+project+"/releases/assets/"+asset_id;
 				
-				response = getFromGit(get_asset_url, null, KubeUtils.getSecret(namespace,secret_url),"octet-stream");
+				response = getWithREST(get_asset_url, null, KubeUtils.getSecret(namespace,secret_url),"octet-stream");
 			} else {
 				System.out.println("in getStackFromGIT, reading from github public index: "+url);
-				response = getFromGit(url, user, pw, "yaml");
+				response = getWithREST(url, user, pw, "yaml");
 
 			}
 		} catch (Exception e) {
@@ -327,9 +355,25 @@ public class StackUtils {
 		return aList;
 	}
 	
+	private static HashMap<String,String> getKabStackDigest(Stack s, String versionToFind) {
+		String digest=null,imageName=null;
+		HashMap<String,String> imageMetaData = new HashMap<String,String>();
+		
+		List<StackStatusVersions> versions=s.getStatus().getVersions();
+		// note eventually we may have multiple images, potentially for multiple architectures
+		for (StackStatusVersions version:versions) {
+			digest=version.getImages().get(0).getDigest().getActivation();
+			imageName=version.getImages().get(0).getImage();
+		}
+		imageMetaData.put("digest",digest);
+		imageMetaData.put("imageName",imageName);
+		
+		return imageMetaData;
+	}
+	
 
 	
-	public static List allStacks(StackList fromKabanero) {
+	public static List allStacks(StackList fromKabanero, String namespace) {
 		ArrayList<Map> allStacks = new ArrayList<Map>();
 		try {
 			for (Stack s : fromKabanero.getItems()) {
@@ -348,7 +392,21 @@ public class StackUtils {
 						}
 					}
 					versionMap.put("status", statusStr);
-					versionMap.put("version", stackStatusVersion.getVersion());
+					String versionNum=stackStatusVersion.getVersion();
+					versionMap.put("version", versionNum);
+					Map imageMap = getKabStackDigest(s, versionNum);
+					String kabDigest = (String) imageMap.get("digest");
+					
+					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace);
+					
+					boolean match=false;
+					if (kabDigest!=null && imageDigest!=null) {
+						match=kabDigest.contentEquals(imageDigest);
+					}
+					
+					versionMap.put("digest check passed", match);
+					versionMap.put("kabanero digest", kabDigest);
+					versionMap.put("image digest", imageDigest);
 					status.add(versionMap);
 				}
 				allMap.put("name", name);
