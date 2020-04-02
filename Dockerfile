@@ -26,6 +26,6 @@ RUN rm /config/configDropins/defaults/open-default-port.xml
 
 # get buildah
 FROM quay.io/buildah/stable:v1.9.0
-RUN yum -y install
+RUN yum -y install buildah
 
 
