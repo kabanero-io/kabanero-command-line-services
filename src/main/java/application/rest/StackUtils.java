@@ -111,7 +111,7 @@ public class StackUtils {
 		
 		String url="https://"+crURL+"/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
 		String response=getWithREST(url, (String) m.get("user"), (String) m.get("password"), "json");
-		String buildahResponse=getImageWithBuildah(url, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
+		String buildahResponse=getImageWithBuildah(containerRegistryURL, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
 		System.out.println("buildahResponse"+buildahResponse);
 		
 		
