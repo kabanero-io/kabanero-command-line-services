@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import javax.net.ssl.SSLContext;
 
@@ -38,6 +39,7 @@ import com.ibm.json.java.JSONObject;
 import io.kabanero.v1alpha2.client.apis.KabaneroApi;
 import io.kabanero.v1alpha2.models.Kabanero;
 import io.kabanero.v1alpha2.models.KabaneroList;
+import io.kabanero.v1alpha2.models.KabaneroSpecGovernancePolicy;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksGitRelease;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksHttps;
 import io.kabanero.v1alpha2.models.KabaneroSpecStacksPipelines;
@@ -81,6 +83,20 @@ public class StackUtils {
 	    }
 	};
 	
+	private static String getImageWithBuildah(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
+		String digest=null;
+		// buildah pull --creds=myusername:mypassword --cert-dir ~/auth myregistry/myrepository/imagename:imagetag
+		String[] command = {"buildad","pull --creds="+user+":"+password+" "+url+"/"+repository+"/"+imageName+":"+tag};
+		Process process = Runtime.getRuntime().exec(command);
+		Scanner kb = new Scanner(process.getInputStream());
+		StringBuilder sb = new StringBuilder();
+		for(;kb.hasNext();) {
+			sb.append(kb.next());
+		}
+		digest=sb.toString();
+		return digest;
+	}
+	
 	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		//String token = "PRIVATE-TOKEN "+KubeUtils.getSecret(namespace, "https://docker.io");
 		System.out.println("containerRegistryURL"+containerRegistryURL);
@@ -95,6 +111,9 @@ public class StackUtils {
 		
 		String url="https://"+crURL+"/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
 		String response=getWithREST(url, (String) m.get("user"), (String) m.get("password"), "json");
+		String buildahResponse=getImageWithBuildah(url, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
+		System.out.println("buildahResponse"+buildahResponse);
+		
 		
 		JSONObject jo = JSONObject.parse(response);
 		JSONArray images = (JSONArray) jo.get("images");
@@ -407,16 +426,20 @@ public class StackUtils {
 					String containerRegistryURL = image.substring(0,image.indexOf("/"));
 					
 					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, containerRegistryURL);
+					//Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
+					//String policy = k.getSpec().getGovernancePolicy().getStackPolicy();
+										
 					
-					String digestCheck="failed";
+					String digestCheck="mismatched";
 					if (kabDigest!=null && imageDigest!=null) {
 						if (kabDigest.contentEquals(imageDigest)) {
-							digestCheck="passed";
+							digestCheck="matched";
 						}
 					} else {
 						digestCheck="unknown";
 					}
 					
+					//versionMap.put("digest policy", policy);
 					versionMap.put("digest check", digestCheck);
 					versionMap.put("kabanero digest", kabDigest);
 					versionMap.put("image digest", imageDigest);
