@@ -27,20 +27,6 @@ RUN rm /config/configDropins/defaults/open-default-port.xml
 ### get buildah
 #FROM quay.io/buildah/stable:v1.9.0
 #RUN yum -y install buildah
-yum -y install \
-    make \
-    golang \
-    bats \
-    btrfs-progs-devel \
-    device-mapper-devel \
-    glib2-devel \
-    gpgme-devel \
-    libassuan-devel \
-    libseccomp-devel \
-    git \
-    bzip2 \
-    go-md2man \
-    runc \
-    skopeo-containers
+
 
 
