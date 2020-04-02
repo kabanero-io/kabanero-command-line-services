@@ -24,7 +24,7 @@ RUN chmod 444 /config/jvm.options
 RUN chmod 444 /config/resources/security/cacerts
 RUN rm /config/configDropins/defaults/open-default-port.xml
 
-# get buildah
+### get buildah
 #FROM quay.io/buildah/stable:v1.9.0
 #RUN yum -y install buildah
 yum -y install \
