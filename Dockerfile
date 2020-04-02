@@ -27,7 +27,7 @@ RUN rm /config/configDropins/defaults/open-default-port.xml
 # get buildah
 #FROM quay.io/buildah/stable:v1.9.0
 #RUN yum -y install buildah
-sudo subscription-manager repos --enable=rhel-7-server-extras-rpms
-sudo yum -y install buildah
+subscription-manager repos --enable=rhel-7-server-extras-rpms
+yum -y install buildah
 
 
