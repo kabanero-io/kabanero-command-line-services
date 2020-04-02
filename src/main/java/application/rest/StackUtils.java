@@ -25,7 +25,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -81,6 +80,20 @@ public class StackUtils {
 	    }
 	};
 	
+//	private static String getImageWithBuildah(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
+//		String digest=null;
+//		// buildah pull --creds=myusername:mypassword --cert-dir ~/auth myregistry/myrepository/imagename:imagetag
+//		String[] command = {"buildad","pull --creds="+user+":"+password+" "+url+"/"+repository+"/"+imageName+":"+tag};
+//		Process process = Runtime.getRuntime().exec(command);
+//		Scanner kb = new Scanner(process.getInputStream());
+//		StringBuilder sb = new StringBuilder();
+//		for(;kb.hasNext();) {
+//			sb.append(kb.next());
+//		}
+//		digest=sb.toString();
+//		return digest;
+//	}
+	
 	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		//String token = "PRIVATE-TOKEN "+KubeUtils.getSecret(namespace, "https://docker.io");
 		System.out.println("containerRegistryURL"+containerRegistryURL);
@@ -95,6 +108,9 @@ public class StackUtils {
 		
 		String url="https://"+crURL+"/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
 		String response=getWithREST(url, (String) m.get("user"), (String) m.get("password"), "json");
+		//String buildahResponse=getImageWithBuildah(containerRegistryURL, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
+		//System.out.println("buildahResponse"+buildahResponse);
+		
 		
 		JSONObject jo = JSONObject.parse(response);
 		JSONArray images = (JSONArray) jo.get("images");
@@ -385,7 +401,6 @@ public class StackUtils {
 		try {
 			for (Stack s : fromKabanero.getItems()) {
 				HashMap allMap = new HashMap();
-				//System.out.println("working on one collection: " + s);
 				String name = s.getMetadata().getName();
 				name = name.trim();
 				List<StackStatusVersions> versions = s.getStatus().getVersions();
@@ -407,11 +422,12 @@ public class StackUtils {
 					String containerRegistryURL = image.substring(0,image.indexOf("/"));
 					
 					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, containerRegistryURL);
+										
 					
-					String digestCheck="failed";
+					String digestCheck="mismatched";
 					if (kabDigest!=null && imageDigest!=null) {
 						if (kabDigest.contentEquals(imageDigest)) {
-							digestCheck="passed";
+							digestCheck="matched";
 						}
 					} else {
 						digestCheck="unknown";
