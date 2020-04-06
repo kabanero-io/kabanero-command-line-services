@@ -24,6 +24,6 @@ RUN chmod 444 /config/jvm.options
 RUN chmod 444 /config/resources/security/cacerts
 RUN rm /config/configDropins/defaults/open-default-port.xml
 
-FROM quay.io/buildah/stable:v1.9.0
+
 
 
