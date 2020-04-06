@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import javax.net.ssl.SSLContext;
 
@@ -80,19 +81,19 @@ public class StackUtils {
 	    }
 	};
 	
-//	private static String getImageWithBuildah(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
-//		String digest=null;
-//		// buildah pull --creds=myusername:mypassword --cert-dir ~/auth myregistry/myrepository/imagename:imagetag
-//		String[] command = {"buildad","pull --creds="+user+":"+password+" "+url+"/"+repository+"/"+imageName+":"+tag};
-//		Process process = Runtime.getRuntime().exec(command);
-//		Scanner kb = new Scanner(process.getInputStream());
-//		StringBuilder sb = new StringBuilder();
-//		for(;kb.hasNext();) {
-//			sb.append(kb.next());
-//		}
-//		digest=sb.toString();
-//		return digest;
-//	}
+	private static String getImageWithBuildah(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
+		String digest=null;
+		// buildah pull --creds=myusername:mypassword --cert-dir ~/auth myregistry/myrepository/imagename:imagetag
+		String[] command = {"buildah","pull --creds="+user+":"+password+" "+url+"/"+repository+"/"+imageName+":"+tag};
+		Process process = Runtime.getRuntime().exec(command);
+		Scanner kb = new Scanner(process.getInputStream());
+		StringBuilder sb = new StringBuilder();
+		for(;kb.hasNext();) {
+			sb.append(kb.next());
+		}
+		digest=sb.toString();
+		return digest;
+	}
 	
 	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		//String token = "PRIVATE-TOKEN "+KubeUtils.getSecret(namespace, "https://docker.io");
@@ -108,8 +109,8 @@ public class StackUtils {
 		
 		String url="https://"+crURL+"/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
 		String response=getWithREST(url, (String) m.get("user"), (String) m.get("password"), "json");
-		//String buildahResponse=getImageWithBuildah(containerRegistryURL, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
-		//System.out.println("buildahResponse"+buildahResponse);
+		String buildahResponse=getImageWithBuildah(containerRegistryURL, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
+		System.out.println("buildahResponse"+buildahResponse);
 		
 		
 		JSONObject jo = JSONObject.parse(response);
