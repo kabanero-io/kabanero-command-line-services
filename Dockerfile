@@ -41,7 +41,7 @@ RUN rm /config/configDropins/defaults/open-default-port.xml
 #sudo apt-get -qq -y install buildah
 
 ### Copy repository configuration for temporary tools needed during the build that will be removed after skopeo is built.
-COPY ./yum.repos.d /etc/yum.repos.d
+#COPY ./yum.repos.d /etc/yum.repos.d
 
 ### Add necessary Red Hat repos here
 ## Note: The UBI has different repos than the RHEL repos.
