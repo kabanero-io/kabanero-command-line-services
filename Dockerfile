@@ -27,49 +27,7 @@ RUN rm /config/configDropins/defaults/open-default-port.xml
 
 
 #FROM quay.io/buildah/stable:v1.9.0
-#RUN yum -y install buildah
-
-### Copy repository configuration for temporary tools needed during the build that will be removed after skopeo is built.
-COPY ./yum.repos.d /etc/yum.repos.d
-
-### Add necessary Red Hat repos here
-## Note: The UBI has different repos than the RHEL repos.
-RUN REPOLIST=ubi-8-baseos,ubi-8-codeready-builder,ubi-8-appstream \
-
-### Add your package needs here
-    SKOPEO_VERSION_NAME=0.1.40 \
-    SKOPEO_SRC_PKG_NAME=v${SKOPEO_VERSION_NAME}.tar.gz \
-    SKOPEO_SRC_ROOT_NAME=skopeo-${SKOPEO_VERSION_NAME} \
-    INSTALL_PKGS="ostree-libs" \
-    TEMP_BUILD_UBI_PKGS="wget make golang gpgme-devel libassuan-devel device-mapper-devel" && \
-    yum -y update-minimal --disablerepo "*" --enablerepo ubi-8* --setopt=tsflags=nodocs \
-      --security --sec-severity=Important --sec-severity=Critical && \
-    yum repolist && \
-    yum -y install --disablerepo "*" --enablerepo ${REPOLIST} --setopt=tsflags=nodocs ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
-
-### Install your application here -- add all other necessary items to build your image
-    GOPATH=$(pwd) && \
-    mkdir -p /src/github.com/containers && \
-    cd /src/github.com/containers && \
-    wget https://github.com/containers/skopeo/archive/${SKOPEO_SRC_PKG_NAME} && \
-    tar -xzpf ${SKOPEO_SRC_PKG_NAME} && \
-    rm -f ${SKOPEO_SRC_PKG_NAME} && \
-    mv ${SKOPEO_SRC_ROOT_NAME} skopeo && \
-    cd skopeo && \
-    make binary-local && \
-    mv skopeo /usr/local/bin && \
-    # Remove source tree
-    rm -rf ${GOPATH}/src && \
-    # Create required config file
-    mkdir -p /etc/containers && \
-    echo $'{\n    \"default\": [\n        {\n            \"type\": \"insecureAcceptAnything\"\n        }\n    ]\n}' \
-    > /etc/containers/policy.json && \
-    cat /etc/containers/policy.json && \
-    yum -y remove --setopt=tsflags=nodocs ${TEMP_BUILD_UBI_PKGS} ${TEMP_BUILD_OTHER_PKGS} && \
-    yum clean all -y && \
-    # Remove repos' configs
-    rm -rf /etc/rhsm /etc/yum.repos.d /etc/pki/entitlement /etc/pki/rpm-gpg
-
-
+RUN yum module install container-tools
+RUN yum -y install buildah
 
 
