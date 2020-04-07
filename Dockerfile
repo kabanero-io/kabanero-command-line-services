@@ -64,19 +64,20 @@ RUN REPOLIST=ubi-8-baseos,ubi-8-codeready-builder,ubi-8-appstream \
     cd /src/github.com/containers && \
     wget https://github.com/containers/skopeo/archive/${SKOPEO_SRC_PKG_NAME} && \
     tar -xzpf ${SKOPEO_SRC_PKG_NAME} && \
-    rm -f ${SKOPEO_SRC_PKG_NAME} && \
+    #rm -f ${SKOPEO_SRC_PKG_NAME} && \
     mv ${SKOPEO_SRC_ROOT_NAME} skopeo && \
     cd skopeo && \
     make binary-local && \
     mv skopeo /usr/local/bin && \
     # Remove source tree
-    rm -rf ${GOPATH}/src && \
+    #rm -rf ${GOPATH}/src && \
     # Create required config file
     mkdir -p /etc/containers && \
     echo $'{\n    \"default\": [\n        {\n            \"type\": \"insecureAcceptAnything\"\n        }\n    ]\n}' \
     > /etc/containers/policy.json && \
-    cat /etc/containers/policy.json && \
-    yum -y remove --setopt=tsflags=nodocs ${TEMP_BUILD_UBI_PKGS} ${TEMP_BUILD_OTHER_PKGS} && \
-    yum clean all -y && \
+    #cat /etc/containers/policy.json && \ 
+    cat /etc/containers/policy.json 
+    #yum -y remove --setopt=tsflags=nodocs ${TEMP_BUILD_UBI_PKGS} ${TEMP_BUILD_OTHER_PKGS} && \
+    #yum clean all -y && \
     # Remove repos' configs
-    rm -rf /etc/rhsm /etc/yum.repos.d /etc/pki/entitlement /etc/pki/rpm-gpg
+    #rm -rf /etc/rhsm /etc/yum.repos.d /etc/pki/entitlement /etc/pki/rpm-gpg
