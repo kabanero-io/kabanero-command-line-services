@@ -28,7 +28,7 @@ RUN rm /config/configDropins/defaults/open-default-port.xml
 
 
 #FROM quay.io/buildah/stable:v1.9.0
-RUN yum module install container-tools
-RUN yum -y install buildah
+#RUN yum module install container-tools
+#RUN yum -y install buildah
 
 
