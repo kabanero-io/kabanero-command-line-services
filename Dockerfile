@@ -29,7 +29,7 @@ RUN rm /config/configDropins/defaults/open-default-port.xml
 #RUN yum -y install wget git
 
 ### Copy repository configuration for temporary tools needed during the build that will be removed after skopeo is built.
-COPY ./yum.repos.d /etc/yum.repos.d
+#COPY ./yum.repos.d /etc/yum.repos.d
 
 ### Add necessary Red Hat repos here
 ## Note: The UBI has different repos than the RHEL repos.
@@ -70,7 +70,7 @@ RUN REPOLIST=ubi-8-baseos,ubi-8-codeready-builder,ubi-8-appstream \
     yum -y remove --setopt=tsflags=nodocs ${TEMP_BUILD_UBI_PKGS} ${TEMP_BUILD_OTHER_PKGS} && \
     yum clean all -y && \
     # Remove repos' configs
-    rm -rf /etc/rhsm /etc/yum.repos.d /etc/pki/entitlement /etc/pki/rpm-gpg
+    #rm -rf /etc/rhsm /etc/yum.repos.d /etc/pki/entitlement /etc/pki/rpm-gpg
 
 
 
