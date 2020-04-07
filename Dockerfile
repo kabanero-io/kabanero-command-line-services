@@ -1,7 +1,7 @@
 # Docker build for Kabanero CLI Microservice
 #FROM openliberty/open-liberty:webProfile7-ubi-min
 #FROM openliberty/open-liberty:kernel-java8-openj9-ubi
-FROM openliberty:full-java8-openj9
+FROM openliberty
 
 USER root
 # The following labels are required for Redhat container certification
