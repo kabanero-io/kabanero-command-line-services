@@ -3,7 +3,7 @@
 FROM openliberty/open-liberty:kernel-java8-openj9-ubi
 #FROM open-liberty
 
-#USER root
+USER root
 # The following labels are required for Redhat container certification
 LABEL vendor="Kabanero" \
       name="Kabanero CLI Service" \
