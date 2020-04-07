@@ -97,7 +97,7 @@ public class StackUtils {
 	
 	private static String getImageWithSkopeo(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
 		String digest=null;
-		String parms = "inspect "+url+"/"+repository+"/"+imageName+":"+tag;
+		String parms = "inspect docker://"+url+"/"+repository+"/"+imageName+":"+tag;
 		System.out.println("parms="+parms);
 		String[] command = {"/usr/local/bin/skopeo",parms};
 		//String[] command = {"/usr/local/bin/skopeo",""};
