@@ -81,14 +81,31 @@ public class StackUtils {
 	    }
 	};
 	
-	private static String getImageWithBuildah(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
+//	private static String getImageWithBuildah(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
+//		String digest=null;
+//		// buildah pull --creds=myusername:mypassword --cert-dir ~/auth myregistry/myrepository/imagename:imagetag
+//		String[] command = {"buildah","pull --creds="+user+":"+password+" "+url+"/"+repository+"/"+imageName+":"+tag};
+//		Process process = Runtime.getRuntime().exec(command);
+//		Scanner kb = new Scanner(process.getInputStream());
+//		StringBuilder sb = new StringBuilder();
+//		for(;kb.hasNext();) {
+//			sb.append(kb.next());
+//		}
+//		digest=sb.toString();
+//		return digest;
+//	}
+	
+	private static String getImageWithSkopeo(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
 		String digest=null;
-		// buildah pull --creds=myusername:mypassword --cert-dir ~/auth myregistry/myrepository/imagename:imagetag
-		String[] command = {"buildah","pull --creds="+user+":"+password+" "+url+"/"+repository+"/"+imageName+":"+tag};
+		String parms = "inspect "+url+"/"+repository+"/"+imageName+":"+tag;
+		System.out.println("parms="+parms);
+		String[] command = {"/usr/local/bin/skopeo",parms};
+		//String[] command = {"/usr/local/bin/skopeo",""};
 		Process process = Runtime.getRuntime().exec(command);
 		Scanner kb = new Scanner(process.getInputStream());
 		StringBuilder sb = new StringBuilder();
 		for(;kb.hasNext();) {
+			System.out.println("blip");
 			sb.append(kb.next());
 		}
 		digest=sb.toString();
@@ -109,8 +126,8 @@ public class StackUtils {
 		
 		String url="https://"+crURL+"/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
 		String response=getWithREST(url, (String) m.get("user"), (String) m.get("password"), "json");
-		String buildahResponse=getImageWithBuildah(containerRegistryURL, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
-		System.out.println("buildahResponse"+buildahResponse);
+		String skopeoResponse=getImageWithSkopeo(containerRegistryURL, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
+		System.out.println("skopeoResponse="+skopeoResponse);
 		
 		
 		JSONObject jo = JSONObject.parse(response);
