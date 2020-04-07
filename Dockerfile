@@ -1,6 +1,7 @@
 # Docker build for Kabanero CLI Microservice
 #FROM openliberty/open-liberty:webProfile7-ubi-min
 FROM openliberty/open-liberty:kernel-java8-openj9-ubi
+USER root
 # The following labels are required for Redhat container certification
 LABEL vendor="Kabanero" \
       name="Kabanero CLI Service" \
@@ -26,7 +27,7 @@ RUN rm /config/configDropins/defaults/open-default-port.xml
 
 
 #FROM quay.io/buildah/stable:v1.9.0
-RUN sudo yum -y install buildah
+RUN yum -y install buildah
 
 
 
