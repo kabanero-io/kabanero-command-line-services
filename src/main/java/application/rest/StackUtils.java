@@ -85,10 +85,11 @@ public class StackUtils {
 	private static String getImageWithSkopeo(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
 		String digest=null;
 		String parm1 = "inspect";
-		String parm2 ="docker://"+url+"/"+repository+"/"+imageName+":"+tag;
+		String parm2 = "--creds "+user+":"+password;
+		String parm3 = "docker://"+url+"/"+repository+"/"+imageName+":"+tag;
 		System.out.println("parm1 = "+parm1);
-		System.out.println("parm2 = "+parm1);
-		String[] command = {"/usr/local/bin/skopeo",parm1,parm2};
+		System.out.println("parm3 = "+parm3);
+		String[] command = {"/usr/local/bin/skopeo",parm1,parm2, parm3};
 		Process process = Runtime.getRuntime().exec(command);
 		Scanner kb = new Scanner(process.getInputStream());
 		StringBuilder sb = new StringBuilder();
