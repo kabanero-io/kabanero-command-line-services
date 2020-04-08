@@ -97,9 +97,11 @@ public class StackUtils {
 	
 	private static String getImageWithSkopeo(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
 		String digest=null;
-		String parms = "inspect docker://"+url+"/"+repository+"/"+imageName+":"+tag;
-		System.out.println("parms="+parms);
-		String[] command = {"/usr/local/bin/skopeo",parms};
+		String parm1 = "inspect";
+		String parm2 ="docker://"+url+"/"+repository+"/"+imageName+":"+tag;
+		System.out.println("parm1 = "+parm1);
+		System.out.println("parm2 = "+parm1);
+		String[] command = {"/usr/local/bin/skopeo",parm1,parm2};
 		//String[] command = {"/usr/local/bin/skopeo",""};
 		Process process = Runtime.getRuntime().exec(command);
 		Scanner kb = new Scanner(process.getInputStream());
@@ -114,7 +116,7 @@ public class StackUtils {
 	
 	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		//String token = "PRIVATE-TOKEN "+KubeUtils.getSecret(namespace, "https://docker.io");
-		System.out.println("containerRegistryURL"+containerRegistryURL);
+		System.out.println("containerRegistryURL="+containerRegistryURL);
 		Map m = KubeUtils.getUserAndPasswordFromSecret(namespace, containerRegistryURL);
 		String digest=null;
 		
