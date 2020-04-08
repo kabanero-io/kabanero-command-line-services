@@ -54,5 +54,4 @@ RUN REPOLIST=ubi-8-baseos,ubi-8-codeready-builder,ubi-8-appstream \
     mkdir -p /etc/containers && \
     echo $'{\n    \"default\": [\n        {\n            \"type\": \"insecureAcceptAnything\"\n        }\n    ]\n}' \
     > /etc/containers/policy.json && \
-    #cat /etc/containers/policy.json && \ 
     cat /etc/containers/policy.json 

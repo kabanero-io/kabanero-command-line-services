@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 
 import javax.net.ssl.SSLContext;
 
@@ -81,7 +82,7 @@ public class StackUtils {
 	    }
 	};
 	
-	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
+	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String crNamespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		System.out.println("containerRegistryURL="+containerRegistryURL);
 		Map<String, String> m = KubeUtils.getUserAndPasswordFromSecret(namespace, containerRegistryURL);
 		String digest=null;
@@ -93,7 +94,7 @@ public class StackUtils {
 		String parm1 = "inspect";
 		String parm2 = "--creds";
 		String parm3 = (String) m.get("user")+":"+(String) m.get("password");
-		String parm4 = "docker://"+containerRegistryURL+"/"+namespace+"/"+stackName+":"+versionNumber;
+		String parm4 = "docker://"+containerRegistryURL+"/"+crNamespace+"/"+stackName+":"+versionNumber;
 		String[] command = {"/usr/local/bin/skopeo",parm1,parm2, parm3, parm4};
 		Process process = Runtime.getRuntime().exec(command);
 		Scanner kb = new Scanner(process.getInputStream());
@@ -408,9 +409,13 @@ public class StackUtils {
 					Map imageMap = getKabStackDigest(s, versionNum);
 					String kabDigest = (String) imageMap.get("digest");
 					String image = (String) imageMap.get("imageName"); // docker.io/kabanero/nodejs
-					String containerRegistryURL = image.substring(0,image.indexOf("/"));
 					
-					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, containerRegistryURL);
+					StringTokenizer st = new StringTokenizer(image,"/");
+					
+					String containerRegistryURL = st.nextToken();
+					String crNameSpace = st.nextToken();
+					
+					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
 										
 					
 					String digestCheck="mismatched";

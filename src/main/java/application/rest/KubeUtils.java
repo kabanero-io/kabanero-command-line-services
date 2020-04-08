@@ -523,7 +523,12 @@ public class KubeUtils {
     
     private static Map<String,String> locateCorrectSecretUserAndPass(V1Secret v1secret, String gitURL) throws IOException {
 		V1Secret secret = null;
-		Iterator it = v1secret.getMetadata().getAnnotations().values().iterator();
+		Iterator it = null;
+		try {
+			it = v1secret.getMetadata().getAnnotations().values().iterator();
+		} catch (NullPointerException npe) {
+			return null;
+		}
 		String url = (String) it.next();
 		url = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
 		String user=null, password = null;
@@ -566,6 +571,9 @@ public class KubeUtils {
             System.out.println("exception message: " + e.getMessage());
             throw new ApiException("Error retrieving kubernetes secret for GHE processing, error message: "+e.getMessage()+", cause: "+e.getCause());
         } 
+        if (m==null ) {
+        	throw new ApiException("Could not retrieve kubernetes secret for GHE or Container Registry processing, try recycling your CLI pod if you created the secret");
+        }
         return m;
      }
 
