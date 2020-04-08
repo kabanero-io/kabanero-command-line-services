@@ -424,6 +424,7 @@ public class StackUtils {
 							digestCheck="matched";
 						}
 					} else {
+						System.out.println("could not find one of the digests.  Kab digest="+kabDigest+", imageDigest="+imageDigest);
 						digestCheck="unknown";
 					}
 					
