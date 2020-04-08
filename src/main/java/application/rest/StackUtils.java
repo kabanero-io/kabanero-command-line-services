@@ -102,15 +102,14 @@ public class StackUtils {
 		System.out.println("parm1 = "+parm1);
 		System.out.println("parm2 = "+parm1);
 		String[] command = {"/usr/local/bin/skopeo",parm1,parm2};
-		//String[] command = {"/usr/local/bin/skopeo",""};
 		Process process = Runtime.getRuntime().exec(command);
 		Scanner kb = new Scanner(process.getInputStream());
 		StringBuilder sb = new StringBuilder();
 		for(;kb.hasNext();) {
-			System.out.println("blip");
 			sb.append(kb.next());
 		}
-		digest=sb.toString();
+		JSONObject jo = JSONObject.parse(sb.toString());
+		digest = (String) jo.get("Digest");
 		return digest;
 	}
 	
@@ -120,23 +119,16 @@ public class StackUtils {
 		Map m = KubeUtils.getUserAndPasswordFromSecret(namespace, containerRegistryURL);
 		String digest=null;
 		
-		String crURL=(String) containerRegistries.get(containerRegistryURL);
+		//String crURL=(String) containerRegistries.get(containerRegistryURL);
 		
 		System.out.println("stackName="+stackName);
 		System.out.println("versionNumber="+versionNumber);
 		System.out.println("namespace="+namespace);
 		
-		String url="https://"+crURL+"/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
-		String response=getWithREST(url, (String) m.get("user"), (String) m.get("password"), "json");
-		String skopeoResponse=getImageWithSkopeo(containerRegistryURL, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
-		System.out.println("skopeoResponse="+skopeoResponse);
+		//String url="https://"+crURL+"/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
+		//String response=getWithREST(url, (String) m.get("user"), (String) m.get("password"), "json");
+		digest=getImageWithSkopeo(containerRegistryURL, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
 		
-		
-		JSONObject jo = JSONObject.parse(response);
-		JSONArray images = (JSONArray) jo.get("images");
-		JSONObject image = (JSONObject)images.get(0);
-		digest = (String) image.get("digest");
-		digest = digest.substring(digest.lastIndexOf(":")+1);
 		return digest;
 	}
 	
