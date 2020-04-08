@@ -91,11 +91,10 @@ public class StackUtils {
 		System.out.println("namespace="+namespace);
 		
 		String parm1 = "inspect";
-		String parm2 = "--creds "+(String) m.get("user")+":"+(String) m.get("password");
-		String parm3 = "docker://"+containerRegistryURL+"/"+namespace+"/"+stackName+":"+versionNumber;
-		System.out.println("parm1 = "+parm1);
-		System.out.println("parm3 = "+parm3);
-		String[] command = {"/usr/local/bin/skopeo",parm1,parm2, parm3};
+		String parm2 = "--creds";
+		String parm3 = (String) m.get("user")+":"+(String) m.get("password");
+		String parm4 = "docker://"+containerRegistryURL+"/"+namespace+"/"+stackName+":"+versionNumber;
+		String[] command = {"/usr/local/bin/skopeo",parm1,parm2, parm3, parm4};
 		Process process = Runtime.getRuntime().exec(command);
 		Scanner kb = new Scanner(process.getInputStream());
 		StringBuilder sb = new StringBuilder();
