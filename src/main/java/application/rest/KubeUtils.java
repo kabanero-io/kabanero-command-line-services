@@ -523,7 +523,12 @@ public class KubeUtils {
     
     private static Map<String,String> locateCorrectSecretUserAndPass(V1Secret v1secret, String gitURL) throws IOException {
 		V1Secret secret = null;
-		Iterator it = v1secret.getMetadata().getAnnotations().values().iterator();
+		Iterator it = null;
+		try {
+			it = v1secret.getMetadata().getAnnotations().values().iterator();
+		} catch (NullPointerException npe) {
+			return null;
+		}
 		String url = (String) it.next();
 		url = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
 		String user=null, password = null;
