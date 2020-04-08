@@ -571,6 +571,9 @@ public class KubeUtils {
             System.out.println("exception message: " + e.getMessage());
             throw new ApiException("Error retrieving kubernetes secret for GHE processing, error message: "+e.getMessage()+", cause: "+e.getCause());
         } 
+        if (m==null ) {
+        	throw new ApiException("Cloud not retrieve kubernetes secret for GHE processing");
+        }
         return m;
      }
 
