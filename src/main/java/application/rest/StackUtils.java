@@ -80,20 +80,7 @@ public class StackUtils {
 	    	return v1.compareTo(v2);
 	    }
 	};
-	
-//	private static String getImageWithBuildah(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
-//		String digest=null;
-//		// buildah pull --creds=myusername:mypassword --cert-dir ~/auth myregistry/myrepository/imagename:imagetag
-//		String[] command = {"buildah","pull --creds="+user+":"+password+" "+url+"/"+repository+"/"+imageName+":"+tag};
-//		Process process = Runtime.getRuntime().exec(command);
-//		Scanner kb = new Scanner(process.getInputStream());
-//		StringBuilder sb = new StringBuilder();
-//		for(;kb.hasNext();) {
-//			sb.append(kb.next());
-//		}
-//		digest=sb.toString();
-//		return digest;
-//	}
+
 	
 	private static String getImageWithSkopeo(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
 		String digest=null;
@@ -115,19 +102,14 @@ public class StackUtils {
 	}
 	
 	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
-		//String token = "PRIVATE-TOKEN "+KubeUtils.getSecret(namespace, "https://docker.io");
 		System.out.println("containerRegistryURL="+containerRegistryURL);
 		Map m = KubeUtils.getUserAndPasswordFromSecret(namespace, containerRegistryURL);
 		String digest=null;
-		
-		//String crURL=(String) containerRegistries.get(containerRegistryURL);
 		
 		System.out.println("stackName="+stackName);
 		System.out.println("versionNumber="+versionNumber);
 		System.out.println("namespace="+namespace);
 		
-		//String url="https://"+crURL+"/v2/repositories/"+namespace+"/"+stackName+"/tags/"+versionNumber;
-		//String response=getWithREST(url, (String) m.get("user"), (String) m.get("password"), "json");
 		digest=getImageWithSkopeo(containerRegistryURL, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
 		
 		return digest;
