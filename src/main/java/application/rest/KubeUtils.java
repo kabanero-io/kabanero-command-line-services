@@ -572,7 +572,7 @@ public class KubeUtils {
             throw new ApiException("Error retrieving kubernetes secret for GHE processing, error message: "+e.getMessage()+", cause: "+e.getCause());
         } 
         if (m==null ) {
-        	throw new ApiException("Cloud not retrieve kubernetes secret for GHE processing");
+        	throw new ApiException("Could not retrieve kubernetes secret for GHE or Container Registry processing, try recycling your CLI pod if you created the secret");
         }
         return m;
      }
