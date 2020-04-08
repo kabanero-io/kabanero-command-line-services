@@ -80,13 +80,19 @@ public class StackUtils {
 	    	return v1.compareTo(v2);
 	    }
 	};
-
 	
-	private static String getImageWithSkopeo(String url, String user, String password, String repository, String imageName, String tag) throws IOException {
+	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
+		System.out.println("containerRegistryURL="+containerRegistryURL);
+		Map<String, String> m = KubeUtils.getUserAndPasswordFromSecret(namespace, containerRegistryURL);
 		String digest=null;
+		
+		System.out.println("stackName="+stackName);
+		System.out.println("versionNumber="+versionNumber);
+		System.out.println("namespace="+namespace);
+		
 		String parm1 = "inspect";
-		String parm2 = "--creds "+user+":"+password;
-		String parm3 = "docker://"+url+"/"+repository+"/"+imageName+":"+tag;
+		String parm2 = "--creds "+(String) m.get("user")+":"+(String) m.get("password");
+		String parm3 = "docker://"+containerRegistryURL+"/"+namespace+"/"+stackName+":"+versionNumber;
 		System.out.println("parm1 = "+parm1);
 		System.out.println("parm3 = "+parm3);
 		String[] command = {"/usr/local/bin/skopeo",parm1,parm2, parm3};
@@ -96,23 +102,10 @@ public class StackUtils {
 		for(;kb.hasNext();) {
 			sb.append(kb.next());
 		}
+		kb.close();
 		JSONObject jo = JSONObject.parse(sb.toString());
 		digest = (String) jo.get("Digest");
 		digest = digest.substring(digest.lastIndexOf(":")+1);
-		return digest;
-	}
-	
-	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
-		System.out.println("containerRegistryURL="+containerRegistryURL);
-		Map m = KubeUtils.getUserAndPasswordFromSecret(namespace, containerRegistryURL);
-		String digest=null;
-		
-		System.out.println("stackName="+stackName);
-		System.out.println("versionNumber="+versionNumber);
-		System.out.println("namespace="+namespace);
-		
-		digest=getImageWithSkopeo(containerRegistryURL, (String) m.get("user"), (String) m.get("password"), namespace, stackName, versionNumber);
-		
 		return digest;
 	}
 	
