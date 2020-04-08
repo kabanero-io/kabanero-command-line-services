@@ -102,6 +102,7 @@ public class StackUtils {
 		for(;kb.hasNext();) {
 			sb.append(kb.next());
 		}
+		System.out.println("result from skopeo: "+sb.toString());
 		kb.close();
 		JSONObject jo = JSONObject.parse(sb.toString());
 		digest = (String) jo.get("Digest");
