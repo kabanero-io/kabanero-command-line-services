@@ -110,6 +110,7 @@ public class StackUtils {
 		}
 		JSONObject jo = JSONObject.parse(sb.toString());
 		digest = (String) jo.get("Digest");
+		digest = digest.substring(digest.lastIndexOf(":")+1);
 		return digest;
 	}
 	
