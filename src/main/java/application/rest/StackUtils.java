@@ -437,6 +437,9 @@ public class StackUtils {
 						digestCheck="unknown";
 					}
 					
+					if (kabDigest == null) {
+						kabDigest="does not exist";
+					}
 					versionMap.put("digest check", digestCheck);
 					versionMap.put("kabanero digest", kabDigest);
 					versionMap.put("image digest", imageDigest);
