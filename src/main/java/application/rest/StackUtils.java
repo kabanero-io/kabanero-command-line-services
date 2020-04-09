@@ -102,12 +102,19 @@ public class StackUtils {
 		for(;kb.hasNext();) {
 			sb.append(kb.next());
 		}
-		System.out.println("result from skopeo:  "+sb.toString());
 		kb.close();
-		JSONObject jo = JSONObject.parse(sb.toString());
-		digest = (String) jo.get("Digest");
-		digest = digest.substring(digest.lastIndexOf(":")+1);
-		return digest;
+		String result = sb.toString();
+		if (result!=null) {
+			if (result.contains("manifest unknown")) {
+				return "image not found in container registry";
+			}
+			System.out.println("result from skopeo:  "+result);
+			JSONObject jo = JSONObject.parse(result);
+			digest = (String) jo.get("Digest");
+			digest = digest.substring(digest.lastIndexOf(":")+1);
+			return digest;
+		}
+		return null;
 	}
 	
 	
@@ -386,7 +393,7 @@ public class StackUtils {
 	
 
 	
-	public static List allStacks(StackList fromKabanero, String namespace) {
+	public static List allStacks(StackList fromKabanero, String namespace) throws Exception {
 		ArrayList<Map> allStacks = new ArrayList<Map>();
 		try {
 			for (Stack s : fromKabanero.getItems()) {
@@ -396,7 +403,7 @@ public class StackUtils {
 				List<StackStatusVersions> versions = s.getStatus().getVersions();
 				List status = new ArrayList<Map>();
 				for (StackStatusVersions stackStatusVersion : versions) {
-					HashMap versionMap = new HashMap();
+					HashMap<String,String> versionMap = new HashMap<String,String>();
 					String statusStr = stackStatusVersion.getStatus();
 					if ("inactive".contentEquals(statusStr)) {
 						if (isStatusPending(s, stackStatusVersion.getVersion())) {
@@ -416,15 +423,16 @@ public class StackUtils {
 					String crNameSpace = st.nextToken();
 					
 					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
-										
 					
 					String digestCheck="mismatched";
 					if (kabDigest!=null && imageDigest!=null) {
 						if (kabDigest.contentEquals(imageDigest)) {
 							digestCheck="matched";
+						} else if (imageDigest.contains("not found in container registry")) {
+							digestCheck = imageDigest;
 						}
 					} else {
-						System.out.println("could not find one of the digests.  Kab digest="+kabDigest+", imageDigest="+imageDigest);
+						System.out.println("Could not find one of the digests.  Kab digest="+kabDigest+", imageDigest="+imageDigest);
 						digestCheck="unknown";
 					}
 					
@@ -440,6 +448,7 @@ public class StackUtils {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw e;
 		}
 		return allStacks;
 	}
