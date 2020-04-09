@@ -90,6 +90,7 @@ public class StackUtils {
 		System.out.println("stackName="+stackName);
 		System.out.println("versionNumber="+versionNumber);
 		System.out.println("namespace="+namespace);
+		System.out.println("crNamespace="+crNamespace);
 		
 		String parm1 = "inspect";
 		String parm2 = "--creds";
@@ -102,12 +103,19 @@ public class StackUtils {
 		for(;kb.hasNext();) {
 			sb.append(kb.next());
 		}
-		System.out.println("result from skopeo:  "+sb.toString());
 		kb.close();
-		JSONObject jo = JSONObject.parse(sb.toString());
-		digest = (String) jo.get("Digest");
-		digest = digest.substring(digest.lastIndexOf(":")+1);
-		return digest;
+		String result = sb.toString();
+		if (result!=null) {
+			if (result.contains("manifest unknown")||result.length()==0) {
+				return "image not found in container registry";
+			}
+			System.out.println("result from skopeo:  "+result);
+			JSONObject jo = JSONObject.parse(result);
+			digest = (String) jo.get("Digest");
+			digest = digest.substring(digest.lastIndexOf(":")+1);
+			return digest;
+		}
+		return null;
 	}
 	
 	
@@ -372,21 +380,29 @@ public class StackUtils {
 		String digest=null,imageName=null;
 		HashMap<String,String> imageMetaData = new HashMap<String,String>();
 		
+		System.out.println("getting digest for: "+s.getSpec().getName()+", versionToFind: "+versionToFind);
+		
 		List<StackStatusVersions> versions=s.getStatus().getVersions();
 		// note eventually we may have multiple images, potentially for multiple architectures
 		for (StackStatusVersions version:versions) {
-			digest=version.getImages().get(0).getDigest().getActivation();
-			imageName=version.getImages().get(0).getImage();
+			if (version.getImages()!=null) {
+				digest=version.getImages().get(0).getDigest().getActivation();
+				imageName=version.getImages().get(0).getImage();
+			}
 		}
-		imageMetaData.put("digest",digest);
-		imageMetaData.put("imageName",imageName);
+		if (digest != null) {
+			imageMetaData.put("digest",digest);
+			imageMetaData.put("imageName",imageName);
+		} else {
+			imageMetaData = null;
+		}
 		
 		return imageMetaData;
 	}
 	
 
 	
-	public static List allStacks(StackList fromKabanero, String namespace) {
+	public static List allStacks(StackList fromKabanero, String namespace) throws Exception {
 		ArrayList<Map> allStacks = new ArrayList<Map>();
 		try {
 			for (Stack s : fromKabanero.getItems()) {
@@ -396,7 +412,7 @@ public class StackUtils {
 				List<StackStatusVersions> versions = s.getStatus().getVersions();
 				List status = new ArrayList<Map>();
 				for (StackStatusVersions stackStatusVersion : versions) {
-					HashMap versionMap = new HashMap();
+					HashMap<String,String> versionMap = new HashMap<String,String>();
 					String statusStr = stackStatusVersion.getStatus();
 					if ("inactive".contentEquals(statusStr)) {
 						if (isStatusPending(s, stackStatusVersion.getVersion())) {
@@ -406,27 +422,39 @@ public class StackUtils {
 					versionMap.put("status", statusStr);
 					String versionNum=stackStatusVersion.getVersion();
 					versionMap.put("version", versionNum);
+					
 					Map imageMap = getKabStackDigest(s, versionNum);
-					String kabDigest = (String) imageMap.get("digest");
-					String image = (String) imageMap.get("imageName"); // docker.io/kabanero/nodejs
 					
-					StringTokenizer st = new StringTokenizer(image,"/");
+					String kabDigest = null, image = null, imageDigest=null;
 					
-					String containerRegistryURL = st.nextToken();
-					String crNameSpace = st.nextToken();
+					if (imageMap != null) {
+						kabDigest = (String) imageMap.get("digest");
+					    image = (String) imageMap.get("imageName"); // docker.io/kabanero/nodejs
+					    StringTokenizer st = new StringTokenizer(image,"/");
+						
+						String containerRegistryURL = st.nextToken();
+						String crNameSpace = st.nextToken();
+						
+						imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
+					}
 					
-					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
-										
+					
 					
 					String digestCheck="mismatched";
 					if (kabDigest!=null && imageDigest!=null) {
 						if (kabDigest.contentEquals(imageDigest)) {
 							digestCheck="matched";
+						} else if (imageDigest.contains("not found in container registry")) {
+							digestCheck = imageDigest;
 						}
 					} else {
+						System.out.println("Could not find one of the digests.  Kab digest="+kabDigest+", imageDigest="+imageDigest);
 						digestCheck="unknown";
 					}
 					
+					if (kabDigest == null) {
+						kabDigest="does not exist";
+					}
 					versionMap.put("digest check", digestCheck);
 					versionMap.put("kabanero digest", kabDigest);
 					versionMap.put("image digest", imageDigest);
@@ -439,6 +467,7 @@ public class StackUtils {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw e;
 		}
 		return allStacks;
 	}
