@@ -380,14 +380,22 @@ public class StackUtils {
 		String digest=null,imageName=null;
 		HashMap<String,String> imageMetaData = new HashMap<String,String>();
 		
+		System.out.println("getting digest for: "+s.getSpec().getName()+", versionToFind: "+versionToFind);
+		
 		List<StackStatusVersions> versions=s.getStatus().getVersions();
 		// note eventually we may have multiple images, potentially for multiple architectures
 		for (StackStatusVersions version:versions) {
-			digest=version.getImages().get(0).getDigest().getActivation();
-			imageName=version.getImages().get(0).getImage();
+			if (version.getImages()!=null) {
+				digest=version.getImages().get(0).getDigest().getActivation();
+				imageName=version.getImages().get(0).getImage();
+			}
 		}
-		imageMetaData.put("digest",digest);
-		imageMetaData.put("imageName",imageName);
+		if (digest != null) {
+			imageMetaData.put("digest",digest);
+			imageMetaData.put("imageName",imageName);
+		} else {
+			imageMetaData = null;
+		}
 		
 		return imageMetaData;
 	}
@@ -414,16 +422,23 @@ public class StackUtils {
 					versionMap.put("status", statusStr);
 					String versionNum=stackStatusVersion.getVersion();
 					versionMap.put("version", versionNum);
+					
 					Map imageMap = getKabStackDigest(s, versionNum);
-					String kabDigest = (String) imageMap.get("digest");
-					String image = (String) imageMap.get("imageName"); // docker.io/kabanero/nodejs
 					
-					StringTokenizer st = new StringTokenizer(image,"/");
+					String kabDigest = null, image = null, imageDigest=null;
 					
-					String containerRegistryURL = st.nextToken();
-					String crNameSpace = st.nextToken();
+					if (imageMap != null) {
+						kabDigest = (String) imageMap.get("digest");
+					    image = (String) imageMap.get("imageName"); // docker.io/kabanero/nodejs
+					    StringTokenizer st = new StringTokenizer(image,"/");
+						
+						String containerRegistryURL = st.nextToken();
+						String crNameSpace = st.nextToken();
+						
+						imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
+					}
 					
-					String imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
+					
 					
 					String digestCheck="mismatched";
 					if (kabDigest!=null && imageDigest!=null) {
