@@ -400,9 +400,22 @@ public class StackUtils {
 		return imageMetaData;
 	}
 	
+	private static String getRepoName(List curatedStacks, String name, String version) {
+		String repoName="";
+		for (Object obj:curatedStacks) {
+			Map stack = (Map)obj;
+			String nameStr = (String) stack.get("name");
+			String versionStr = (String) stack.get("version");
+			if (nameStr.contentEquals(name) && versionStr.contentEquals(version)) {
+				repoName = (String) stack.get("reponame");
+			}
+		}
+		return repoName;
+	}
+	
 
 	
-	public static List allStacks(StackList fromKabanero, String namespace) throws Exception {
+	public static List allStacks(StackList fromKabanero, String namespace, List curatedStacks) throws Exception {
 		ArrayList<Map> allStacks = new ArrayList<Map>();
 		try {
 			for (Stack s : fromKabanero.getItems()) {
@@ -438,8 +451,6 @@ public class StackUtils {
 						imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
 					}
 					
-					
-					
 					String digestCheck="mismatched";
 					if (kabDigest!=null && imageDigest!=null) {
 						if (kabDigest.contentEquals(imageDigest)) {
@@ -455,6 +466,7 @@ public class StackUtils {
 					if (kabDigest == null) {
 						kabDigest="does not exist";
 					}
+					versionMap.put("reponame", getRepoName(curatedStacks, name, versionNum));
 					versionMap.put("digest check", digestCheck);
 					versionMap.put("kabanero digest", kabDigest);
 					versionMap.put("image digest", imageDigest);
