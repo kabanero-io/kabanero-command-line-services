@@ -90,6 +90,7 @@ public class StackUtils {
 		System.out.println("stackName="+stackName);
 		System.out.println("versionNumber="+versionNumber);
 		System.out.println("namespace="+namespace);
+		System.out.println("crNamespace="+crNamespace);
 		
 		String parm1 = "inspect";
 		String parm2 = "--creds";
@@ -105,6 +106,8 @@ public class StackUtils {
 		kb.close();
 		String result = sb.toString();
 		if (result!=null) {
+			System.out.println("Result="+result+"||");
+			System.out.println("Result length"+result.length());
 			if (result.contains("manifest unknown")) {
 				return "image not found in container registry";
 			}
