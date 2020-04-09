@@ -106,9 +106,7 @@ public class StackUtils {
 		kb.close();
 		String result = sb.toString();
 		if (result!=null) {
-			System.out.println("Result="+result+"||");
-			System.out.println("Result length"+result.length());
-			if (result.contains("manifest unknown")) {
+			if (result.contains("manifest unknown")||result.length()==0) {
 				return "image not found in container registry";
 			}
 			System.out.println("result from skopeo:  "+result);
