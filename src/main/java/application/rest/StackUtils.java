@@ -466,6 +466,9 @@ public class StackUtils {
 					if (kabDigest == null) {
 						kabDigest="does not exist";
 					}
+					if (imageDigest == null) {
+						imageDigest="could not be retrieved";
+					}
 					versionMap.put("reponame", getRepoName(curatedStacks, name, versionNum));
 					versionMap.put("digest check", digestCheck);
 					versionMap.put("kabanero digest", kabDigest);
