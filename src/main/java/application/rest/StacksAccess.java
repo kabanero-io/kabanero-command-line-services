@@ -200,7 +200,7 @@ public class StacksAccess {
 			
 			
 			
-			List kabStacks=StackUtils.allStacks(fromKabanero, namespace);
+			List kabStacks=StackUtils.allStacks(fromKabanero, namespace, curatedStacks);
 			
 			System.out.println("kabanero instance stacks before sort:"+kabStacks);
 			
