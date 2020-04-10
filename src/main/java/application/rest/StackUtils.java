@@ -390,12 +390,10 @@ public class StackUtils {
 				imageName=version.getImages().get(0).getImage();
 			}
 		}
-		if (digest != null) {
-			imageMetaData.put("digest",digest);
-			imageMetaData.put("imageName",imageName);
-		} else {
-			imageMetaData = null;
-		}
+		
+		imageMetaData.put("digest",digest);
+		imageMetaData.put("imageName",imageName);
+		
 		
 		return imageMetaData;
 	}
@@ -439,18 +437,18 @@ public class StackUtils {
 					Map imageMap = getKabStackDigest(s, versionNum);
 					
 					String kabDigest = null, image = null, imageDigest=null;
-					
-					if (imageMap != null) {
-						kabDigest = (String) imageMap.get("digest");
-					    image = (String) imageMap.get("imageName"); // docker.io/kabanero/nodejs
-					    StringTokenizer st = new StringTokenizer(image,"/");
-						
-						String containerRegistryURL = st.nextToken();
-						String crNameSpace = st.nextToken();
-						
-						imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
-					}
-					
+
+
+					kabDigest = (String) imageMap.get("digest");
+					image = (String) imageMap.get("imageName"); // docker.io/kabanero/nodejs
+					StringTokenizer st = new StringTokenizer(image,"/");
+
+					String containerRegistryURL = st.nextToken();
+					String crNameSpace = st.nextToken();
+
+					imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
+
+
 					String digestCheck="mismatched";
 					if (kabDigest!=null && imageDigest!=null) {
 						if (kabDigest.contentEquals(imageDigest)) {
