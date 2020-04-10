@@ -441,13 +441,12 @@ public class StackUtils {
 
 					kabDigest = (String) imageMap.get("digest");
 					image = (String) imageMap.get("imageName"); // docker.io/kabanero/nodejs
-					StringTokenizer st = new StringTokenizer(image,"/");
-
-					String containerRegistryURL = st.nextToken();
-					String crNameSpace = st.nextToken();
-
-					imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
-
+					if (image!=null) {
+						StringTokenizer st = new StringTokenizer(image,"/");
+						String containerRegistryURL = st.nextToken();
+						String crNameSpace = st.nextToken();
+						imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
+					}
 
 					String digestCheck="mismatched";
 					if (kabDigest!=null && imageDigest!=null) {
