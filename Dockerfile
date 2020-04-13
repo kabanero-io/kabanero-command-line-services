@@ -1,6 +1,11 @@
 # Docker build for Kabanero CLI Microservice
 FROM openliberty/open-liberty:kernel-java8-openj9-ubi
 
+RUN groupadd -g 999 appuser && \
+    useradd -r -u 999 -g appuser appuser
+USER appuser
+
+
 # The following labels are required for Redhat container certification
 LABEL vendor="Kabanero" \
       name="Kabanero CLI Service" \
@@ -36,11 +41,9 @@ RUN REPOLIST=ubi-8-baseos,ubi-8-codeready-builder,ubi-8-appstream \
     SKOPEO_SRC_ROOT_NAME=skopeo-${SKOPEO_VERSION_NAME} \
     INSTALL_PKGS="ostree-libs" \
     TEMP_BUILD_UBI_PKGS="wget make golang gpgme-devel libassuan-devel device-mapper-devel" && \
-    #yum -y update-minimal --disablerepo "*" --enablerepo ubi-8* --setopt=tsflags=nodocs \
-    yum -y update-minimal --disablerepo "*" --setopt=tsflags=nodocs \
+    yum -y update-minimal --disablerepo "*" --enablerepo ubi-8* --setopt=tsflags=nodocs \
     yum repolist && \
-    #yum -y install --disablerepo "*" --enablerepo ${REPOLIST} --setopt=tsflags=nodocs ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
-    yum -y install --disablerepo "*" --setopt=tsflags=nodocs ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
+    yum -y install --disablerepo "*" --enablerepo ${REPOLIST} --setopt=tsflags=nodocs ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
 
 ### Install your application here -- add all other necessary items to build your image
     GOPATH=$(pwd) && \
