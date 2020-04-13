@@ -36,8 +36,7 @@ RUN REPOLIST=ubi-8-baseos,ubi-8-codeready-builder,ubi-8-appstream \
     INSTALL_PKGS="ostree-libs" \
     TEMP_BUILD_UBI_PKGS="wget make golang gpgme-devel libassuan-devel device-mapper-devel" && \
     #yum -y update-minimal --disablerepo "*" --enablerepo ubi-8* --setopt=tsflags=nodocs \
-    yum -y update-minimal --disablerepo "*" --setopt=tsflags=nodocs \
-      --security --sec-severity=Important --sec-severity=Critical && \
+    yum install yum-downloadonly ubi-8* \
     yum repolist && \
     #yum -y install --disablerepo "*" --enablerepo ${REPOLIST} --setopt=tsflags=nodocs ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
     yum -y install --disablerepo "*" --setopt=tsflags=nodocs ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
