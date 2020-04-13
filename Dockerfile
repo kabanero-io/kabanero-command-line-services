@@ -1,7 +1,6 @@
 # Docker build for Kabanero CLI Microservice
 FROM openliberty/open-liberty:kernel-java8-openj9-ubi
 
-USER root
 # The following labels are required for Redhat container certification
 LABEL vendor="Kabanero" \
       name="Kabanero CLI Service" \
@@ -25,6 +24,7 @@ RUN chmod 444 /config/jvm.options
 RUN chmod 444 /config/resources/security/cacerts
 RUN rm /config/configDropins/defaults/open-default-port.xml
 
+### Figure out how to build without root
 ### Add necessary Red Hat repos here
 ## Note: The UBI has different repos than the RHEL repos.
 RUN REPOLIST=ubi-8-baseos,ubi-8-codeready-builder,ubi-8-appstream \
