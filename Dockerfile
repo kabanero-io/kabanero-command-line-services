@@ -24,6 +24,7 @@ RUN chmod 444 /config/jvm.options
 RUN chmod 444 /config/resources/security/cacerts
 RUN rm /config/configDropins/defaults/open-default-port.xml
 
+RUN whoami
 ### Figure out how to build without root
 ### Add necessary Red Hat repos here
 ## Note: The UBI has different repos than the RHEL repos.
@@ -36,10 +37,10 @@ RUN REPOLIST=ubi-8-baseos,ubi-8-codeready-builder,ubi-8-appstream \
     INSTALL_PKGS="ostree-libs" \
     TEMP_BUILD_UBI_PKGS="wget make golang gpgme-devel libassuan-devel device-mapper-devel" && \
     #yum -y update-minimal --disablerepo "*" --enablerepo ubi-8* --setopt=tsflags=nodocs \
-    yum install yum-downloadonly ubi-8* \
+    yum -y update-minimal --disablerepo "*" --setopt=tsflags=nodocs \
     yum repolist && \
     #yum -y install --disablerepo "*" --enablerepo ${REPOLIST} --setopt=tsflags=nodocs ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
-    yum install yum-downloadonly ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
+    yum -y install --disablerepo "*" --setopt=tsflags=nodocs ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
 
 ### Install your application here -- add all other necessary items to build your image
     GOPATH=$(pwd) && \
