@@ -39,7 +39,7 @@ RUN REPOLIST=ubi-8-baseos,ubi-8-codeready-builder,ubi-8-appstream \
     yum install yum-downloadonly ubi-8* \
     yum repolist && \
     #yum -y install --disablerepo "*" --enablerepo ${REPOLIST} --setopt=tsflags=nodocs ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
-    yum -y install --disablerepo "*" --setopt=tsflags=nodocs ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
+    yum install yum-downloadonly ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
 
 ### Install your application here -- add all other necessary items to build your image
     GOPATH=$(pwd) && \
