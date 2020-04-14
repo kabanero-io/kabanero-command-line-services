@@ -466,6 +466,11 @@ public class StackUtils {
 					if (imageDigest == null) {
 						imageDigest="could not be retrieved";
 					}
+					
+					if (!"active".contentEquals(stackStatusVersion.getStatus())) {
+						digestCheck = "NA";
+					}
+					
 					versionMap.put("reponame", getRepoName(curatedStacks, name, versionNum));
 					versionMap.put("digest check", digestCheck);
 					versionMap.put("kabanero digest", kabDigest);

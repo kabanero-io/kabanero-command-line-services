@@ -1,8 +1,6 @@
 # Docker build for Kabanero CLI Microservice
 FROM openliberty/open-liberty:kernel-java8-openj9-ubi
 
-
-
 # The following labels are required for Redhat container certification
 LABEL vendor="Kabanero" \
       name="Kabanero CLI Service" \
@@ -25,7 +23,6 @@ RUN chmod 444 /config/server.env
 RUN chmod 444 /config/jvm.options
 RUN chmod 444 /config/resources/security/cacerts
 RUN rm /config/configDropins/defaults/open-default-port.xml
-
 
 ### switch to root in order to install skopeo
 USER root
