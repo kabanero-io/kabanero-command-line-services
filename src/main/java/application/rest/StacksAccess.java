@@ -105,7 +105,7 @@ public class StacksAccess {
 		}
 		JSONObject msg = new JSONObject();
 		msg.put("image", image);
-		return Response.ok(msg).build();
+		return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 	}
 	
 	@GET
@@ -120,7 +120,7 @@ public class StacksAccess {
 		JSONObject resp = new JSONObject();
 		resp.put("message",
 				msg + ", The Kabanero operator status is: " + k.getStatus().getKabaneroInstance().getMessage());
-		return Response.ok(msg).entity(resp).build();
+		return Response.ok(msg).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 	}
 
 	@GET
@@ -140,7 +140,7 @@ public class StacksAccess {
 				System.out.println("login token has expired, please login again");
 				JSONObject resp = new JSONObject();
 				resp.put("message", "your login token has expired or your credentials are invalid, please login again");
-				return Response.status(401).entity(resp).build();
+				return Response.status(401).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 			}
 			
 			ArrayList stacks = new ArrayList();
@@ -157,7 +157,7 @@ public class StacksAccess {
 					if (firstElem.contains("HTTP Code 429:")) {
 						JSONObject resp = new JSONObject();
 						resp.put("message", firstElem);
-						return Response.status(429).entity(resp).build();
+						return Response.status(429).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 					}
 				}
 			} catch (RuntimeException ex) {
@@ -165,14 +165,14 @@ public class StacksAccess {
 				JSONObject resp = new JSONObject();
 				System.out.println("Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause());
 				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
-				return Response.status(424).entity(resp).build();
+				return Response.status(424).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				JSONObject resp = new JSONObject();
 				String message = "Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause();
 				System.out.println(message);
 				resp.put("message", message);
-				return Response.status(424).entity(resp).build();
+				return Response.status(424).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 			}
 			
 			System.out.println("stacks: "+stacks);
@@ -243,9 +243,9 @@ public class StacksAccess {
 			e.printStackTrace();
 			JSONObject resp = new JSONObject();
 			resp.put("message", e.getMessage());
-			return Response.status(500).entity(resp).build();
+			return Response.status(500).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		}
-		return Response.ok(msg).build();
+		return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 	}
 	
 	
@@ -275,7 +275,7 @@ public class StacksAccess {
 		JSONObject msg = new JSONObject();
 		msg.put("message", workaround);
 
-		return Response.ok(msg).build();
+		return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 	}
 
 	@PUT
@@ -427,7 +427,7 @@ public class StacksAccess {
 			e.printStackTrace();
 			JSONObject resp = new JSONObject();
 			resp.put("message", e.getMessage());
-			return Response.status(500).entity(resp).build();
+			return Response.status(500).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		}
 		System.out.println("starting stack SYNC");
 
@@ -660,7 +660,7 @@ public class StacksAccess {
 			e.printStackTrace();
 		}
 		System.out.println("finishing refresh");
-		return Response.ok(msg).build();
+		return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 	}
 	
 	private String getDesiredState(List<Map> versionColls, List<Map> activateColls) {
@@ -755,7 +755,7 @@ public class StacksAccess {
 				System.out.println("*** " + "Stack name: " + name + " 404 not found");
 				msg.put("status", "Stack name: " + name + " 404 not found");
 				msg.put("message", "Stack name: " + name + " 404 not found");
-				return Response.status(400).entity(msg).build();
+				return Response.status(400).entity(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 			}
 			List<StackSpecVersions> kabSpecVersions=null;
 			if (version!=null) {
@@ -772,13 +772,13 @@ public class StacksAccess {
 					System.out.println(msgStr);
 					msg.put("status", msgStr);
 					msg.put("message", msgStr);
-					return Response.status(400).entity(msg).build();
+					return Response.status(400).entity(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 				}
 			} else {
 				System.out.println("no version number supplied for stack: "+name);
 				msg.put("status", "no version number supplied for stack: "+name);
 				msg.put("message", "no version number supplied for stack: "+name);
-				return Response.status(400).entity(msg).build();
+				return Response.status(400).entity(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 			}
 			System.out.println(kabStack.getSpec().getName()+" stack for patch deactivate: " + kabStack.toString());
 			kabStack.getSpec().setVersions(kabSpecVersions);
@@ -787,7 +787,7 @@ public class StacksAccess {
 			msg.put("status", "Stack name: " + name + " version: "+version+" deactivated");
 			msg.put("message", "Stack name: " + name + " version: "+version+" deactivated");
 			msg.put("repositories", getRepositories(kab));
-			return Response.ok(msg).build();
+			return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();
 			String responseBody = apie.getResponseBody();
@@ -797,7 +797,7 @@ public class StacksAccess {
 			msg.put("message",
 					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + apie.getMessage());
 			msg.put("exception message", apie.getMessage()+", cause: "+apie.getCause());
-			return Response.status(400).entity(msg).build();
+			return Response.status(400).entity(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -807,7 +807,7 @@ public class StacksAccess {
 			msg.put("message",
 					"Stack name: " + name + " version: "+version+" failed to deactivate, exception message: " + e.getMessage());
 			msg.put("exception message", e.getMessage()+", cause: "+e.getCause());
-			return Response.status(400).entity(msg).build();
+			return Response.status(400).entity(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").header("X-Content-Type-Options","nosniff").build();
 		}
 
 	}
