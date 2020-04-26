@@ -783,7 +783,7 @@ public class StacksAccess {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/stacks/describe/{name}/versions/{version}")
+	@Path("/describe/stacks/{name}/versions/{version}")
 	public Response describeStack(@Context final HttpServletRequest request,
 			@PathParam("name") final String name, @PathParam("version") final String version) throws Exception {
 		// make call to kabanero to delete collection
