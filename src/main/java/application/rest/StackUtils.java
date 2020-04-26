@@ -82,7 +82,7 @@ public class StackUtils {
 	    }
 	};
 	
-	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String crNamespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
+	public static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String crNamespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		System.out.println("containerRegistryURL="+containerRegistryURL);
 		Map<String, String> m = KubeUtils.getUserAndPasswordFromSecret(namespace, containerRegistryURL);
 		String digest=null;
@@ -376,7 +376,7 @@ public class StackUtils {
 		return aList;
 	}
 	
-	private static HashMap<String,String> getKabStackDigest(Stack s, String versionToFind) {
+	public static HashMap<String,String> getKabStackDigest(Stack s, String versionToFind) {
 		String digest=null,imageName=null;
 		HashMap<String,String> imageMetaData = new HashMap<String,String>();
 		
@@ -398,7 +398,7 @@ public class StackUtils {
 		return imageMetaData;
 	}
 	
-	private static String getRepoName(List curatedStacks, String name, String version) {
+	public static String getRepoName(List curatedStacks, String name, String version) {
 		String repoName="";
 		for (Object obj:curatedStacks) {
 			Map stack = (Map)obj;
@@ -409,6 +409,32 @@ public class StackUtils {
 			}
 		}
 		return repoName;
+	}
+	
+	public static String digestCheck(String kabDigest, String imageDigest, String status) {
+		String digestCheck="mismatched";
+		if (kabDigest!=null && imageDigest!=null) {
+			if (kabDigest.contentEquals(imageDigest)) {
+				digestCheck="matched";
+			} else if (imageDigest.contains("not found in container registry")) {
+				digestCheck = imageDigest;
+			}
+		} else {
+			System.out.println("Could not find one of the digests.  Kab digest="+kabDigest+", imageDigest="+imageDigest);
+			digestCheck="unknown";
+		}
+		
+		if (kabDigest == null) {
+			kabDigest="does not exist";
+		}
+		if (imageDigest == null) {
+			imageDigest="could not be retrieved";
+		}
+		
+		if (!"active".contentEquals(status)) {
+			digestCheck = "NA";
+		}
+		return digestCheck;
 	}
 	
 
@@ -448,31 +474,31 @@ public class StackUtils {
 						imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
 					}
 
-					String digestCheck="mismatched";
-					if (kabDigest!=null && imageDigest!=null) {
-						if (kabDigest.contentEquals(imageDigest)) {
-							digestCheck="matched";
-						} else if (imageDigest.contains("not found in container registry")) {
-							digestCheck = imageDigest;
-						}
-					} else {
-						System.out.println("Could not find one of the digests.  Kab digest="+kabDigest+", imageDigest="+imageDigest);
-						digestCheck="unknown";
-					}
-					
-					if (kabDigest == null) {
-						kabDigest="does not exist";
-					}
-					if (imageDigest == null) {
-						imageDigest="could not be retrieved";
-					}
-					
-					if (!"active".contentEquals(stackStatusVersion.getStatus())) {
-						digestCheck = "NA";
-					}
+//					String digestCheck="mismatched";
+//					if (kabDigest!=null && imageDigest!=null) {
+//						if (kabDigest.contentEquals(imageDigest)) {
+//							digestCheck="matched";
+//						} else if (imageDigest.contains("not found in container registry")) {
+//							digestCheck = imageDigest;
+//						}
+//					} else {
+//						System.out.println("Could not find one of the digests.  Kab digest="+kabDigest+", imageDigest="+imageDigest);
+//						digestCheck="unknown";
+//					}
+//					
+//					if (kabDigest == null) {
+//						kabDigest="does not exist";
+//					}
+//					if (imageDigest == null) {
+//						imageDigest="could not be retrieved";
+//					}
+//					
+//					if (!"active".contentEquals(stackStatusVersion.getStatus())) {
+//						digestCheck = "NA";
+//					}
 					
 					versionMap.put("reponame", getRepoName(curatedStacks, name, versionNum));
-					versionMap.put("digest check", digestCheck);
+					versionMap.put("digest check", digestCheck(kabDigest,imageDigest, stackStatusVersion.getStatus()));
 					versionMap.put("kabanero digest", kabDigest);
 					versionMap.put("image digest", imageDigest);
 					status.add(versionMap);
