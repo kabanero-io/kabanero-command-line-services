@@ -786,8 +786,8 @@ public class StacksAccess {
 	@Path("/describe/stacks/{name}/versions/{version}")
 	public Response describeStack(@Context final HttpServletRequest request,
 			@PathParam("name") final String name, @PathParam("version") final String version) throws Exception {
-		// make call to kabanero to delete collection
-
+		System.out.println("In describe stack");
+		
 		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
 
 		ApiClient apiClient = KubeUtils.getApiClient();
@@ -874,6 +874,7 @@ public class StacksAccess {
 			
 			String kabDigest = (String) m.get("digest");
 			
+			System.out.println("curated stacks in describe: "+curatedStacks);
 			
 			msg.put("name", name);
 			msg.put("version", version);
@@ -882,6 +883,7 @@ public class StacksAccess {
 			msg.put("digest check", StackUtils.digestCheck(kabDigest, imageDigest, status));
 			msg.put("kabanero digest", kabDigest);
 			msg.put("image digest", imageDigest);
+			msg.put("project", namespace);
 			return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();
