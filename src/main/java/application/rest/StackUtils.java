@@ -400,10 +400,12 @@ public class StackUtils {
 	
 	public static String getRepoName(List curatedStacks, String name, String version) {
 		String repoName="";
+		System.out.println("name="+name+", version="+version);
 		for (Object obj:curatedStacks) {
 			Map stack = (Map)obj;
 			String nameStr = (String) stack.get("name");
 			String versionStr = (String) stack.get("version");
+			System.out.println("nameStr="+nameStr+", versionStr="+versionStr);
 			if (nameStr.contentEquals(name) && versionStr.contentEquals(version)) {
 				repoName = (String) stack.get("reponame");
 			}
