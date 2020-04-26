@@ -122,6 +122,35 @@
 			"response": []
 		},
 		{
+			"name": "remote get describe",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer {{JWT}}"
+					}
+				],
+				"url": {
+					"raw": "https://{{myurl}}/v1/describe/stacks/nodejs/versions/0.3.3",
+					"protocol": "https",
+					"host": [
+						"{{myurl}}"
+					],
+					"path": [
+						"v1",
+						"describe",
+						"stacks",
+						"nodejs",
+						"versions",
+						"0.3.3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Deactivate a Stack version",
 			"request": {
 				"method": "DELETE",
