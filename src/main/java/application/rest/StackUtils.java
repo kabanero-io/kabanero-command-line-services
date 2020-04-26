@@ -403,10 +403,11 @@ public class StackUtils {
 		System.out.println("name="+name+", version="+version);
 		for (Object obj:curatedStacks) {
 			Map stack = (Map)obj;
-			String nameStr = (String) stack.get("name");
+			String nameStr = (String) stack.get("id");
+			String nameStr2 = (String) stack.get("name");
 			String versionStr = (String) stack.get("version");
 			System.out.println("nameStr="+nameStr+", versionStr="+versionStr);
-			if (nameStr.contentEquals(name) && versionStr.contentEquals(version)) {
+			if ((nameStr.contentEquals(name) || nameStr2.contentEquals(name)) && versionStr.contentEquals(version)) {
 				repoName = (String) stack.get("reponame");
 			}
 		}
