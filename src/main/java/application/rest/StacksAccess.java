@@ -792,10 +792,14 @@ public class StacksAccess {
 
 		ApiClient apiClient = KubeUtils.getApiClient();
 		
-		List deployments = KubeUtils.listResources(apiClient, group, apiVersion, "Deployments",namespace);
-		for (Object obj: deployments) {
-			Map map = (Map)obj;
-			System.out.println("map="+map.toString());
+		try {
+			List deployments = KubeUtils.listResources(apiClient, group, apiVersion, "Deployments",namespace);
+			for (Object obj: deployments) {
+				Map map = (Map)obj;
+				System.out.println("map="+map.toString());
+			}
+		} catch (Exception e) {
+			System.out.println("tolerate: "+e.getMessage());
 		}
 		
 		StackApi api = new StackApi(apiClient);
@@ -867,9 +871,10 @@ public class StacksAccess {
 			String image = null;
 			image = (String) m.get("imageName"); // docker.io/kabanero/nodejs
 			String imageDigest="";
+			String containerRegistryURL = "";
 			if (image!=null) {
 				StringTokenizer st = new StringTokenizer(image,"/");
-				String containerRegistryURL = st.nextToken();
+				containerRegistryURL = st.nextToken();
 				String crNameSpace = st.nextToken();
 				imageDigest = StackUtils.getImageDigestFromRegistry(name, version, namespace, crNameSpace, containerRegistryURL);
 			}
@@ -889,7 +894,8 @@ public class StacksAccess {
 			
 			msg.put("name", name);
 			msg.put("version", version);
-			msg.put("git repo url", repoUrl);  /// <---- TODO
+			msg.put("git repo url", repoUrl);  
+			msg.put("container registry url", containerRegistryURL); 
 			msg.put("status", status);
 			msg.put("digest check", StackUtils.digestCheck(kabDigest, imageDigest, status));
 			msg.put("kabanero digest", kabDigest);
