@@ -682,13 +682,16 @@ public class StackUtils {
 		System.out.println("isStackVersionInGit");
 		System.out.println("input parms - name: "+name+" version: "+version);
 		try {
+			System.out.println("GIT map list size: "+fromGit.size());
 			for (Map map1 : fromGit) {
+				System.out.println("map1: "+map1);
 				String name1 = (String) map1.get("name");
 				name1 = name1.trim();
+				System.out.println("name1: "+name1);
 				if (name1.contentEquals(name)) {
 					List<Map> versions = (List<Map>) map1.get("versions");
 					System.out.println("versions: "+versions);
-					System.out.println("versions: "+versions);
+					
 					for (Map versionElement:versions) {
 						String versionValue = (String) versionElement.get("version");
 						if (version.equals(versionValue)) {
