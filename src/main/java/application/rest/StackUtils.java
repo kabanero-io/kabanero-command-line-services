@@ -399,7 +399,7 @@ public class StackUtils {
 	}
 	
 	public static String getRepoName(List curatedStacks, String name, String version) {
-		String repoName="";
+		String repoName=null;
 		for (Object obj:curatedStacks) {
 			Map stack = (Map)obj;
 			String nameStr = (String) stack.get("id");
