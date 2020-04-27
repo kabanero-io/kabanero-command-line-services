@@ -791,7 +791,17 @@ public class StacksAccess {
 		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
 
 		ApiClient apiClient = KubeUtils.getApiClient();
+		
+		List deployments = KubeUtils.listResources(apiClient, group, apiVersion, "Deployments",namespace);
+		for (Object obj: deployments) {
+			Map map = (Map)obj;
+			System.out.println("map="+map.toString());
+		}
+		
 		StackApi api = new StackApi(apiClient);
+		
+		
+		
 		String plural = "stacks";
 
 		JSONObject msg = new JSONObject();
