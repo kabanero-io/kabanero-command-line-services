@@ -187,41 +187,6 @@ public class StacksAccess {
 			
 			ArrayList stacks = new ArrayList();
 			
-			
-			
-//			try {
-//				for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
-//					stacks.addAll( (ArrayList) StackUtils
-//							.getStackFromGIT(getUser(request), PAT, r, namespace));
-//				}
-//				String firstElem = stacks.get(0).toString();
-//				if (firstElem!=null) {
-//					if (firstElem.contains("HTTP Code 429:")) {
-//						JSONObject resp = new JSONObject();
-//						resp.put("message", firstElem);
-//						return Response.status(429).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
-//					}
-//				}
-//			} catch (RuntimeException ex) {
-//				ex.printStackTrace();
-//				JSONObject resp = new JSONObject();
-//				System.out.println("Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause());
-//				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
-//				return Response.status(424).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
-//			} catch (Exception ex) {
-//				ex.printStackTrace();
-//				JSONObject resp = new JSONObject();
-//				String message = "Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause();
-//				System.out.println(message);
-//				resp.put("message", message);
-//				return Response.status(424).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
-//			}
-//			
-//			System.out.println("stacks: "+stacks);
-//			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
-//			Collections.sort(curatedStacks, mapComparator);
-//			System.out.println("curatedStacks (after sort): "+curatedStacks);
-			
 			List curatedStacks = getCuratedStacks(request, PAT);
 			Object o = curatedStacks.get(0);
 			if (o instanceof JSONObject) {
