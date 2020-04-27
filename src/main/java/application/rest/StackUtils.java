@@ -474,29 +474,6 @@ public class StackUtils {
 						String crNameSpace = st.nextToken();
 						imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
 					}
-
-//					String digestCheck="mismatched";
-//					if (kabDigest!=null && imageDigest!=null) {
-//						if (kabDigest.contentEquals(imageDigest)) {
-//							digestCheck="matched";
-//						} else if (imageDigest.contains("not found in container registry")) {
-//							digestCheck = imageDigest;
-//						}
-//					} else {
-//						System.out.println("Could not find one of the digests.  Kab digest="+kabDigest+", imageDigest="+imageDigest);
-//						digestCheck="unknown";
-//					}
-//					
-//					if (kabDigest == null) {
-//						kabDigest="does not exist";
-//					}
-//					if (imageDigest == null) {
-//						imageDigest="could not be retrieved";
-//					}
-//					
-//					if (!"active".contentEquals(stackStatusVersion.getStatus())) {
-//						digestCheck = "NA";
-//					}
 					
 					versionMap.put("reponame", getRepoName(curatedStacks, name, versionNum));
 					versionMap.put("digest check", digestCheck(kabDigest,imageDigest, stackStatusVersion.getStatus()));
@@ -682,16 +659,11 @@ public class StackUtils {
 		System.out.println("isStackVersionInGit");
 		System.out.println("input parms - name: "+name+" version: "+version);
 		try {
-			System.out.println("GIT map list size: "+fromGit.size());
 			for (Map map1 : fromGit) {
-				System.out.println("map1: "+map1);
 				String name1 = (String) map1.get("name");
 				name1 = name1.trim();
-				System.out.println("name1: "+name1);
 				if (name1.contentEquals(name)) {
 					List<Map> versions = (List<Map>) map1.get("versions");
-					System.out.println("versions: "+versions);
-					
 					for (Map versionElement:versions) {
 						String versionValue = (String) versionElement.get("version");
 						if (version.equals(versionValue)) {
