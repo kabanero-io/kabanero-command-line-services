@@ -816,14 +816,6 @@ public class StacksAccess {
 			}
 		}
 		
-//		stack name: <stack name>
-//		version: <version>
-//		source: <GH repo> 
-//		status: active/deactivated
-//		valid digest: T/F
-//		kabanero digest: <sha for kabanero digest>
-//		image digest: <sha for image digest>
-
 		try {
 
 			Stack kabStack = api.getStack(namespace, name);
@@ -876,9 +868,18 @@ public class StacksAccess {
 			
 			System.out.println("curated stacks in describe: "+curatedStacks);
 			
+			String repoUrl="";
+			String repoName = StackUtils.getRepoName(curatedStacks, name, version);
+			Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
+			for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
+				if (r.getName().contentEquals(repoName)) {
+					repoUrl = r.getHttps().getUrl();
+				}
+			}
+			
 			msg.put("name", name);
 			msg.put("version", version);
-			msg.put("git repo", StackUtils.getRepoName(curatedStacks, name, version));  /// <---- TODO
+			msg.put("git repo url", repoUrl);  /// <---- TODO
 			msg.put("status", status);
 			msg.put("digest check", StackUtils.digestCheck(kabDigest, imageDigest, status));
 			msg.put("kabanero digest", kabDigest);
