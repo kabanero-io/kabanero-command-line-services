@@ -684,8 +684,9 @@ public class StackUtils {
 		try {
 			for (Map map1 : fromGit) {
 				String name1 = (String) map1.get("name");
+				String name2 = (String) map1.get("id");
 				name1 = name1.trim();
-				if (name1.contentEquals(name)) {
+				if (name1.contentEquals(name) || name2.contentEquals(name)) {
 					List<Map> versions = (List<Map>) map1.get("versions");
 					System.out.println("versions: "+versions);
 					for (Map versionElement:versions) {

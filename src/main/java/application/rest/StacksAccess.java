@@ -884,12 +884,19 @@ public class StacksAccess {
 			System.out.println("curated stacks in describe: "+curatedStacks);
 			
 			String repoUrl="";
-			String repoName = StackUtils.getRepoName(curatedStacks, name, version);
-			Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
-			for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
-				if (r.getName().contentEquals(repoName)) {
-					repoUrl = r.getHttps().getUrl();
+			String repoName = null;
+			repoName = StackUtils.getRepoName(curatedStacks, name, version);
+			if (repoName!=null) {
+				Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
+				for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
+					if (r.getName().contentEquals(repoName)) {
+						repoUrl = r.getHttps().getUrl();
+					}
 				}
+			}
+			
+			if (repoName==null) {
+				status = status + " (obsolete)";
 			}
 			
 			msg.put("name", name);
