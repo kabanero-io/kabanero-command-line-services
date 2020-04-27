@@ -431,7 +431,7 @@ public class StackUtils {
 		if (imageDigest == null) {
 			imageDigest="could not be retrieved";
 		}
-		
+		status=status.substring(0, 6);  
 		if (!"active".contentEquals(status)) {
 			digestCheck = "NA";
 		}
