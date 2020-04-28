@@ -116,22 +116,3 @@ stacks:
   - id: simple
     url: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/nodejs.v0.3.3.templates.simple.tar.gz
   version: 0.3.3
-- default-template: simple
-  description: Runtime for Node.js applications
-  id: nodejs
-  image: docker.io/kabanerobeta/nodejs:0.3.3
-  language: nodejs
-  license: Apache-2.0
-  maintainers:
-  - email: vieuxtech@gmail.com
-    github-id: sam-github
-    name: Sam Roberts
-  name: Node.js
-  requirements:
-    appsody-version: '>= 0.2.7'
-    docker-version: '>= 17.09.0'
-  src: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/nodejs.v0.3.3.source.tar.gz
-  templates:
-  - id: simple
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/nodejs.v0.3.3.templates.simple.tar.gz
-  version: 0.3.4
