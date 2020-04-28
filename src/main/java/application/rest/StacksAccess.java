@@ -139,7 +139,6 @@ public class StacksAccess {
 					JSONObject resp = new JSONObject();
 					resp.put("message", firstElem);
 					stacks.add(resp);
-					//return Response.status(429).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 				}
 			}
 		} catch (RuntimeException ex) {
@@ -149,7 +148,6 @@ public class StacksAccess {
 			resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
 			stacks.add(resp);
 			failure=true;
-			//return Response.status(424).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			JSONObject resp = new JSONObject();
@@ -158,7 +156,6 @@ public class StacksAccess {
 			resp.put("message", message);
 			stacks.add(resp);
 			failure=true;
-			//return Response.status(424).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		}
 		
 		System.out.println("stacks: "+stacks);
@@ -779,10 +776,6 @@ public class StacksAccess {
 		}
 		
 		StackApi api = new StackApi(apiClient);
-		
-		
-		
-		String plural = "stacks";
 
 		JSONObject msg = new JSONObject();
 		

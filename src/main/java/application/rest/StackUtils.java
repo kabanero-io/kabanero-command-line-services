@@ -425,12 +425,6 @@ public class StackUtils {
 			digestCheck="unknown";
 		}
 		
-		if (kabDigest == null) {
-			kabDigest="does not exist";
-		}
-		if (imageDigest == null) {
-			imageDigest="could not be retrieved";
-		}
 		status=status.substring(0, 6);  
 		if (!"active".contentEquals(status)) {
 			digestCheck = "NA";
