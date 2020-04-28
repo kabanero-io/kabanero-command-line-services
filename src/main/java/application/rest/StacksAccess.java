@@ -234,7 +234,7 @@ public class StacksAccess {
 			
 			
 			try {
-				List newStacks = (List<Map>) StackUtils.filterNewStacks(stacks,
+				List newStacks = (List<Map>) StackUtils.filterNewStacks(curatedStacks,
 						fromKabanero);
 				Collections.sort(newStacks, mapComparator);
 				
