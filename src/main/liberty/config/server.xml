@@ -39,10 +39,11 @@
     
     
     
-    <sslDefault sslRef="kabSSLConfig"/>
-    <ssl id="kabSSLConfig" keyStoreRef="defaultKeyStore" trustStoreRef="validationKeystore"/>
-    <keyStore id="defaultKeyStore" />
-    <keyStore id="validationKeystore" location="${server.config.dir}/resources/security/cacerts" type="jks" />
+    <keyStore id="defaultKeyStore"
+            password="changeit"
+            location="/etc/tls/secrets/java.io/kabanero.cli/keystores/keystore.p12"
+            type="PKCS12"/>
+  	<ssl id="defaultSSLConfig" keyStoreRef="defaultKeyStore" trustDefaultCerts="true" sslProtocol="TLSv1.2"/>
     
     <!-- this will be the issuer of the jwts -->
     <variable name="jwt.issuer" defaultValue="https://kabasec.com" />
