@@ -535,9 +535,7 @@ public class StackUtils {
 						System.out.println("name="+name+",git version="+version+",versions="+versions);
 						// check if the version from the git map occurs in the list of versions
 						// for this name matched stack map
-						System.out.println("name1="+name1+", versions=");
 						for (StackStatusVersions stackStatusVersions : versions) {
-							System.out.print(stackStatusVersions.getVersion()+", ");
 							if (version.contentEquals(stackStatusVersions.getVersion())) {
 								match = true;
 								HashMap versionForName = new HashMap();
