@@ -513,6 +513,7 @@ public class StackUtils {
 	
 
 	public static List filterNewStacks(List<Map> fromGit, StackList fromKabanero) {
+		System.out.println("Entering filterNewStacks");
 		ArrayList<Map> newStacks = new ArrayList<Map>();
 		ArrayList<Map> registerVersionForName = new ArrayList<Map>();
 		try {
@@ -534,7 +535,9 @@ public class StackUtils {
 						System.out.println("name="+name+",git version="+version+",versions="+versions);
 						// check if the version from the git map occurs in the list of versions
 						// for this name matched stack map
+						System.out.println("name1="+name1+", versions=");
 						for (StackStatusVersions stackStatusVersions : versions) {
+							System.out.print(stackStatusVersions.getVersion()+", ");
 							if (version.contentEquals(stackStatusVersions.getVersion())) {
 								match = true;
 								HashMap versionForName = new HashMap();
@@ -546,6 +549,7 @@ public class StackUtils {
 					}
 				}
 				if (!match) {
+					System.out.println("** NEW name="+map.get("id")+",git version="+version);
 					gitMap.put("name", (String)map.get("id"));
 					gitMap.put("version", version);
 					gitMap.put("desiredState", "active");
