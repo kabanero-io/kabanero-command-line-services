@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -122,6 +123,50 @@ public class StacksAccess {
 				msg + ", The Kabanero operator status is: " + k.getStatus().getKabaneroInstance().getMessage());
 		return Response.ok(msg).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 	}
+	
+	private List getCuratedStacks(HttpServletRequest request, String PAT) {
+		ArrayList stacks = new ArrayList();
+		boolean failure=false;
+		try {
+			Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
+			for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
+				stacks.addAll( (ArrayList) StackUtils
+						.getStackFromGIT(getUser(request), PAT, r, namespace));
+			}
+			String firstElem = stacks.get(0).toString();
+			if (firstElem!=null) {
+				if (firstElem.contains("HTTP Code 429:")) {
+					JSONObject resp = new JSONObject();
+					resp.put("message", firstElem);
+					stacks.add(resp);
+				}
+			}
+		} catch (RuntimeException ex) {
+			ex.printStackTrace();
+			JSONObject resp = new JSONObject();
+			System.out.println("Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause());
+			resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
+			stacks.add(resp);
+			failure=true;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			JSONObject resp = new JSONObject();
+			String message = "Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause();
+			System.out.println(message);
+			resp.put("message", message);
+			stacks.add(resp);
+			failure=true;
+		}
+		
+		System.out.println("stacks: "+stacks);
+		if (failure) {
+			return stacks;
+		}
+		List curatedStacks = StackUtils.streamLineMasterMap(stacks);
+		Collections.sort(curatedStacks, mapComparator);
+		System.out.println("curatedStacks (after sort): "+curatedStacks);
+		return stacks;
+	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -145,40 +190,18 @@ public class StacksAccess {
 			
 			ArrayList stacks = new ArrayList();
 			
-			
-			
-			try {
-				for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
-					stacks.addAll( (ArrayList) StackUtils
-							.getStackFromGIT(getUser(request), PAT, r, namespace));
+			List curatedStacks = getCuratedStacks(request, PAT);
+			Object o = curatedStacks.get(0);
+			if (o instanceof JSONObject) {
+				JSONObject element = (JSONObject) o;
+				String message = (String) element.get("message");
+				if (message.contains("HTTP Code 429:")) {
+					return Response.status(429).entity(element).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+				} else {
+					return Response.status(424).entity(element).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 				}
-				String firstElem = stacks.get(0).toString();
-				if (firstElem!=null) {
-					if (firstElem.contains("HTTP Code 429:")) {
-						JSONObject resp = new JSONObject();
-						resp.put("message", firstElem);
-						return Response.status(429).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
-					}
-				}
-			} catch (RuntimeException ex) {
-				ex.printStackTrace();
-				JSONObject resp = new JSONObject();
-				System.out.println("Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause());
-				resp.put("message", "The CLI service could not read the repository URL specification(s) from the Kabanero CR");
-				return Response.status(424).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				JSONObject resp = new JSONObject();
-				String message = "Exception reading stack hub indexes, exception message: "+ex.getMessage()+", cause: "+ex.getCause();
-				System.out.println(message);
-				resp.put("message", message);
-				return Response.status(424).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 			}
 			
-			System.out.println("stacks: "+stacks);
-			List curatedStacks = StackUtils.streamLineMasterMap(stacks);
-			Collections.sort(curatedStacks, mapComparator);
-			System.out.println("curatedStacks (after sort): "+curatedStacks);
 			List<Map> curatedStacksMaps = StackUtils.packageStackMaps(curatedStacks);
 			System.out.println("curatedStacksMap (after packaging): "+curatedStacksMaps);
 			
@@ -214,7 +237,7 @@ public class StacksAccess {
 			
 			
 			try {
-				List newStacks = (List<Map>) StackUtils.filterNewStacks(stacks,
+				List newStacks = (List<Map>) StackUtils.filterNewStacks(curatedStacks,
 						fromKabanero);
 				Collections.sort(newStacks, mapComparator);
 				
@@ -723,6 +746,161 @@ public class StacksAccess {
 			ja.add(jo);
 		}
 		return ja;
+	}
+	
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/describe/stacks/{name}/versions/{version}")
+	public Response describeStack(@Context final HttpServletRequest request,
+			@PathParam("name") final String name, @PathParam("version") final String version) throws Exception {
+		System.out.println("In describe stack");
+		
+		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
+
+		ApiClient apiClient = KubeUtils.getApiClient();
+		
+		try {
+			List deployments = KubeUtils.listResources(apiClient, group, apiVersion, "deployments",namespace);
+			for (Object obj: deployments) {
+				Map map = (Map)obj;
+				System.out.println("map="+map.toString());
+			}
+		} catch (ApiException apie) {
+			System.out.println("tolerate: "+apie.getMessage());
+			System.out.println("response body: "+apie.getResponseBody());
+		}
+		
+		catch (Exception e) {
+			System.out.println("tolerate: "+e.getMessage());
+		}
+		
+		StackApi api = new StackApi(apiClient);
+
+		JSONObject msg = new JSONObject();
+		
+		String PAT = getPAT();
+		if (PAT==null) {
+			System.out.println("login token has expired, please login again");
+			JSONObject resp = new JSONObject();
+			resp.put("message", "your login token has expired or your credentials are invalid, please login again");
+			return Response.status(401).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+		}
+		
+		List curatedStacks = getCuratedStacks(request, PAT);
+		Object o = curatedStacks.get(0);
+		if (o instanceof JSONObject) {
+			JSONObject element = (JSONObject) o;
+			String message = (String) element.get("message");
+			if (message.contains("HTTP Code 429:")) {
+				return Response.status(429).entity(element).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+			} else {
+				return Response.status(424).entity(element).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+			}
+		}
+		
+		try {
+
+			Stack kabStack = api.getStack(namespace, name);
+			System.out.println("*** reading stack object: "+kabStack);
+			if (kabStack==null) {
+				System.out.println("*** " + "Stack name: " + name + " 404 not found");
+				msg.put("status", "Stack name: " + name + " 404 not found");
+				msg.put("message", "Stack name: " + name + " 404 not found");
+				return Response.status(400).entity(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+			}
+			String status="";
+			List<StackStatusVersions> kabStatusVersions=null;
+			if (version!=null) {
+				kabStatusVersions=kabStack.getStatus().getVersions();
+				boolean verMatch=false;
+				for (StackStatusVersions versionStatus:kabStatusVersions) {
+					if (version.contentEquals(versionStatus.getVersion())) {
+						status = versionStatus.getStatus();
+						verMatch=true;
+					}
+				}
+				if (!verMatch) {
+					String msgStr="Stack: "+name+"  does not have version: "+version;
+					System.out.println(msgStr);
+					msg.put("status", msgStr);
+					msg.put("message", msgStr);
+					return Response.status(400).entity(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+				}
+			} else {
+				System.out.println("no version number supplied for stack: "+name);
+				msg.put("status", "no version number supplied for stack: "+name);
+				msg.put("message", "no version number supplied for stack: "+name);
+				return Response.status(400).entity(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+			}
+			
+			
+			Map m = StackUtils.getKabStackDigest(kabStack,version);
+			String gitRepo = "";
+			String image = null;
+			image = (String) m.get("imageName"); // docker.io/kabanero/nodejs
+			String imageDigest="";
+			String containerRegistryURL = "";
+			if (image!=null) {
+				StringTokenizer st = new StringTokenizer(image,"/");
+				containerRegistryURL = st.nextToken();
+				String crNameSpace = st.nextToken();
+				imageDigest = StackUtils.getImageDigestFromRegistry(name, version, namespace, crNameSpace, containerRegistryURL);
+			}
+			
+			String kabDigest = (String) m.get("digest");
+			
+			System.out.println("curated stacks in describe: "+curatedStacks);
+			
+			String repoUrl="";
+			String repoName = null;
+			repoName = StackUtils.getRepoName(curatedStacks, name, version);
+			if (repoName!=null) {
+				Kabanero k = StackUtils.getKabaneroForNamespace(namespace);
+				for (KabaneroSpecStacksRepositories r :  k.getSpec().getStacks().getRepositories()) {
+					if (r.getName().contentEquals(repoName)) {
+						repoUrl = r.getHttps().getUrl();
+					}
+				}
+			}
+			
+			if (repoName==null) {
+				status = status + " (obsolete)";
+			}
+			
+			msg.put("name", name);
+			msg.put("version", version);
+			msg.put("git repo url", repoUrl);  
+			msg.put("image", image); 
+			msg.put("status", status);
+			msg.put("digest check", StackUtils.digestCheck(kabDigest, imageDigest, status));
+			msg.put("kabanero digest", kabDigest);
+			msg.put("image digest", imageDigest);
+			msg.put("project", namespace);
+			return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+		} catch (ApiException apie) {
+			apie.printStackTrace();
+			String responseBody = apie.getResponseBody();
+			System.err.println("Response body: " + responseBody);
+			msg.put("status",
+					"Stack name: " + name + " version: "+version+" failed to retrieve stack metadat, message: " + apie.getMessage());
+			msg.put("message",
+					"Stack name: " + name + " version: "+version+" failed to retrieve stack metadat, message: " + apie.getMessage());
+			msg.put("exception message", apie.getMessage()+", cause: "+apie.getCause());
+			return Response.status(400).entity(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			msg.put("status",
+					"Stack name: " + name + " version: "+version+" failed to retrieve stack metadat, message: " + e.getMessage());
+			msg.put("message",
+					"Stack name: " + name + " version: "+version+" failed to retrieve stack metadat, message: " + e.getMessage());
+			msg.put("exception message", e.getMessage()+", cause: "+e.getCause());
+			return Response.status(400).entity(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").header("X-Content-Type-Options","nosniff").build();
+		}
+
+
 	}
 
 

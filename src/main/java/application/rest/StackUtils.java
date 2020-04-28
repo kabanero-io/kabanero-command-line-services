@@ -82,7 +82,7 @@ public class StackUtils {
 	    }
 	};
 	
-	private static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String crNamespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
+	public static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String crNamespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		System.out.println("containerRegistryURL="+containerRegistryURL);
 		Map<String, String> m = KubeUtils.getUserAndPasswordFromSecret(namespace, containerRegistryURL);
 		String digest=null;
@@ -376,7 +376,7 @@ public class StackUtils {
 		return aList;
 	}
 	
-	private static HashMap<String,String> getKabStackDigest(Stack s, String versionToFind) {
+	public static HashMap<String,String> getKabStackDigest(Stack s, String versionToFind) {
 		String digest=null,imageName=null;
 		HashMap<String,String> imageMetaData = new HashMap<String,String>();
 		
@@ -398,17 +398,38 @@ public class StackUtils {
 		return imageMetaData;
 	}
 	
-	private static String getRepoName(List curatedStacks, String name, String version) {
-		String repoName="";
+	public static String getRepoName(List curatedStacks, String name, String version) {
+		String repoName=null;
 		for (Object obj:curatedStacks) {
 			Map stack = (Map)obj;
-			String nameStr = (String) stack.get("name");
+			String nameStr = (String) stack.get("id");
+			String nameStr2 = (String) stack.get("name");
 			String versionStr = (String) stack.get("version");
-			if (nameStr.contentEquals(name) && versionStr.contentEquals(version)) {
+			if ((nameStr.contentEquals(name) || nameStr2.contentEquals(name)) && versionStr.contentEquals(version)) {
 				repoName = (String) stack.get("reponame");
 			}
 		}
 		return repoName;
+	}
+	
+	public static String digestCheck(String kabDigest, String imageDigest, String status) {
+		String digestCheck="mismatched";
+		if (kabDigest!=null && imageDigest!=null) {
+			if (kabDigest.contentEquals(imageDigest)) {
+				digestCheck="matched";
+			} else if (imageDigest.contains("not found in container registry")) {
+				digestCheck = imageDigest;
+			}
+		} else {
+			System.out.println("Could not find one of the digests.  Kab digest="+kabDigest+", imageDigest="+imageDigest);
+			digestCheck="unknown";
+		}
+		
+		status=status.substring(0, 6);  
+		if (!"active".contentEquals(status)) {
+			digestCheck = "NA";
+		}
+		return digestCheck;
 	}
 	
 
@@ -447,32 +468,9 @@ public class StackUtils {
 						String crNameSpace = st.nextToken();
 						imageDigest = getImageDigestFromRegistry(name, versionNum, namespace, crNameSpace, containerRegistryURL);
 					}
-
-					String digestCheck="mismatched";
-					if (kabDigest!=null && imageDigest!=null) {
-						if (kabDigest.contentEquals(imageDigest)) {
-							digestCheck="matched";
-						} else if (imageDigest.contains("not found in container registry")) {
-							digestCheck = imageDigest;
-						}
-					} else {
-						System.out.println("Could not find one of the digests.  Kab digest="+kabDigest+", imageDigest="+imageDigest);
-						digestCheck="unknown";
-					}
-					
-					if (kabDigest == null) {
-						kabDigest="does not exist";
-					}
-					if (imageDigest == null) {
-						imageDigest="could not be retrieved";
-					}
-					
-					if (!"active".contentEquals(stackStatusVersion.getStatus())) {
-						digestCheck = "NA";
-					}
 					
 					versionMap.put("reponame", getRepoName(curatedStacks, name, versionNum));
-					versionMap.put("digest check", digestCheck);
+					versionMap.put("digest check", digestCheck(kabDigest,imageDigest, stackStatusVersion.getStatus()));
 					versionMap.put("kabanero digest", kabDigest);
 					versionMap.put("image digest", imageDigest);
 					status.add(versionMap);
@@ -509,6 +507,7 @@ public class StackUtils {
 	
 
 	public static List filterNewStacks(List<Map> fromGit, StackList fromKabanero) {
+		System.out.println("Entering filterNewStacks");
 		ArrayList<Map> newStacks = new ArrayList<Map>();
 		ArrayList<Map> registerVersionForName = new ArrayList<Map>();
 		try {
@@ -542,6 +541,7 @@ public class StackUtils {
 					}
 				}
 				if (!match) {
+					System.out.println("** NEW name="+map.get("id")+",git version="+version);
 					gitMap.put("name", (String)map.get("id"));
 					gitMap.put("version", version);
 					gitMap.put("desiredState", "active");
@@ -660,7 +660,6 @@ public class StackUtils {
 				name1 = name1.trim();
 				if (name1.contentEquals(name)) {
 					List<Map> versions = (List<Map>) map1.get("versions");
-					System.out.println("versions: "+versions);
 					for (Map versionElement:versions) {
 						String versionValue = (String) versionElement.get("version");
 						if (version.equals(versionValue)) {
@@ -729,7 +728,10 @@ public class StackUtils {
 		String saveName = "";
 		for (Map stack : stacks) {
 			System.out.println("packageStackMaps one stack: "+stack.toString());
-			String name = (String) stack.get("name");
+			String name = (String) stack.get("id");
+			if (name==null) {
+				name = (String) stack.get("name");
+			}
 			// append versions and desiredStates to stack
 			if (name.contentEquals(saveName)) {
 				HashMap versionMap = new HashMap();
