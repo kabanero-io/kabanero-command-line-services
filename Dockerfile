@@ -8,7 +8,7 @@ LABEL vendor="Kabanero" \
       description="This image contains the service for the Kabanero CLI.  See https://github.com/kabanero-io/kabanero-command-line-services/"
 
 
-SEC_TLS_TRUSTDEFAULTCERTS=true
+ENV SEC_TLS_TRUSTDEFAULTCERTS=true
 # The licence must be here for Redhat container certification
 COPY LICENSE /licenses/ 
 
