@@ -867,7 +867,7 @@ public class StacksAccess {
 			msg.put("name", name);
 			msg.put("version", version);
 			msg.put("git repo url", repoUrl);  
-			msg.put("container registry url", containerRegistryURL); 
+			msg.put("image", image); 
 			msg.put("status", status);
 			msg.put("digest check", StackUtils.digestCheck(kabDigest, imageDigest, status));
 			msg.put("kabanero digest", kabDigest);
