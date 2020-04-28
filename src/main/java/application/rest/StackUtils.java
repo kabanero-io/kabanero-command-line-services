@@ -733,6 +733,9 @@ public class StackUtils {
 		for (Map stack : stacks) {
 			System.out.println("packageStackMaps one stack: "+stack.toString());
 			String name = (String) stack.get("id");
+			if (name==null) {
+				name = (String) stack.get("name");
+			}
 			// append versions and desiredStates to stack
 			if (name.contentEquals(saveName)) {
 				HashMap versionMap = new HashMap();

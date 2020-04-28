@@ -763,7 +763,12 @@ public class StacksAccess {
 				Map map = (Map)obj;
 				System.out.println("map="+map.toString());
 			}
-		} catch (Exception e) {
+		} catch (ApiException apie) {
+			System.out.println("tolerate: "+apie.getMessage());
+			System.out.println("response body: "+apie.getResponseBody());
+		}
+		
+		catch (Exception e) {
 			System.out.println("tolerate: "+e.getMessage());
 		}
 		
