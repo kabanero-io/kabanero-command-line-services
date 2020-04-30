@@ -84,20 +84,38 @@ public class StackUtils {
 	
 	public static String getImageDigestFromRegistry(String stackName, String versionNumber, String namespace, String crNamespace, String containerRegistryURL) throws ApiException, IOException, KeyManagementException, NoSuchAlgorithmException {
 		System.out.println("containerRegistryURL="+containerRegistryURL);
-		Map<String, String> m = KubeUtils.getUserAndPasswordFromSecret(namespace, containerRegistryURL);
-		String digest=null;
-		
+		Map<String, String> m = null;
+		boolean canLocaterCRSecret = true;
+		try {
+			m = KubeUtils.getUserAndPasswordFromSecret(namespace, containerRegistryURL);
+		}  catch (ApiException e) {
+			String exMsg = e.getMessage();
+			if (exMsg.contains("Could not retrieve kubernetes secret")) {
+				canLocaterCRSecret = false;
+			}
+		}
 		System.out.println("stackName="+stackName);
 		System.out.println("versionNumber="+versionNumber);
 		System.out.println("namespace="+namespace);
 		System.out.println("crNamespace="+crNamespace);
+
+		String digest=null;
+		String[] commandToRun = null;
+		if (canLocaterCRSecret) {
+			String parm1 = "inspect";
+			String parm2 = "--creds";
+			String parm3 = (String) m.get("user")+":"+(String) m.get("password");
+			String parm4 = "docker://"+containerRegistryURL+"/"+crNamespace+"/"+stackName+":"+versionNumber;
+			String[] command = {"/usr/local/bin/skopeo",parm1,parm2, parm3, parm4};
+			commandToRun = command;
+		} else {
+			String parm1 = "inspect";
+			String parm2 = "docker://"+containerRegistryURL+"/"+crNamespace+"/"+stackName+":"+versionNumber;
+			String[] command = {"/usr/local/bin/skopeo",parm1,parm2};
+			commandToRun = command;
+		}
 		
-		String parm1 = "inspect";
-		String parm2 = "--creds";
-		String parm3 = (String) m.get("user")+":"+(String) m.get("password");
-		String parm4 = "docker://"+containerRegistryURL+"/"+crNamespace+"/"+stackName+":"+versionNumber;
-		String[] command = {"/usr/local/bin/skopeo",parm1,parm2, parm3, parm4};
-		Process process = Runtime.getRuntime().exec(command);
+		Process process = Runtime.getRuntime().exec(commandToRun);
 		Scanner kb = new Scanner(process.getInputStream());
 		StringBuilder sb = new StringBuilder();
 		for(;kb.hasNext();) {
