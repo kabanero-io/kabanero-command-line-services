@@ -31,6 +31,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 
 @PermitAll()
@@ -81,6 +82,7 @@ public class Login {
     @POST
     public Properties login(Properties args) {
         UserCredentials creds = null;
+        String msg = "login failed, you may want to check your authorization configuration. Check the CLI Service pod for more information.";
         try {
             creds = new UserCredentials(args);
         } catch (KabaneroSecurityException e) {
@@ -92,9 +94,12 @@ public class Login {
             checkTeamsAndGithubURL(auth);
             jwt = auth.getJwt(creds);  // check id, password/PAT, and team membership here.
         } catch (KabaneroSecurityException e) {
-            return returnError(e.getStatusCode(), "An error occurred during authentication for user [" + creds.getId() + "].", e);
+            return returnError(e.getStatusCode(), "An error occurred during authentication for user ", e);
         } catch (Exception e) {
-            return returnError(500, "An error occurred during authentication for user [" + creds.getId() + "].", e);
+        	System.out.println(returnError(500, "An error occurred during authentication for user", e));
+        	Properties p = new Properties();
+            p.put("message", msg);
+            return p;
         }
         throttle();
         lastTimeJWTissued=System.currentTimeMillis();
