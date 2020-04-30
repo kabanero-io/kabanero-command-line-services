@@ -65,6 +65,7 @@ public class GitHubService {
 
     private String getUserId() throws KabaneroSecurityException {
         try {
+        	System.out.println("Gathering github authorization configuration information");
             JsonObject userInfo = getJsonObjectFromApi("GET", config.getUserInfoUrl());
             return userInfo.getString("login");
         } catch (KabaneroSecurityException e) {
