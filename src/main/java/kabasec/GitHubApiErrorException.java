@@ -27,6 +27,7 @@ public class GitHubApiErrorException extends KabaneroSecurityException {
             // Expected the response to be a JSON object but failed to parse or process the string
             newMessage = "Caught exception extracting an error message from the GitHub response [" + githubResponse + "]. Exception was: " + e;
             e.printStackTrace();
+            throw new RuntimeException("could not parse exception response");
         }
         return newMessage;
     }
