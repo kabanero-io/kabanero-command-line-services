@@ -761,7 +761,7 @@ public class StacksAccess {
 		ApiClient apiClient = KubeUtils.getApiClient();
 		
 		try {
-			List deployments = KubeUtils.listResources(apiClient, group, apiVersion, "deployments",namespace);
+			List deployments = KubeUtils.listResources2(apiClient, group, apiVersion, "deployments",namespace);
 			for (Object obj: deployments) {
 				Map map = (Map)obj;
 				System.out.println("map="+map.toString());
