@@ -34,7 +34,7 @@ The ports are set in the pom.xml file
 ### Run
 
 To build and run the application:
-1. to build please see: `https://github.com/kabanero-io/kabanero-command-line-services/build-help.md`
+1. to build please see: `https://github.com/kabanero-io/kabanero-command-line-services/blob/master/build-help.md`
 2. to run see README at: `https://github.com/kabanero-io/kabanero-command-line`
 
 
