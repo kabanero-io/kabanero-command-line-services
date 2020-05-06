@@ -96,7 +96,7 @@ public class Login {
         } catch (KabaneroSecurityException e) {
             return returnError(e.getStatusCode(), "An error occurred during authentication for user ", e);
         } catch (Exception e) {
-        	if (e.getMessage().contains("Unexpected char 60 at")) {
+        	if (e.getMessage().contains("could not parse exception response")) {
         		msg = "login failed, you may want to check your authorization configuration. Double check the apiUrl: in your github: configuraton in the Kabanero CR document to make sure it's correct";
         		System.out.println(returnError(500, "An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR document to make sure it's correct", e));
         	} else {
