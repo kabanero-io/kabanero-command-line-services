@@ -25,8 +25,8 @@ public class GitHubApiErrorException extends KabaneroSecurityException {
                 newMessage += " See the documentation for this API at " + documentationUrl + ".";
             }
         } catch (JsonParsingException jpe) {
-        	System.out.println("An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR document to make sure it's correct");
-        	throw new RuntimeException("could not parse exception response, An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR document to make sure it's correct");
+        	System.out.println("An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct");
+        	throw new RuntimeException("could not parse exception response, An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct");
         } catch (Exception e) {
             // Expected the response to be a JSON object but failed to parse or process the string
             newMessage = "Caught exception extracting an error message from the GitHub response [" + githubResponse + "]. Exception was: " + e;
