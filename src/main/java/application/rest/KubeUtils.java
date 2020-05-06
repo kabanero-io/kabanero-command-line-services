@@ -624,13 +624,11 @@ public class KubeUtils {
             String plural = "routes";
             String namespace = "tekton-pipelines";
             List resources = listResourcesSimple(apiClient, group, version, plural, namespace);
-            System.out.println("tekton resources: "+resources);
             String dashboardUrl = "notfound";
             for (Object obj: resources) {
             	Map m = (Map)obj;
-            	System.out.println("resource map="+m);
             	Map spec = (Map) m.get("spec");
-            	String host = (String) spec.get("name");
+            	String host = (String) spec.get("host");
             	if (host!=null) {
             		if (host.contains("tekton-dashboard")) {
             			dashboardUrl = host;
