@@ -30,9 +30,9 @@ RUN rm /config/configDropins/defaults/open-default-port.xml
 USER root
 ### Figure out how to build without root
 ### Add necessary Red Hat repos here
+
 ## Note: The UBI has different repos than the RHEL repos.
 RUN REPOLIST=ubi-8-baseos,ubi-8-codeready-builder,ubi-8-appstream \
-
 ### Add your package needs here
     SKOPEO_VERSION_NAME=0.1.40 \
     SKOPEO_SRC_PKG_NAME=v${SKOPEO_VERSION_NAME}.tar.gz \
@@ -42,22 +42,18 @@ RUN REPOLIST=ubi-8-baseos,ubi-8-codeready-builder,ubi-8-appstream \
     yum -y update-minimal --disablerepo "*" --enablerepo ubi-8* --setopt=tsflags=nodocs \
     yum repolist && \
     yum -y install --disablerepo "*" --enablerepo ${REPOLIST} --setopt=tsflags=nodocs ${INSTALL_PKGS} ${TEMP_BUILD_UBI_PKGS} && \
-
 ### Install your application here -- add all other necessary items to build your image
     GOPATH=$(pwd) && \
     mkdir -p /src/github.com/containers && \
     cd /src/github.com/containers && \
     wget https://github.com/containers/skopeo/archive/${SKOPEO_SRC_PKG_NAME} && \
     tar -xzpf ${SKOPEO_SRC_PKG_NAME} && \
-    mv ${SKOPEO_SRC_ROOT_NAME} skopeo && \
-    cd skopeo && \
-    make binary-local && \
-    mv skopeo /usr/local/bin && \
+    mv ${SKOPEO_SRC_ROOT_NAME} skopeo
+RUN cd /src/github.com/containers/skopeo && make binary-local
+RUN cd /src/github.com/containers/skopeo &&  mv skopeo /usr/local/bin &&  mkdir -p /etc/containers
     # Create required config file
-    mkdir -p /etc/containers && \
-    echo $'{\n    \"default\": [\n        {\n            \"type\": \"insecureAcceptAnything\"\n        }\n    ]\n}' \
-    > /etc/containers/policy.json && \
-    cat /etc/containers/policy.json 
+RUN   echo $'{\n    \"default\": [\n        {\n            \"type\": \"insecureAcceptAnything\"\n        }\n    ]\n}' >  /etc/containers/policy.json
+RUN   cat /etc/containers/policy.json
 
 ### switch back to liberty user 
 USER 1001
