@@ -432,6 +432,35 @@ public class KubeUtils {
        customApi.patchNamespacedCustomObjectStatus(group, version, namespace, plural, name, jsonBody);
     }
     
+    public static List listResources2(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
+        logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
+        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources2(apiClient,group, version, plural, namespace);
+        List<Map> list=(List)map.get("items");
+        ArrayList aList = new ArrayList();
+        for (Map m:list) {
+        	Map metadata = (Map) m.get("metadata");
+        	String name = (String) metadata.get("name");
+        	Map annotations = (Map) metadata.get("annotations");
+        	Map spec = (Map) m.get("spec");
+        	String collectionVersion = (String) spec.get("version");
+        	HashMap outMap = new HashMap();
+        	outMap.put("name",name);
+        	outMap.put("version", collectionVersion);
+        	aList.add(outMap);
+        } 
+        return aList;
+     }
+    
+    public static List listResourcesSimple(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
+        logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
+        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources2(apiClient,group, version, plural, namespace);
+        List<Map> list=(List)map.get("items");
+        
+        return list;
+     }
+    
+    
+    
     public static List listResources(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
         logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
         LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources(apiClient,group, version, plural, namespace);
@@ -449,6 +478,15 @@ public class KubeUtils {
         	aList.add(outMap);
         } 
         return aList;
+     }
+    
+    public static Map mapResources2(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
+        logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
+        CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
+        Object obj = customApi.listClusterCustomObject(group, version, plural, "true", "","", 60, false);
+        System.out.println("current kab collections="+obj.toString());
+        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) obj;
+        return map;
      }
     
     public static Map mapResources(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
@@ -585,10 +623,21 @@ public class KubeUtils {
             String version = "v1";
             String plural = "routes";
             String namespace = "tekton-pipelines";
-            Map resources = mapResources(apiClient, group, version, plural, namespace);
-            
+            List resources = listResourcesSimple(apiClient, group, version, plural, namespace);
+            String dashboardUrl = "notfound";
+            for (Object obj: resources) {
+            	Map m = (Map)obj;
+            	Map spec = (Map) m.get("spec");
+            	String host = (String) spec.get("host");
+            	if (host!=null) {
+            		if (host.contains("tekton-dashboard")) {
+            			dashboardUrl = host;
+            			break;
+            		}
+            	}
+            }
             route += "https://";
-            route += listRouteUrl(resources);
+            route += dashboardUrl;
         } catch (Exception e) {
             System.out.println("exception cause: " + e.getCause());
             System.out.println("exception message: " + e.getMessage());
