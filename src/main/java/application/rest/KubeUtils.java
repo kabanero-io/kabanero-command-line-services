@@ -612,7 +612,7 @@ public class KubeUtils {
             String group = "route.openshift.io";
             String version = "v1";
             String plural = "routes";
-            String namespace = "tekton-pipelines";
+            String namespace = "openshift-pipelines";
             Map resources = mapResources(apiClient, group, version, plural, namespace);
             
             route += "https://";
