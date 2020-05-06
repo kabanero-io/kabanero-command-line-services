@@ -629,13 +629,13 @@ public class KubeUtils {
             for (Object obj: resources) {
             	Map m = (Map)obj;
             	System.out.println("resource map="+m);
-            	String name = "";
-            	if (m.get("name")!=null) {
-            		name = (String) m.get("name");
-            	}
-            	if (name.contains("tekton-dashboard")) {
-            		dashboardUrl = name = (String) m.get("host");
-            		break;
+            	Map spec = (Map) m.get("spec");
+            	String host = (String) spec.get("name");
+            	if (host!=null) {
+            		if (host.contains("tekton-dashboard")) {
+            			dashboardUrl = host;
+            			break;
+            		}
             	}
             }
             route += "https://";
