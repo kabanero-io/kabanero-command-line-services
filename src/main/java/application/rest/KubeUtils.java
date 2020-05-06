@@ -451,6 +451,16 @@ public class KubeUtils {
         return aList;
      }
     
+    public static List listResourcesSimple(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
+        logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
+        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources2(apiClient,group, version, plural, namespace);
+        List<Map> list=(List)map.get("items");
+        
+        return list;
+     }
+    
+    
+    
     public static List listResources(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
         logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
         LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources(apiClient,group, version, plural, namespace);
@@ -612,11 +622,24 @@ public class KubeUtils {
             String group = "route.openshift.io";
             String version = "v1";
             String plural = "routes";
-            String namespace = "openshift-pipelines";
-            Map resources = mapResources(apiClient, group, version, plural, namespace);
-            
+            String namespace = "tekton-pipelines";
+            List resources = listResourcesSimple(apiClient, group, version, plural, namespace);
+            System.out.println("tekton resources: "+resources);
+            String dashboardUrl = "notfound";
+            for (Object obj: resources) {
+            	Map m = (Map)obj;
+            	System.out.println("resource map="+m);
+            	String name = "";
+            	if (m.get("name")!=null) {
+            		name = (String) m.get("name");
+            	}
+            	if (name.contains("tekton-dashboard")) {
+            		dashboardUrl = name = (String) m.get("host");
+            		break;
+            	}
+            }
             route += "https://";
-            route += listRouteUrl(resources);
+            route += dashboardUrl;
         } catch (Exception e) {
             System.out.println("exception cause: " + e.getCause());
             System.out.println("exception message: " + e.getMessage());
