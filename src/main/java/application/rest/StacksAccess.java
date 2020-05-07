@@ -765,9 +765,12 @@ public class StacksAccess {
 			for (Object obj: deployments) {
 				Map map = (Map)obj;
 				Map metadata = (Map)map.get("metadata");
+				System.out.println("metadata = "+metadata);
 				Map labels = (Map)metadata.get("labels");
+				System.out.println("labels = "+labels);
 				String id = (String)labels.get("stack.appsody.dev/id");
 				String ver = (String)labels.get("stack.appsody.dev/version");
+				System.out.println("id = "+id+" version = "+ver);
 				if (id!=null && ver!=null) {
 					System.out.println("id = "+id+" version = "+ver);
 					if (id.contentEquals(name) && ver.contentEquals(version)) {
