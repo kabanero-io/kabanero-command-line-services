@@ -1,37 +1,9 @@
 apiVersion: v2
 stacks:
 - default-template: default
-  description: Open Liberty & OpenJ9 using Maven
-  id: java-openliberty
-  image: docker.io/kabanerobeta/java-openliberty:0.2.3
-  language: java
-  license: Apache-2.0
-  maintainers:
-  - email: andrasak@us.ibm.com
-    github-id: uberskigeek
-    name: Mike Andrasak
-  - email: ajmauer@us.ibm.com
-    github-id: ajm01
-    name: Andy Mauer
-  - email: skurz@us.ibm.com
-    github-id: ""
-    name: Scott Kurz
-  - email: awisniew@us.ibm.com
-    github-id: ""
-    name: Adam Wisniewski
-  name: Open Liberty
-  requirements:
-    appsody-version: '>= 0.5.0'
-    docker-version: '>= 17.09.0'
-  src: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/java-openliberty.v0.2.3.source.tar.gz
-  templates:
-  - id: default
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/java-openliberty.v0.2.3.templates.default.tar.gz
-  version: 0.2.3
-- default-template: default
   description: Spring Boot using OpenJ9 and Maven
   id: java-spring-boot2
-  image: docker.io/kabanerobeta/java-spring-boot2:0.3.28
+  image: docker.io/kabanerobeta/java-spring-boot2:0.3.29
   language: java
   license: Apache-2.0
   maintainers:
@@ -41,66 +13,29 @@ stacks:
   - email: ozzy@ca.ibm.com
     github-id: bardweller
     name: Ozzy Osborne
+  - email: rtrotter@us.ibm.com
+    github-id: richard-trotter
+    name: Richard Trotter
+  - email: hyayi@us.ibm.com
+    github-id: yharish991
+    name: Harish Yayi
   name: Spring Boot®
   requirements:
     appsody-version: '>= 0.5.0'
     docker-version: '>= 17.09.0'
-  src: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/java-spring-boot2.v0.3.28.source.tar.gz
+  src: https://github.com/kabanero-io/collections/releases/download/0.9.0-rc.1/java-spring-boot2.v0.3.29.source.tar.gz
   templates:
+  - id: kafka
+    url: https://github.com/kabanero-io/collections/releases/download/0.9.0-rc.1/java-spring-boot2.v0.3.29.templates.kafka.tar.gz
   - id: kotlin
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/java-spring-boot2.v0.3.28.templates.kotlin.tar.gz
+    url: https://github.com/kabanero-io/collections/releases/download/0.9.0-rc.1/java-spring-boot2.v0.3.29.templates.kotlin.tar.gz
   - id: default
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/java-spring-boot2.v0.3.28.templates.default.tar.gz
-  version: 0.3.28
-- default-template: simple
-  description: Express web framework for Node.js
-  id: nodejs-express
-  image: docker.io/kabanerobeta/nodejs-express:0.2.10
-  language: nodejs
-  license: Apache-2.0
-  maintainers:
-  - email: cnbailey@gmail.com
-    github-id: seabaylea
-    name: Chris Bailey
-  - email: neeraj.laad@gmail.com
-    github-id: neeraj-laad
-    name: Neeraj Laad
-  name: Node.js Express
-  src: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/nodejs-express.v0.2.10.source.tar.gz
-  templates:
-  - id: simple
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/nodejs-express.v0.2.10.templates.simple.tar.gz
-  - id: scaffold
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/nodejs-express.v0.2.10.templates.scaffold.tar.gz
-  version: 0.2.10
-- default-template: default
-  description: Eclipse MicroProfile on Open Liberty & OpenJ9 using Maven
-  id: java-microprofile
-  image: docker.io/kabanerobeta/java-microprofile:0.2.26
-  language: java
-  license: Apache-2.0
-  maintainers:
-  - email: emijiang6@googlemail.com
-    github-id: Emily-Jiang
-    name: Emily Jiang
-  - email: neeraj.laad@gmail.com
-    github-id: neeraj-laad
-    name: Neeraj Laad
-  - email: ozzy@ca.ibm.com
-    github-id: BarDweller
-    name: Ozzy
-  name: Eclipse MicroProfile®
-  requirements:
-    appsody-version: '>= 0.5.0'
-  src: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/java-microprofile.v0.2.26.source.tar.gz
-  templates:
-  - id: default
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/java-microprofile.v0.2.26.templates.default.tar.gz
-  version: 0.2.26
+    url: https://github.com/kabanero-io/collections/releases/download/0.9.0-rc.1/java-spring-boot2.v0.3.29.templates.default.tar.gz
+  version: 0.3.29
 - default-template: simple
   description: Runtime for Node.js applications
   id: nodejs
-  image: docker.io/kabanerobeta/nodejs:0.3.3
+  image: docker.io/kabanerobeta/nodejs:0.3.6
   language: nodejs
   license: Apache-2.0
   maintainers:
@@ -111,8 +46,81 @@ stacks:
   requirements:
     appsody-version: '>= 0.2.7'
     docker-version: '>= 17.09.0'
-  src: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/nodejs.v0.3.3.source.tar.gz
+  src: https://github.com/kabanero-io/collections/releases/download/0.9.0-rc.1/nodejs.v0.3.6.source.tar.gz
   templates:
   - id: simple
-    url: https://github.com/kabanero-io/collections/releases/download/0.6.4-rc.1/nodejs.v0.3.3.templates.simple.tar.gz
+    url: https://github.com/kabanero-io/collections/releases/download/0.9.0-rc.1/nodejs.v0.3.6.templates.simple.tar.gz
+  version: 0.3.6
+- default-template: simple
+  description: Express web framework for Node.js
+  id: nodejs-express
+  image: docker.io/kabanerobeta/nodejs-express:0.4.8
+  language: nodejs
+  license: Apache-2.0
+  maintainers:
+  - email: vieuxtech@gmail.com
+    github-id: sam-github
+    name: Sam Roberts
+  name: Node.js Express
+  requirements:
+    appsody-version: '>= 0.2.7'
+    docker-version: '>= 17.09.0'
+  src: https://github.com/kabanero-io/collections/releases/download/0.9.0-rc.1/nodejs-express.v0.4.8.source.tar.gz
+  templates:
+  - id: kafka
+    url: https://github.com/kabanero-io/collections/releases/download/0.9.0-rc.1/nodejs-express.v0.4.8.templates.kafka.tar.gz
+  - id: simple
+    url: https://github.com/kabanero-io/collections/releases/download/0.9.0-rc.1/nodejs-express.v0.4.8.templates.simple.tar.gz
+  - id: scaffold
+    url: https://github.com/kabanero-io/collections/releases/download/0.9.0-rc.1/nodejs-express.v0.4.8.templates.scaffold.tar.gz
+  version: 0.4.8
+- default-template: default
+  description: Eclipse MicroProfile & Jakarta EE on Open Liberty & OpenJ9 using Maven
+  id: java-openliberty
+  image: docker.io/appsody/java-openliberty:0.2.11
+  language: java
+  license: Apache-2.0
+  maintainers:
+  - email: andrasak@us.ibm.com
+    github-id: uberskigeek
+    name: Mike Andrasak
+  - email: ajmauer@us.ibm.com
+    github-id: ajm01
+    name: Andy Mauer
+  - email: skurz@us.ibm.com
+    github-id: scottkurz
+    name: Scott Kurz
+  - email: awisniew@us.ibm.com
+    github-id: awisniew90
+    name: Adam Wisniewski
+  name: Open Liberty
+  requirements:
+    appsody-version: '>= 0.5.0'
+    docker-version: '>= 17.09.0'
+  src: https://github.com/appsody/stacks/releases/download/java-openliberty-v0.2.11/incubator.java-openliberty.v0.2.11.source.tar.gz
+  templates:
+  - id: kafka
+    url: https://github.com/appsody/stacks/releases/download/java-openliberty-v0.2.11/incubator.java-openliberty.v0.2.11.templates.kafka.tar.gz
+  - id: default
+    url: https://github.com/appsody/stacks/releases/download/java-openliberty-v0.2.11/incubator.java-openliberty.v0.2.11.templates.default.tar.gz
+  version: 0.2.11
+- default-template: default
+  description: Quarkus runtime for running Java applications
+  id: quarkus
+  image: docker.io/appsody/quarkus:0.3.3
+  language: java
+  license: Apache-2.0
+  maintainers:
+  - email: probinso@redhat.com
+    github-id: paulrobinson
+    name: Paul Robinson
+  name: Quarkus
+  requirements:
+    appsody-version: '>= 0.6.0'
+  src: https://github.com/appsody/stacks/releases/download/quarkus-v0.3.3/incubator.quarkus.v0.3.3.source.tar.gz
+  templates:
+  - id: kafka
+    url: https://github.com/appsody/stacks/releases/download/quarkus-v0.3.3/incubator.quarkus.v0.3.3.templates.kafka.tar.gz
+  - id: default
+    url: https://github.com/appsody/stacks/releases/download/quarkus-v0.3.3/incubator.quarkus.v0.3.3.templates.default.tar.gz
   version: 0.3.3
