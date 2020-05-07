@@ -886,7 +886,7 @@ public class StacksAccess {
 			msg.put("kabanero digest", kabDigest);
 			msg.put("image digest", imageDigest);
 			msg.put("project", namespace);
-			msg.put("applications", appNames);
+			msg.put("applications", appNames.toString());
 			return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();
