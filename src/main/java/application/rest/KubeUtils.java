@@ -453,7 +453,7 @@ public class KubeUtils {
     
     public static List listResourcesSimple(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
         logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
-        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources2(apiClient,group, version, plural, namespace);
+        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources(apiClient,group, version, plural, namespace);
         List<Map> list=(List)map.get("items");
         
         return list;
@@ -627,6 +627,7 @@ public class KubeUtils {
             String dashboardUrl = "notfound";
             for (Object obj: resources) {
             	Map m = (Map)obj;
+            	System.out.println("resource map="+m);
             	Map spec = (Map) m.get("spec");
             	String host = (String) spec.get("host");
             	if (host!=null) {
