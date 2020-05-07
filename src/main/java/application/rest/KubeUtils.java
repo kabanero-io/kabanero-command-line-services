@@ -627,7 +627,6 @@ public class KubeUtils {
             String dashboardUrl = "notfound";
             for (Object obj: resources) {
             	Map m = (Map)obj;
-            	System.out.println("resource map="+m);
             	Map spec = (Map) m.get("spec");
             	String host = (String) spec.get("host");
             	if (host!=null) {
