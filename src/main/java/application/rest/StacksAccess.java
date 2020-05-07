@@ -764,7 +764,7 @@ public class StacksAccess {
 			List deployments = KubeUtils.listResources2(apiClient, group, apiVersion, "deployments",namespace);
 			for (Object obj: deployments) {
 				Map map = (Map)obj;
-				System.out.println("map="+map.toString());
+				System.out.println("deployment map="+map.toString());
 			}
 		} catch (ApiException apie) {
 			System.out.println("tolerate: "+apie.getMessage());

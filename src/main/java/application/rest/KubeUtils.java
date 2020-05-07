@@ -438,19 +438,7 @@ public class KubeUtils {
         version="v1";
         LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources2(apiClient,group, version, plural, namespace);
         List<Map> list=(List)map.get("items");
-        ArrayList aList = new ArrayList();
-        for (Map m:list) {
-        	Map metadata = (Map) m.get("metadata");
-        	String name = (String) metadata.get("name");
-        	Map annotations = (Map) metadata.get("annotations");
-        	Map spec = (Map) m.get("spec");
-        	String collectionVersion = (String) spec.get("version");
-        	HashMap outMap = new HashMap();
-        	outMap.put("name",name);
-        	outMap.put("version", collectionVersion);
-        	aList.add(outMap);
-        } 
-        return aList;
+        return list;
      }
     
     public static List listResourcesSimple(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
@@ -486,7 +474,6 @@ public class KubeUtils {
         logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
         Object obj = customApi.listClusterCustomObject(group, version, plural, "true", "","", 60, false);
-        System.out.println("current kab collections="+obj.toString());
         LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) obj;
         return map;
      }
