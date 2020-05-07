@@ -38,7 +38,7 @@ public class Authentication {
 
     private final String JWT_BUILDER_ID = "kabsecbuilder";
     private HashSet<String> allKnownTeamNames = new HashSet<String>();
-	private ArrayList<String> listOfAllowedTeams;
+	private ArrayList<String> listOfAllowedTeams=new ArrayList<String>();
     public static final long podinstance = System.currentTimeMillis();
 
     /**
