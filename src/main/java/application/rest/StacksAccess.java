@@ -755,7 +755,7 @@ public class StacksAccess {
 	public Response describeStack(@Context final HttpServletRequest request,
 			@PathParam("name") final String name, @PathParam("version") final String version) throws Exception {
 		System.out.println("In describe stack");
-		
+		List appNames = new ArrayList<String>();
 		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
 
 		ApiClient apiClient = KubeUtils.getApiClient();
@@ -764,7 +764,16 @@ public class StacksAccess {
 			List deployments = KubeUtils.listResources2(apiClient, group, apiVersion, "deployments",namespace);
 			for (Object obj: deployments) {
 				Map map = (Map)obj;
-				System.out.println("deployment map="+map.toString());
+				Map metadata = (Map)map.get("metadata");
+				Map labels = (Map)metadata.get("labels");
+				String id = (String)labels.get("stack.appsody.dev/id");
+				String ver = (String)labels.get("stack.appsody.dev/version");
+				if (id!=null && ver!=null) {
+					System.out.println("id = "+id+" version = "+ver);
+					if (id.contentEquals(name) && ver.contentEquals(version)) {
+						appNames.add((String)metadata.get("name"));
+					}
+				}
 			}
 		} catch (ApiException apie) {
 			System.out.println("tolerate: "+apie.getMessage());
@@ -877,6 +886,7 @@ public class StacksAccess {
 			msg.put("kabanero digest", kabDigest);
 			msg.put("image digest", imageDigest);
 			msg.put("project", namespace);
+			msg.put("applications", appNames);
 			return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();
