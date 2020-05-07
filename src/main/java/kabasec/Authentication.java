@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -37,6 +38,7 @@ public class Authentication {
 
     private final String JWT_BUILDER_ID = "kabsecbuilder";
     private HashSet<String> allKnownTeamNames = new HashSet<String>();
+	private ArrayList<String> listOfAllowedTeams;
     public static final long podinstance = System.currentTimeMillis();
 
     /**
@@ -87,8 +89,11 @@ public class Authentication {
     }
     
     private void throwExceptionIfUserIsNotInAnyDefinedTeams(String userId, JsonArray teams)throws KabaneroSecurityException {
-        for (int i = 0; i < teams.size(); i++) {
+        System.out.println("********* throwExceptionIfUserIsNotInAnyDefinedTeams ***********");
+        System.out.println("teams that "+userId+" are in:");
+    	for (int i = 0; i < teams.size(); i++) {
             String teamName =  teams.getString(i); 
+            System.out.println(teamName);
             boolean found = allKnownTeamNames.contains(teamName);
             if (!found) {
                 found = allKnownTeamNames.contains(convertToOldFormat(teamName));
@@ -97,6 +102,7 @@ public class Authentication {
                 return;
             }
         }  
+    	System.out.println("List of allowed teams: "+listOfAllowedTeams.toString());
         String msg = "The user is not a member of any defined teams.";
         System.out.println("Login failed. User " +userId + " was not a member of any defined teams: "+ allKnownTeamNames.toString());
         throw new KabaneroSecurityException(HttpServletResponse.SC_BAD_REQUEST, msg);
@@ -230,6 +236,7 @@ public class Authentication {
                     continue;
                 }
                 String value = config.getValue(prop, String.class);
+                listOfAllowedTeams.add(value);
                 System.out.println("getGroupNamesNewWay Team: " + teamName + " Environment Variable: "+ prop + " Value: " + value);
                 String[] values = value.split(",");
                 for(int i=0; i< values.length; i++) {
