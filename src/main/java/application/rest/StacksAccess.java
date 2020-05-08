@@ -764,6 +764,7 @@ public class StacksAccess {
 			List deployments = KubeUtils.listResources2(apiClient, group, apiVersion, "deployments",namespace);
 			for (Object obj: deployments) {
 				Map map = (Map)obj;
+				System.out.println("deployment map = "+map);
 				Map metadata = (Map)map.get("metadata");
 				System.out.println("metadata = "+metadata);
 				Map labels = (Map)metadata.get("labels");
