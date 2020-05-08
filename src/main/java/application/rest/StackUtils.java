@@ -754,7 +754,13 @@ public class StackUtils {
 			if (name.contentEquals(saveName)) {
 				HashMap versionMap = new HashMap();
 				versionMap.put("version", (String) stack.get("version"));
-				versionMap.put("images", stack.get("images"));
+				
+				JSONObject imageJson = new JSONObject();
+				imageJson.put("image", (String) stack.get("image"));
+				ArrayList images = new ArrayList();
+				images.add(imageJson);
+				
+				versionMap.put("images", images);
 				versionMap.put("reponame", stack.get("reponame"));
 				versions.add(versionMap);
 				Collections.sort(versions, mapComparator2);
@@ -768,7 +774,13 @@ public class StackUtils {
 				map.put("name",name);
 				HashMap versionMap = new HashMap();
 				versionMap.put("version", (String) stack.get("version"));
-				versionMap.put("images", stack.get("images"));
+				
+				JSONObject imageJson = new JSONObject();
+				imageJson.put("image", (String) stack.get("image"));
+				ArrayList images = new ArrayList();
+				images.add(imageJson);
+				
+				versionMap.put("images", images);
 				versionMap.put("reponame", stack.get("reponame"));
 				versions.add(versionMap);
 				updatedStacks.add(map);

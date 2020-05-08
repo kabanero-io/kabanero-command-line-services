@@ -99,7 +99,7 @@ public class GitHubService {
     }
 
     private JsonArray getJsonArrayFromApi(String requestMethod, String apiUrl) throws KabaneroSecurityException {
-        String gitHubApiResponse = httpUtils.callApi(requestMethod, apiUrl, userId, passwordOrPat);
+        String gitHubApiResponse = httpUtils.callApi(requestMethod, apiUrl+"?per_page=100", userId, passwordOrPat);
         return Json.createReader(new StringReader(gitHubApiResponse)).readArray();
     }
 

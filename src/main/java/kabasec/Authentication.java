@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -37,6 +38,7 @@ public class Authentication {
 
     private final String JWT_BUILDER_ID = "kabsecbuilder";
     private HashSet<String> allKnownTeamNames = new HashSet<String>();
+	private ArrayList<String> listOfAllowedTeams=new ArrayList<String>();
     public static final long podinstance = System.currentTimeMillis();
 
     /**
@@ -87,8 +89,11 @@ public class Authentication {
     }
     
     private void throwExceptionIfUserIsNotInAnyDefinedTeams(String userId, JsonArray teams)throws KabaneroSecurityException {
-        for (int i = 0; i < teams.size(); i++) {
+        System.out.println("********* throwExceptionIfUserIsNotInAnyDefinedTeams ***********");
+        System.out.println("teams that "+userId+" are in:");
+    	for (int i = 0; i < teams.size(); i++) {
             String teamName =  teams.getString(i); 
+            System.out.println(teamName);
             boolean found = allKnownTeamNames.contains(teamName);
             if (!found) {
                 found = allKnownTeamNames.contains(convertToOldFormat(teamName));
@@ -97,6 +102,7 @@ public class Authentication {
                 return;
             }
         }  
+    	System.out.println("List of allowed teams: "+listOfAllowedTeams.toString());
         String msg = "The user is not a member of any defined teams.";
         System.out.println("Login failed. User " +userId + " was not a member of any defined teams: "+ allKnownTeamNames.toString());
         throw new KabaneroSecurityException(HttpServletResponse.SC_BAD_REQUEST, msg);
@@ -230,19 +236,16 @@ public class Authentication {
                     continue;
                 }
                 String value = config.getValue(prop, String.class);
-                System.out.println("getGroupNamesNewWay Team: " + teamName + " Environment Variable: "+ prop + " Value: " + value);
+                listOfAllowedTeams.add(value);
                 String[] values = value.split(",");
                 for(int i=0; i< values.length; i++) {
                     if (values[i].equals(teamName)) {
                         allKnownTeamNames.add(values[i]);
-                        System.out.println("allKnownTeamNames add: "+ values[i]);
-                        System.out.println("getGroupNamesNewWay **Group "+ groupName + " added for team: " + teamName);
                         groups.add(groupName);
                     }
                 }                
             }            
         }
-        System.out.println("getGroupNamesNewWay **groups for team: "+ teamName + ": "+ groups);
         return groups.toArray(new String[] {});
     }
  
@@ -265,17 +268,13 @@ public class Authentication {
         org.eclipse.microprofile.config.Config config = ConfigProvider.getConfig();
         String groups = null;
         try {
-            System.out.println("getGroupNamesOldWay search: "+ Constants.ROLESPREFIXOLD + teamName);
             groups = config.getValue(Constants.ROLESPREFIXOLD + teamName, String.class);
-            System.out.println("getGroupNamesOldWay result: " + groups);
             allKnownTeamNames.add(teamName);
         }catch (NoSuchElementException e) {
             try {
                 // mpconfig doesn't convert blanks to _, but we will for convenience.
                 String teamName2=teamName.replace(" ", "_");
-                System.out.println("getGroupNamesOldWay search2: "+ Constants.ROLESPREFIXOLD + teamName2);
                 groups = config.getValue(Constants.ROLESPREFIXOLD + teamName2, String.class); 
-                System.out.println("getGroupNamesOldWay result2: "+ groups);
                 allKnownTeamNames.add(teamName2);
             } catch (NoSuchElementException e2) {
                 // not there
