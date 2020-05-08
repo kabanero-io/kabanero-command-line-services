@@ -439,6 +439,7 @@ public class KubeUtils {
         LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources2(apiClient,group, version, plural, namespace);
         List<Map> list=(List)map.get("items");
         System.out.println("in listResources2, list="+list.toString());
+        System.out.println("** in listResources2, after list ***");
         return list;
      }
     
@@ -473,6 +474,7 @@ public class KubeUtils {
     
     public static Map mapResources2(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
         logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
+        System.out.println("entering mapResources2");
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
         Object obj = customApi.listClusterCustomObject(group, version, plural, "true", "","", 60, false);
         LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) obj;
