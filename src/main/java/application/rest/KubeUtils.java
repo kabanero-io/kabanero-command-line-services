@@ -438,6 +438,7 @@ public class KubeUtils {
         version="v1";
         LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources2(apiClient,group, version, plural, namespace);
         List<Map> list=(List)map.get("items");
+        System.out.println("in listResources2, list="+list.toString());
         return list;
      }
     
