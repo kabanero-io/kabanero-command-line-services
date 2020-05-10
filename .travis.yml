@@ -24,10 +24,10 @@ deploy:
      condition: ${DOCKER_USERNAME} && ${DOCKER_PASSWORD}
 - provider: script
   script: make push-image
-  on:
+#  on:
 # branch named "latest" in my private fork
-     branch: latest
-     condition: ${DOCKER_USERNAME} && ${DOCKER_PASSWORD}
+#     branch: latest
+#     condition: ${DOCKER_USERNAME} && ${DOCKER_PASSWORD}
 
 
 
