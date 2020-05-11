@@ -784,8 +784,11 @@ public class StacksAccess {
 				}
 			}
 		} catch (ApiException apie) {
-			System.out.println("tolerate: "+apie.getMessage());
+			apie.printStackTrace();
 			System.out.println("response body: "+apie.getResponseBody());
+			JSONObject resp = new JSONObject();
+			resp.put("message", "response error: "+apie.getResponseBody());
+			return Response.status(400).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		}
 		
 		catch (Exception e) {
