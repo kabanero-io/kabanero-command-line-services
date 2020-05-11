@@ -760,34 +760,44 @@ public class StacksAccess {
 
 		ApiClient apiClient = KubeUtils.getApiClient();
 		
-//		try {
-//			List deployments = KubeUtils.listResources2(apiClient, group, apiVersion, "deployments",namespace);
-//			for (Object obj: deployments) {
-//				Map map = (Map)obj;
-//				System.out.println("deployment map = "+map);
-//				Map metadata = (Map)map.get("metadata");
-//				System.out.println("metadata = "+metadata);
-//				Map labels = (Map)metadata.get("labels");
-//				System.out.println("labels = "+labels);
-//				String id = (String)labels.get("stack.appsody.dev/id");
-//				String ver = (String)labels.get("stack.appsody.dev/version");
-//				System.out.println("id = "+id+" version = "+ver);
-//				if (id!=null && ver!=null) {
-//					System.out.println("id = "+id+" version = "+ver);
-//					if (id.contentEquals(name) && ver.contentEquals(version)) {
-//						appNames.add((String)metadata.get("name"));
-//					}
-//				}
-//			}
-//		} catch (ApiException apie) {
-//			System.out.println("tolerate: "+apie.getMessage());
-//			System.out.println("response body: "+apie.getResponseBody());
-//		}
+		group="apps";
+        String listVersion="v1";
 		
-//		catch (Exception e) {
-//			System.out.println("tolerate: "+e.getMessage());
-//		}
-//		
+		try {
+			List deployments = KubeUtils.listResources2(apiClient, group, listVersion, "deployments",namespace);
+			for (Object obj: deployments) {
+				Map map = (Map)obj;
+				Map metadata = (Map)map.get("metadata");
+				System.out.println("metadata = "+metadata);
+				Map labels = (Map)metadata.get("labels");
+				if (labels!=null) {
+					System.out.println("labels = "+labels);
+					String id = (String)labels.get("stack.appsody.dev/id");
+					String ver = (String)labels.get("stack.appsody.dev/version");
+					System.out.println("id = "+id+" version = "+ver);
+					if (id!=null && ver!=null) {
+						System.out.println("id = "+id+" version = "+ver);
+						if (id.contentEquals(name) && ver.contentEquals(version)) {
+							appNames.add((String)metadata.get("name"));
+						}
+					}
+				}
+			}
+		} catch (ApiException apie) {
+			apie.printStackTrace();
+			System.out.println("response body: "+apie.getResponseBody());
+			JSONObject resp = new JSONObject();
+			resp.put("message", "response error: "+apie.getResponseBody());
+			return Response.status(400).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+		}
+		
+		catch (Exception e) {
+			e.printStackTrace();
+			JSONObject resp = new JSONObject();
+			resp.put("message", "unexpected error: "+e.getMessage());
+			return Response.status(500).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+		}
+
 		StackApi api = new StackApi(apiClient);
 
 		JSONObject msg = new JSONObject();
@@ -890,7 +900,7 @@ public class StacksAccess {
 			msg.put("kabanero digest", kabDigest);
 			msg.put("image digest", imageDigest);
 			msg.put("project", namespace);
-			//msg.put("applications", appNames.toString());
+			msg.put("applications", appNames.toString());
 			return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();
