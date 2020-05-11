@@ -787,7 +787,10 @@ public class StacksAccess {
 		}
 		
 		catch (Exception e) {
-			System.out.println("tolerate: "+e.getMessage());
+			e.printStackTrace();
+			JSONObject resp = new JSONObject();
+			resp.put("message", "unexpected error: "+e.getMessage());
+			return Response.status(500).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		}
 
 		StackApi api = new StackApi(apiClient);
