@@ -13,10 +13,8 @@ build-image:
 
 push-image:
 
-echo "IMAGE="$(IMAGE)
-
-
 ifneq "$(IMAGE)" "kabanero/kabanero-command-line-services:latest"
+	echo "IMAGE="$(IMAGE)
 	echo "<<1>>"
 	# Default push
 	docker push $(IMAGE)
