@@ -768,14 +768,16 @@ public class StacksAccess {
 				Map metadata = (Map)map.get("metadata");
 				System.out.println("metadata = "+metadata);
 				Map labels = (Map)metadata.get("labels");
-				System.out.println("labels = "+labels);
-				String id = (String)labels.get("stack.appsody.dev/id");
-				String ver = (String)labels.get("stack.appsody.dev/version");
-				System.out.println("id = "+id+" version = "+ver);
-				if (id!=null && ver!=null) {
+				if (labels!=null) {
+					System.out.println("labels = "+labels);
+					String id = (String)labels.get("stack.appsody.dev/id");
+					String ver = (String)labels.get("stack.appsody.dev/version");
 					System.out.println("id = "+id+" version = "+ver);
-					if (id.contentEquals(name) && ver.contentEquals(version)) {
-						appNames.add((String)metadata.get("name"));
+					if (id!=null && ver!=null) {
+						System.out.println("id = "+id+" version = "+ver);
+						if (id.contentEquals(name) && ver.contentEquals(version)) {
+							appNames.add((String)metadata.get("name"));
+						}
 					}
 				}
 			}
