@@ -13,9 +13,8 @@ build-image:
 
 push-image:
 
-echo "in push-image:, IMAGE="$(IMAGE)
-echo "REPOSITORY="$(REPOSITORY)
-echo "TRAVIS_BRANCH="$(TRAVIS_BRANCH)
+echo "IMAGE="$(IMAGE)
+
 
 ifneq "$(IMAGE)" "kabanero/kabanero-command-line-services:latest"
 	echo "<<1>>"
