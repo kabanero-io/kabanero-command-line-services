@@ -13,6 +13,9 @@ build-image:
 
 push-image:
 ifneq "$(IMAGE)" "kabanero/kabanero-command-line-services:latest"
+	echo "in push-image:, IMAGE="$(IMAGE)
+	echo "REPOSITORY="$(REPOSITORY)
+	echo "TRAVIS_BRANCH="$(TRAVIS_BRANCH)
 	# Default push
 	docker push $(IMAGE)
 endif
@@ -25,6 +28,9 @@ ifdef TRAVIS_TAG
 endif
 
 ifdef TRAVIS_BRANCH
+	echo "in if TRAVIS_BRANCH, IMAGE="$(IMAGE)
+	echo "REPOSITORY="$(REPOSITORY)
+	echo "TRAVIS_BRANCH="$(TRAVIS_BRANCH)
 	# This is a Travis branch build. Pushing using Docker tag TRAVIS_BRANCH
 	docker tag $(IMAGE) $(REPOSITORY):$(TRAVIS_BRANCH)
 	docker push $(REPOSITORY):$(TRAVIS_BRANCH)
