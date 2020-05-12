@@ -95,7 +95,7 @@ public class Login {
             jwt = auth.getJwt(creds);  // check id, password/PAT, and team membership here.
         } catch (KabaneroSecurityException e) {
         	// Encountered an error requesting, parsing, or processing GitHub data for user"
-        	if (e.getMessage().contains("Encountered an error requesting, parsing, or processing GitHub data for user")) {
+        	if (e.getMessage().contains("Encountered an error requesting, parsing, or processing GitHub data for user") || e.getMessage().contains("An error occurred during authentication for user Unexpected char")) {
         		msg = "login failed, you may want to check your authorization configuration. Double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct";
         		System.out.println(returnError(500, "An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct", e));
         		Properties p = new Properties();
