@@ -97,7 +97,7 @@ public class Login {
         	if (checkApiUrlException(e)) {
         		msg = "login failed, you may want to check your authorization configuration. Double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct";
         		System.out.println("An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct, exception message:  "+e.getMessage());
-                return returnError(424, msg, e);
+                return returnError(424, msg, null);
         	} else {
         		System.out.println("An error occurred during authentication for user, exception message: "+e.getMessage());
         	}
