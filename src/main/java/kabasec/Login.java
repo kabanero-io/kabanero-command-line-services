@@ -136,11 +136,11 @@ public class Login {
     	System.out.println("msg="+msg+"|||");
     	final String error1="Encountered an error requesting, parsing, or processing GitHub data for user";
     	final String error2="An error occurred during authentication for user Unexpected char";
-    	final String error3="Unexpected char 60 at (line no=1, column no=1, offset=0)";
+    	final String error3="Unexpected char 60";
     	final String error4="could not parse exception response";
     	if (msg.contentEquals(error1)) urlException=true;
     	if (msg.contentEquals(error2)) urlException=true;
-    	if (msg.contentEquals(error3)) urlException=true;
+    	if (msg.contains(error3)) urlException=true;
     	if (msg.contentEquals(error4)) urlException=true;
     	return urlException;
     }
