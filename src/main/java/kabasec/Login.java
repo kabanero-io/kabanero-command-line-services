@@ -95,7 +95,7 @@ public class Login {
             jwt = auth.getJwt(creds);  // check id, password/PAT, and team membership here.
         } catch (KabaneroSecurityException e) {
         	// Encountered an error requesting, parsing, or processing GitHub data for user
-        	if (checkApiUrlException(e.getMessage())) {
+        	if (checkApiUrlException(e)) {
         		msg = "login failed, you may want to check your authorization configuration. Double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct";
         		System.out.println("An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct, exception message: "+ e.getMessage());
         		Properties p = new Properties();
@@ -106,7 +106,7 @@ public class Login {
         	}
         	return returnError(e.getStatusCode(), "An error occurred during authentication for user ", e);
         } catch (Exception e) {
-        	if (checkApiUrlException(e.getMessage())) {
+        	if (checkApiUrlException(e)) {
         		msg = "login failed, you may want to check your authorization configuration. Double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct";
         		System.out.println("An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct, exception message:  "+e.getMessage());
         		Properties p = new Properties();
@@ -131,17 +131,22 @@ public class Login {
         return returnSuccess(jwt);
     }
     
-    private boolean checkApiUrlException(String msg) {
+    private boolean checkApiUrlException(Exception e) {
     	boolean urlException=false;
+    	String msg = e.getMessage();
+    	e.printStackTrace();
     	System.out.println("msg="+msg+"|||");
     	final String error1="Encountered an error requesting, parsing, or processing GitHub data for user";
     	final String error2="An error occurred during authentication for user Unexpected char";
     	final String error3="Unexpected char 60";
     	final String error4="could not parse exception response";
+    	final String error5="An error occurred during authentication for user, double check the apiUrl:";
     	if (msg.contentEquals(error1)) urlException=true;
     	if (msg.contentEquals(error2)) urlException=true;
     	if (msg.contains(error3)) urlException=true;
     	if (msg.contentEquals(error4)) urlException=true;
+    	if (msg.contains(error5)) urlException=true;
+    	System.out.println("urlException="+urlException);
     	return urlException;
     }
     
