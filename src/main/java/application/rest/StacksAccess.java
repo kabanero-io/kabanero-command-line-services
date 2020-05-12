@@ -778,6 +778,8 @@ public class StacksAccess {
 					if (id!=null && ver!=null) {
 						System.out.println("id = "+id+" version = "+ver);
 						if (id.contentEquals(name) && ver.contentEquals(version)) {
+							JSONObject jo = new JSONObject();
+							System.out.println("Application map ="+map);
 							appNames.add((String)metadata.get("name"));
 						}
 					}
