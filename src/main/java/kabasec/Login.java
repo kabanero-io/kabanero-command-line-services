@@ -97,15 +97,12 @@ public class Login {
         	if (checkApiUrlException(e)) {
         		msg = "login failed, you may want to check your authorization configuration. Double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct";
         		System.out.println("An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct, exception message:  "+e.getMessage());
-        		Properties p = new Properties();
-                p.put("message", msg);
-                return p;
+                return returnError(417, msg, e);
+                //return p;
         	} else {
         		System.out.println("An error occurred during authentication for user, exception message: "+e.getMessage());
         	}
-        	Properties p = new Properties();
-            p.put("message", msg);
-            return p;
+        	return returnError(417, msg, e);
         }
         throttle();
         lastTimeJWTissued=System.currentTimeMillis();
@@ -123,7 +120,7 @@ public class Login {
     	boolean urlException=false;
     	String msg = e.getMessage();
     	e.printStackTrace();
-    	System.out.println("msg="+msg+"|||");
+    	System.out.println("msg="+msg+"||");
     	final String error1="Encountered an error requesting, parsing";
     	final String error2="An error occurred during authentication for user Unexpected char";
     	final String error3="Unexpected char 60";
