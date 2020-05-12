@@ -94,13 +94,26 @@ public class Login {
             checkTeamsAndGithubURL(auth);
             jwt = auth.getJwt(creds);  // check id, password/PAT, and team membership here.
         } catch (KabaneroSecurityException e) {
-            return returnError(e.getStatusCode(), "An error occurred during authentication for user ", e);
-        } catch (Exception e) {
-        	if (e.getMessage().contains("could not parse exception response")) {
+        	// Encountered an error requesting, parsing, or processing GitHub data for user
+        	if (e.getMessage().contains("Encountered an error requesting, parsing, or processing GitHub data for user") || e.getMessage().contains("An error occurred during authentication for user Unexpected char")) {
         		msg = "login failed, you may want to check your authorization configuration. Double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct";
-        		System.out.println(returnError(500, "An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct", e));
+        		System.out.println("An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct, exception message: "+ e.getMessage());
+        		Properties p = new Properties();
+                p.put("message", msg);
+                return p;
         	} else {
         		System.out.println(returnError(500, "An error occurred during authentication for user", e));
+        	}
+        	return returnError(e.getStatusCode(), "An error occurred during authentication for user ", e);
+        } catch (Exception e) {
+        	if (e.getMessage().contains("could not parse exception response") || e.getMessage().contains("An error occurred during authentication for user Unexpected char") || e.getMessage().contains("Unexpected char 60 at (line no=1, column no=1, offset=0")) {
+        		msg = "login failed, you may want to check your authorization configuration. Double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct";
+        		System.out.println("An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct, exception message:  "+e.getMessage());
+        		Properties p = new Properties();
+                p.put("message", msg);
+                return p;
+        	} else {
+        		System.out.println("An error occurred during authentication for user, exception message: "+e.getMessage());
         	}
         	Properties p = new Properties();
             p.put("message", msg);

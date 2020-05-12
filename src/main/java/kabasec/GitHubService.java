@@ -59,7 +59,7 @@ public class GitHubService {
             jsonResponse.add("teams", getUserTeams());
             return jsonResponse.build();
         } catch (KabaneroSecurityException e) {
-            throw new KabaneroSecurityException("Encountered an error requesting, parsing, or processing GitHub data for user [" + userId + "]: " + e.getMessage(), e);
+            throw new KabaneroSecurityException("Encountered an error requesting, parsing, or processing GitHub data for user" + e.getMessage(), e);
         }
     }
 
