@@ -102,6 +102,9 @@ public class Login {
                 p.put("message", msg);
                 return p;
         	} else {
+        		System.out.println("<<1>>");
+        		System.out.println("e.message()+"+e.getMessage());
+        		System.out.println("e.cause()+"+e.getCause());
         		System.out.println(returnError(500, "An error occurred during authentication for user", e));
         	}
         	return returnError(e.getStatusCode(), "An error occurred during authentication for user ", e);
@@ -109,7 +112,13 @@ public class Login {
         	if (e.getMessage().contains("could not parse exception response") || e.getMessage().contains("An error occurred during authentication for user Unexpected char")) {
         		msg = "login failed, you may want to check your authorization configuration. Double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct";
         		System.out.println(returnError(500, "An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct", e));
+        		Properties p = new Properties();
+                p.put("message", msg);
+                return p;
         	} else {
+        		System.out.println("<<2>>");
+        		System.out.println("e.message()+"+e.getMessage());
+        		System.out.println("e.cause()+"+e.getCause());
         		System.out.println(returnError(500, "An error occurred during authentication for user", e));
         	}
         	Properties p = new Properties();
