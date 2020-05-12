@@ -133,26 +133,15 @@ public class Login {
     
     private boolean checkApiUrlException(String msg) {
     	boolean urlException=false;
+    	System.out.println("msg="+msg+"|||");
     	final String error1="Encountered an error requesting, parsing, or processing GitHub data for user";
     	final String error2="An error occurred during authentication for user Unexpected char";
-    	final String error3="Unexpected char 60 at (line no=1, column no=1, offset=0";
+    	final String error3="Unexpected char 60 at (line no=1, column no=1, offset=0)";
     	final String error4="could not parse exception response";
-    	switch (msg) {
-    	case error1:
-    		urlException=true;
-    		break;
-    	case error2:
-    		urlException=true;
-    		break;
-    	case error3:
-    		urlException=true;
-    		break;
-    	case error4:
-    		urlException=true;
-    		break;
-    	default:
-    		break;
-    	}
+    	if (msg.contentEquals(error1)) urlException=true;
+    	if (msg.contentEquals(error2)) urlException=true;
+    	if (msg.contentEquals(error3)) urlException=true;
+    	if (msg.contentEquals(error4)) urlException=true;
     	return urlException;
     }
     
