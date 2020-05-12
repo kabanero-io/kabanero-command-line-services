@@ -102,9 +102,6 @@ public class Login {
                 p.put("message", msg);
                 return p;
         	} else {
-        		System.out.println("<<1>>");
-        		System.out.println("e.message()+"+e.getMessage());
-        		System.out.println("e.cause()+"+e.getCause());
         		System.out.println(returnError(500, "An error occurred during authentication for user", e));
         	}
         	return returnError(e.getStatusCode(), "An error occurred during authentication for user ", e);
@@ -116,9 +113,6 @@ public class Login {
                 p.put("message", msg);
                 return p;
         	} else {
-        		System.out.println("<<2>>");
-        		System.out.println("e.message()+"+e.getMessage());
-        		System.out.println("e.cause()+"+e.getCause());
         		System.out.println(returnError(500, "An error occurred during authentication for user", e));
         	}
         	Properties p = new Properties();
