@@ -102,7 +102,7 @@ public class Login {
                 p.put("message", msg);
                 return p;
         	} else {
-        		System.out.println(returnError(500, "An error occurred during authentication for user", e));
+        		System.out.println("An error occurred during authentication for user, exception message: "+ e.getMessage());
         	}
         	return returnError(e.getStatusCode(), "An error occurred during authentication for user ", e);
         } catch (Exception e) {
@@ -136,15 +136,15 @@ public class Login {
     	String msg = e.getMessage();
     	e.printStackTrace();
     	System.out.println("msg="+msg+"|||");
-    	final String error1="Encountered an error requesting, parsing, or processing GitHub data for user";
+    	final String error1="Encountered an error requesting, parsing";
     	final String error2="An error occurred during authentication for user Unexpected char";
     	final String error3="Unexpected char 60";
     	final String error4="could not parse exception response";
     	final String error5="An error occurred during authentication for user, double check the apiUrl:";
-    	if (msg.contentEquals(error1)) urlException=true;
-    	if (msg.contentEquals(error2)) urlException=true;
+    	if (msg.contains(error1)) urlException=true;
+    	if (msg.contains(error2)) urlException=true;
     	if (msg.contains(error3)) urlException=true;
-    	if (msg.contentEquals(error4)) urlException=true;
+    	if (msg.contains(error4)) urlException=true;
     	if (msg.contains(error5)) urlException=true;
     	System.out.println("urlException="+urlException);
     	return urlException;
