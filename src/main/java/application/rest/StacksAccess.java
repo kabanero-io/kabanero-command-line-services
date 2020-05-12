@@ -771,16 +771,18 @@ public class StacksAccess {
 				System.out.println("metadata = "+metadata);
 				Map labels = (Map)metadata.get("labels");
 				if (labels!=null) {
-					System.out.println("labels = "+labels);
 					String id = (String)labels.get("stack.appsody.dev/id");
 					String ver = (String)labels.get("stack.appsody.dev/version");
-					System.out.println("id = "+id+" version = "+ver);
 					if (id!=null && ver!=null) {
 						System.out.println("id = "+id+" version = "+ver);
 						if (id.contentEquals(name) && ver.contentEquals(version)) {
 							JSONObject jo = new JSONObject();
+							Map annotations = (Map)metadata.get("annotations");
+							jo.put("name",(String)metadata.get("name"));
+							jo.put("namespace",(String)metadata.get("namespace"));
+							jo.put("architecture",(String)annotations.get("architecture"));
 							System.out.println("Application map ="+map);
-							appNames.add((String)metadata.get("name"));
+							appNames.add(jo);
 						}
 					}
 				}
