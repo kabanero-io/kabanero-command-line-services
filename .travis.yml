@@ -25,7 +25,8 @@ deploy:
 - provider: script
   script: make push-image
   on:
-     branch: latest
+#     branch: latest
+     all_branches: true
      condition: ${DOCKER_USERNAME} && ${DOCKER_PASSWORD}
 
 
