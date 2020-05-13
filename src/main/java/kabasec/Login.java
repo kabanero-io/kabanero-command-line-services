@@ -138,12 +138,13 @@ public class Login {
     	final String error3="Unexpected char 60";
     	final String error4="could not parse exception response";
     	final String error5="An error occurred during authentication for user, double check the apiUrl:";
-    	if (msg.contains(error1)) {
-    			if (cause.contains(error00) || cause.contains(error0) || msg.contains(error00)|| msg.contains(error0)) {
-    			urlException=false;
-    		}
-    		else urlException=true;
-    	}
+    	
+    	if (msg.contains(error00)) urlException=false;
+    	else if (msg.contains(error0)) urlException=false;
+    	else if (cause.contains(error00)) urlException=false;
+    	else if (cause.contains(error00)) urlException=false;
+    	else if (cause.contains(error0))  urlException=false;
+    	else if (msg.contains(error1)) urlException=true;
     	else if (msg.contains(error2)) urlException=true;
     	else if (msg.contains(error3)) urlException=true;
     	else if (msg.contains(error4)) urlException=true;
