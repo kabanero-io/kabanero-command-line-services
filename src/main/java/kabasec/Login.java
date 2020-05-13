@@ -124,16 +124,24 @@ public class Login {
     	boolean urlException=false;
     	String msg = e.getMessage();
     	e.printStackTrace();
+    	final String error0="Bad Credentials";
     	final String error1="Encountered an error requesting, parsing";
     	final String error2="An error occurred during authentication for user Unexpected char";
     	final String error3="Unexpected char 60";
     	final String error4="could not parse exception response";
     	final String error5="An error occurred during authentication for user, double check the apiUrl:";
-    	if (msg.contains(error1)) urlException=true;
-    	if (msg.contains(error2)) urlException=true;
-    	if (msg.contains(error3)) urlException=true;
-    	if (msg.contains(error4)) urlException=true;
-    	if (msg.contains(error5)) urlException=true;
+    	if (msg.contains(error1)) {
+    		String cause="";
+    		if (e.getCause()!=null) cause = e.getCause().toString();
+    		if (cause.contains(error0) || e.getMessage().contains(error0)) {
+    			urlException=false;
+    		}
+    		else urlException=true;
+    	}
+    	else if (msg.contains(error2)) urlException=true;
+    	else if (msg.contains(error3)) urlException=true;
+    	else if (msg.contains(error4)) urlException=true;
+    	else if (msg.contains(error5)) urlException=true;
     	return urlException;
     }
     
