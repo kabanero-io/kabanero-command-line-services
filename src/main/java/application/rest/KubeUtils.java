@@ -434,7 +434,7 @@ public class KubeUtils {
     
     public static List listResources2(ApiClient apiClient, String group, String version, String plural, String namespace) throws ApiException {
         logger.info("Listing resources {}/{}/{}/{}/{}", group, version, plural, namespace);
-        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources2(apiClient,group, version, plural, namespace);
+        LinkedTreeMap<?, ?> map = (LinkedTreeMap<?, ?>) mapResources(apiClient,group, version, plural, namespace);
         List<Map> list=(List)map.get("items");
         return list;
      }
