@@ -101,7 +101,7 @@ public class Login {
         	} else {
         		System.out.println("An error occurred during authentication for user, exception message: "+e.getMessage());
         	}
-        	return returnError(424, msg, e);
+        	return returnError(401, msg, e);
         }
         throttle();
         lastTimeJWTissued=System.currentTimeMillis();
