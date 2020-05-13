@@ -122,7 +122,14 @@ public class Login {
     
     private boolean checkApiUrlException(Exception e) {
     	boolean urlException=false;
+    	
     	String msg = e.getMessage();
+    	String cause="";
+		if (e.getCause()!=null) cause = e.getCause().toString();
+		System.out.println("in checkApiUrlException");
+		System.out.println("exception msg="+msg);
+		System.out.println("exception cause="+cause);
+		
     	e.printStackTrace();
     	final String error00="Received unexpected 401 response from GET request";
     	final String error0="Bad credentials";
@@ -132,9 +139,7 @@ public class Login {
     	final String error4="could not parse exception response";
     	final String error5="An error occurred during authentication for user, double check the apiUrl:";
     	if (msg.contains(error1)) {
-    		String cause="";
-    		if (e.getCause()!=null) cause = e.getCause().toString();
-    		if (cause.contains(error00) ||cause.contains(error0) || e.getMessage().contains(error0)) {
+    			if (cause.contains(error00) || cause.contains(error0) || msg.contains(error00)|| msg.contains(error0)) {
     			urlException=false;
     		}
     		else urlException=true;
