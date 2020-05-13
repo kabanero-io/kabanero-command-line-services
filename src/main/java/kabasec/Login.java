@@ -93,31 +93,20 @@ public class Login {
             Authentication auth = new Authentication();
             checkTeamsAndGithubURL(auth);
             jwt = auth.getJwt(creds);  // check id, password/PAT, and team membership here.
-        } catch (KabaneroSecurityException e) {
-        	// Encountered an error requesting, parsing, or processing GitHub data for user
-        	if (e.getMessage().contains("Encountered an error requesting, parsing, or processing GitHub data for user") || e.getMessage().contains("An error occurred during authentication for user Unexpected char")) {
-        		msg = "login failed, you may want to check your authorization configuration. Double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct";
-        		System.out.println("An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct, exception message: "+ e.getMessage());
-        		Properties p = new Properties();
-                p.put("message", msg);
-                return p;
-        	} else {
-        		System.out.println(returnError(500, "An error occurred during authentication for user", e));
-        	}
-        	return returnError(e.getStatusCode(), "An error occurred during authentication for user ", e);
         } catch (Exception e) {
-        	if (e.getMessage().contains("could not parse exception response") || e.getMessage().contains("An error occurred during authentication for user Unexpected char") || e.getMessage().contains("Unexpected char 60 at (line no=1, column no=1, offset=0")) {
+        	if (checkApiUrlException(e)) {
         		msg = "login failed, you may want to check your authorization configuration. Double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct";
         		System.out.println("An error occurred during authentication for user, double check the apiUrl: in your github: configuraton in the Kabanero CR Instance to make sure it's correct, exception message:  "+e.getMessage());
-        		Properties p = new Properties();
-                p.put("message", msg);
-                return p;
+                return returnError(424, msg, null);
         	} else {
         		System.out.println("An error occurred during authentication for user, exception message: "+e.getMessage());
         	}
-        	Properties p = new Properties();
-            p.put("message", msg);
-            return p;
+        	if (e instanceof KabaneroSecurityException) {
+        		KabaneroSecurityException k = (KabaneroSecurityException)e;
+        		return returnError(k.getStatusCode(), "An error occurred during authentication for user", e);
+        	} else {
+        		return returnError(401, "An error occurred during authentication for user", e);
+        	}
         }
         throttle();
         lastTimeJWTissued=System.currentTimeMillis();
@@ -129,6 +118,38 @@ public class Login {
         // put/replace id:JWT in the hashtable
         trackJWTs.put(creds.getId(), jwt);
         return returnSuccess(jwt);
+    }
+    
+    private boolean checkApiUrlException(Exception e) {
+    	boolean urlException=false;
+    	
+    	String msg = e.getMessage();
+    	String cause="";
+		if (e.getCause()!=null) cause = e.getCause().toString();
+		System.out.println("in checkApiUrlException");
+		System.out.println("exception msg="+msg);
+		System.out.println("exception cause="+cause);
+		
+    	e.printStackTrace();
+    	final String error0="Received unexpected 401 response from GET request";
+    	final String error1="Bad credentials";
+    	final String error2="Encountered an error requesting, parsing";
+    	final String error3="An error occurred during authentication for user Unexpected char";
+    	final String error4="Unexpected char 60";
+    	final String error5="could not parse exception response";
+    	final String error6="An error occurred during authentication for user, double check the apiUrl:";
+    	
+    	if (msg.contains(error0)) urlException=false;
+    	else if (msg.contains(error1)) urlException=false;
+    	else if (cause.contains(error0)) urlException=false;
+    	else if (cause.contains(error1))  urlException=false;
+    	else if (msg.contains(error2)) urlException=true;
+    	else if (msg.contains(error3)) urlException=true;
+    	else if (msg.contains(error4)) urlException=true;
+    	else if (msg.contains(error5)) urlException=true;
+    	else if (msg.contains(error6)) urlException=true;
+    	System.out.println("urlException="+urlException);
+    	return urlException;
     }
     
     private void throttle() {
@@ -181,7 +202,7 @@ public class Login {
             fullErrorMsg += " " + errorMsg;
         }
         if (e != null) {
-            fullErrorMsg += " " + e.getMessage();
+            fullErrorMsg += ", " + e.getMessage();
         }
         return fullErrorMsg;
     }
