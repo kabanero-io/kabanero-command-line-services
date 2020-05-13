@@ -103,7 +103,7 @@ public class Login {
         	}
         	if (e instanceof KabaneroSecurityException) {
         		KabaneroSecurityException k = (KabaneroSecurityException)e;
-        		returnError(k.getStatusCode(), "An error occurred during authentication for user", e);
+        		return returnError(k.getStatusCode(), "An error occurred during authentication for user", e);
         	} else {
         		return returnError(401, "An error occurred during authentication for user", e);
         	}
@@ -149,6 +149,7 @@ public class Login {
     	else if (msg.contains(error3)) urlException=true;
     	else if (msg.contains(error4)) urlException=true;
     	else if (msg.contains(error5)) urlException=true;
+    	System.out.println("urlException="+urlException);
     	return urlException;
     }
     
