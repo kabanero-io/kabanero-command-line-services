@@ -101,7 +101,12 @@ public class Login {
         	} else {
         		System.out.println("An error occurred during authentication for user, exception message: "+e.getMessage());
         	}
-        	return returnError(401, msg, e);
+        	if (e instanceof KabaneroSecurityException) {
+        		KabaneroSecurityException k = (KabaneroSecurityException)e;
+        		returnError(k.getStatusCode(), "An error occurred during authentication for user", e);
+        	} else {
+        		return returnError(401, "An error occurred during authentication for user", e);
+        	}
         }
         throttle();
         lastTimeJWTissued=System.currentTimeMillis();
