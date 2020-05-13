@@ -131,24 +131,23 @@ public class Login {
 		System.out.println("exception cause="+cause);
 		
     	e.printStackTrace();
-    	final String error00="Received unexpected 401 response from GET request";
-    	final String error0="Bad credentials";
-    	final String error1="Encountered an error requesting, parsing";
-    	final String error2="An error occurred during authentication for user Unexpected char";
-    	final String error3="Unexpected char 60";
-    	final String error4="could not parse exception response";
-    	final String error5="An error occurred during authentication for user, double check the apiUrl:";
+    	final String error0="Received unexpected 401 response from GET request";
+    	final String error1="Bad credentials";
+    	final String error2="Encountered an error requesting, parsing";
+    	final String error3="An error occurred during authentication for user Unexpected char";
+    	final String error4="Unexpected char 60";
+    	final String error5="could not parse exception response";
+    	final String error6="An error occurred during authentication for user, double check the apiUrl:";
     	
-    	if (msg.contains(error00)) urlException=false;
-    	else if (msg.contains(error0)) urlException=false;
-    	else if (cause.contains(error00)) urlException=false;
-    	else if (cause.contains(error00)) urlException=false;
-    	else if (cause.contains(error0))  urlException=false;
-    	else if (msg.contains(error1)) urlException=true;
+    	if (msg.contains(error0)) urlException=false;
+    	else if (msg.contains(error1)) urlException=false;
+    	else if (cause.contains(error0)) urlException=false;
+    	else if (cause.contains(error1))  urlException=false;
     	else if (msg.contains(error2)) urlException=true;
     	else if (msg.contains(error3)) urlException=true;
     	else if (msg.contains(error4)) urlException=true;
     	else if (msg.contains(error5)) urlException=true;
+    	else if (msg.contains(error6)) urlException=true;
     	System.out.println("urlException="+urlException);
     	return urlException;
     }
