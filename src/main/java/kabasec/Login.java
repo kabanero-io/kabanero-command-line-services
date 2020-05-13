@@ -124,7 +124,8 @@ public class Login {
     	boolean urlException=false;
     	String msg = e.getMessage();
     	e.printStackTrace();
-    	final String error0="Bad Credentials";
+    	final String error00="Received unexpected 401 response from GET request";
+    	final String error0="Bad credentials";
     	final String error1="Encountered an error requesting, parsing";
     	final String error2="An error occurred during authentication for user Unexpected char";
     	final String error3="Unexpected char 60";
@@ -133,7 +134,7 @@ public class Login {
     	if (msg.contains(error1)) {
     		String cause="";
     		if (e.getCause()!=null) cause = e.getCause().toString();
-    		if (cause.contains(error0) || e.getMessage().contains(error0)) {
+    		if (cause.contains(error00) ||cause.contains(error0) || e.getMessage().contains(error0)) {
     			urlException=false;
     		}
     		else urlException=true;
