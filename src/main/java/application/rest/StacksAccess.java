@@ -748,6 +748,12 @@ public class StacksAccess {
 		return ja;
 	}
 	
+	private JSONObject convertOneMapToJSON(Map map) {
+		JSONObject jo = new JSONObject();
+		jo.putAll(map);
+		return jo;
+	}
+	
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -792,7 +798,7 @@ public class StacksAccess {
         						JSONObject jo = new JSONObject();
         						jo.put("name", (String)metadata.get("name"));
         						jo.put("namespace", targetNamespace);
-        						jo.put("map", map);
+        						jo.put("map", convertOneMapToJSON(map));
         						applications.add(jo);
         					}
         				}
