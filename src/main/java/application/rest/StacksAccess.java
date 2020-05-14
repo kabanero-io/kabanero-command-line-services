@@ -751,6 +751,10 @@ public class StacksAccess {
 	private JSONObject convertOneMapToJSON(Map map) {
 		JSONObject jo = new JSONObject();
 		jo.putAll(map);
+		System.out.println("**** map put to JSON *****");
+		System.out.println(jo);
+		System.out.println("**** end of map put to JSON *****");
+		
 		return jo;
 	}
 	
