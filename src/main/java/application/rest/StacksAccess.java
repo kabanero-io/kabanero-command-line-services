@@ -929,7 +929,7 @@ public class StacksAccess {
 			msg.put("kabanero digest", kabDigest);
 			msg.put("image digest", imageDigest);
 			msg.put("project", namespace);
-			msg.put("applications", applications);
+			msg.put("applications", applications.toString());
 			return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();
