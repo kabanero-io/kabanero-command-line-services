@@ -18,6 +18,7 @@
  */
 package application.rest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -748,7 +749,7 @@ public class StacksAccess {
 		return ja;
 	}
 	
-	private JsonObject convertOneMapToJSON(Map map) throws ApiException {
+	private JSONObject convertOneMapToJSON(Map map) throws ApiException, IOException {
 		JSONObject jo = new JSONObject();
 		System.out.println(" type of map: "+map.getClass());
 		System.out.println("****");
@@ -756,7 +757,8 @@ public class StacksAccess {
 		System.out.println("****");
 		Gson gson = new Gson();
 		JsonObject jsonObject = gson.toJsonTree(map).getAsJsonObject();
-		return jsonObject;
+		JSONObject json = JSONObject.parse(jsonObject.toString());
+		return json;
 	}
 	
 	
