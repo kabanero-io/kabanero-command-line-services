@@ -748,23 +748,15 @@ public class StacksAccess {
 		return ja;
 	}
 	
-	private JSONObject convertOneMapToJSON(Map map) throws ApiException {
+	private JsonObject convertOneMapToJSON(Map map) throws ApiException {
 		JSONObject jo = new JSONObject();
 		System.out.println(" type of map: "+map.getClass());
 		System.out.println("****");
 		System.out.println(" map before conversion to JSON: "+map);
 		System.out.println("****");
-		try {
-			jo.putAll(map);
-			System.out.println("**** map put to JSON *****");
-			System.out.println(jo);
-			System.out.println("**** end of map put to JSON *****");
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ApiException("something went wrong converting map to json: "+e.getMessage());
-		}
-
-		return jo;
+		Gson gson = new Gson();
+		JsonObject jsonObject = gson.toJsonTree(map).getAsJsonObject();
+		return jsonObject;
 	}
 	
 	
