@@ -751,10 +751,6 @@ public class StacksAccess {
 	
 	private JSONObject convertOneMapToJSON(Map map) throws ApiException, IOException {
 		JSONObject jo = new JSONObject();
-		System.out.println(" type of map: "+map.getClass());
-		System.out.println("****");
-		System.out.println(" map before conversion to JSON: "+map);
-		System.out.println("****");
 		Gson gson = new Gson();
 		JsonObject jsonObject = gson.toJsonTree(map).getAsJsonObject();
 		JSONObject json = JSONObject.parse(jsonObject.toString());
