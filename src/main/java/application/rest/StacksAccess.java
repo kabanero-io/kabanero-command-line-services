@@ -762,9 +762,14 @@ public class StacksAccess {
 		
 		group="apps";
         String listVersion="v1";
+        
+        List<String> nameSpaces = new ArrayList<String>();
 		
         List<String> targetNameSpaces = kab.getSpec().getTargetNamespaces();
-        for (String targetNamespace:targetNameSpaces) {
+        
+        nameSpaces.addAll(targetNameSpaces);
+        
+        for (String targetNamespace:nameSpaces) {
         	try {
         		List deployments = KubeUtils.listResources2(apiClient, group, listVersion, "deployments",targetNamespace);
         		for (Object obj: deployments) {
