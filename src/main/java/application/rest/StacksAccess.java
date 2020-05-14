@@ -748,12 +748,18 @@ public class StacksAccess {
 		return ja;
 	}
 	
-	private JSONObject convertOneMapToJSON(Map map) {
+	private JSONObject convertOneMapToJSON(Map map) throws ApiException {
 		JSONObject jo = new JSONObject();
+		try {
+		
 		jo.putAll(map);
 		System.out.println("**** map put to JSON *****");
 		System.out.println(jo);
 		System.out.println("**** end of map put to JSON *****");
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ApiException("something went wrong converting map to json: "+e.getMessage());
+		}
 		
 		return jo;
 	}
