@@ -764,10 +764,14 @@ public class StacksAccess {
         String listVersion="v1";
         
         List<String> nameSpaces = new ArrayList<String>();
+        
+        nameSpaces.add(namespace);
 		
         List<String> targetNameSpaces = kab.getSpec().getTargetNamespaces();
         
-        nameSpaces.addAll(targetNameSpaces);
+        if (targetNameSpaces!=null) {
+        	nameSpaces.addAll(targetNameSpaces);
+        }
         
         for (String targetNamespace:nameSpaces) {
         	try {
