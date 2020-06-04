@@ -764,7 +764,7 @@ public class StacksAccess {
 	public Response describeStack(@Context final HttpServletRequest request,
 			@PathParam("name") final String name, @PathParam("version") final String version) throws Exception {
 		System.out.println("In describe stack");
-		List applications = new ArrayList<String>();
+		JSONArray applications = new JSONArray();
 		Kabanero kab = StackUtils.getKabaneroForNamespace(namespace);
 
 		ApiClient apiClient = KubeUtils.getApiClient();
@@ -925,7 +925,7 @@ public class StacksAccess {
 			msg.put("kabanero digest", kabDigest);
 			msg.put("image digest", imageDigest);
 			msg.put("project", namespace);
-			msg.put("applications", applications.toString());
+			msg.put("applications", applications);
 			return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();
