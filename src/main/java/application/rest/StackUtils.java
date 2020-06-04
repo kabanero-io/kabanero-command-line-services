@@ -443,8 +443,12 @@ public class StackUtils {
 			digestCheck="unknown";
 		}
 		if (status!=null) {
-			status=status.substring(0, 6);  
-			if (!"active".contentEquals(status)) {
+			if (status.contains("active")) {
+				status=status.substring(0, 6);  
+				if (!"active".contentEquals(status)) {
+					digestCheck = "NA";
+				}
+			} else {
 				digestCheck = "NA";
 			}
 		} else {
