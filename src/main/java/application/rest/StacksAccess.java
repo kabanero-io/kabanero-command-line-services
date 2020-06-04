@@ -782,44 +782,48 @@ public class StacksAccess {
         	nameSpaces.addAll(targetNameSpaces);
         }
         
-        for (String targetNamespace:nameSpaces) {
-        	try {
-        		List deployments = KubeUtils.listResources2(apiClient, group, listVersion, "deployments",targetNamespace);
-        		for (Object obj: deployments) {
-        			Map map = (Map)obj;
-        			Map metadata = (Map)map.get("metadata");
-        			System.out.println("metadata = "+metadata);
-        			Map labels = (Map)metadata.get("labels");
-        			if (labels!=null) {
-        				System.out.println("labels = "+labels);
-        				String id = (String)labels.get("stack.appsody.dev/id");
-        				String ver = (String)labels.get("stack.appsody.dev/version");
-        				System.out.println("id = "+id+" version = "+ver);
-        				if (id!=null && ver!=null) {
+        boolean checkForApps = false;
+        
+        if (checkForApps) {
+        	for (String targetNamespace:nameSpaces) {
+        		try {
+        			List deployments = KubeUtils.listResources2(apiClient, group, listVersion, "deployments",targetNamespace);
+        			for (Object obj: deployments) {
+        				Map map = (Map)obj;
+        				Map metadata = (Map)map.get("metadata");
+        				System.out.println("metadata = "+metadata);
+        				Map labels = (Map)metadata.get("labels");
+        				if (labels!=null) {
+        					System.out.println("labels = "+labels);
+        					String id = (String)labels.get("stack.appsody.dev/id");
+        					String ver = (String)labels.get("stack.appsody.dev/version");
         					System.out.println("id = "+id+" version = "+ver);
-        					if (id.contentEquals(name) && ver.contentEquals(version)) {
-        						JSONObject jo = new JSONObject();
-        						jo.put("name", (String)metadata.get("name"));
-        						jo.put("namespace", targetNamespace);
-        						jo.put("map", convertOneMapToJSON(map));
-        						applications.add(jo);
+        					if (id!=null && ver!=null) {
+        						System.out.println("id = "+id+" version = "+ver);
+        						if (id.contentEquals(name) && ver.contentEquals(version)) {
+        							JSONObject jo = new JSONObject();
+        							jo.put("name", (String)metadata.get("name"));
+        							jo.put("namespace", targetNamespace);
+        							jo.put("map", convertOneMapToJSON(map));
+        							applications.add(jo);
+        						}
         					}
         				}
         			}
+        		} catch (ApiException apie) {
+        			apie.printStackTrace();
+        			System.out.println("response body: "+apie.getResponseBody());
+        			JSONObject resp = new JSONObject();
+        			resp.put("message", "response error: "+apie.getResponseBody());
+        			return Response.status(400).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
         		}
-        	} catch (ApiException apie) {
-        		apie.printStackTrace();
-        		System.out.println("response body: "+apie.getResponseBody());
-        		JSONObject resp = new JSONObject();
-        		resp.put("message", "response error: "+apie.getResponseBody());
-        		return Response.status(400).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
-        	}
 
-        	catch (Exception e) {
-        		e.printStackTrace();
-        		JSONObject resp = new JSONObject();
-        		resp.put("message", "unexpected error: "+e.getMessage());
-        		return Response.status(500).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+        		catch (Exception e) {
+        			e.printStackTrace();
+        			JSONObject resp = new JSONObject();
+        			resp.put("message", "unexpected error: "+e.getMessage());
+        			return Response.status(500).entity(resp).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
+        		}
         	}
         }
 
@@ -925,7 +929,9 @@ public class StacksAccess {
 			msg.put("kabanero digest", kabDigest);
 			msg.put("image digest", imageDigest);
 			msg.put("project", namespace);
-			msg.put("applications", applications);
+			if (checkForApps) {
+				msg.put("applications", applications);
+			}
 			return Response.ok(msg).header("Content-Security-Policy", "default-src 'self'").header("X-Content-Type-Options","nosniff").build();
 		} catch (ApiException apie) {
 			apie.printStackTrace();
