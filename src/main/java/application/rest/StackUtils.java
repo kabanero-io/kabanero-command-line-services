@@ -442,9 +442,12 @@ public class StackUtils {
 			System.out.println("Could not find one of the digests.  Kab digest="+kabDigest+", imageDigest="+imageDigest);
 			digestCheck="unknown";
 		}
-		
-		status=status.substring(0, 6);  
-		if (!"active".contentEquals(status)) {
+		if (status!=null) {
+			status=status.substring(0, 6);  
+			if (!"active".contentEquals(status)) {
+				digestCheck = "NA";
+			}
+		} else {
 			digestCheck = "NA";
 		}
 		return digestCheck;
