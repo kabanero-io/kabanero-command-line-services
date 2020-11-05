@@ -1,6 +1,8 @@
 # Docker build for Kabanero CLI Microservice
 FROM openliberty/open-liberty:kernel-java8-openj9-ubi
 
+### switch to root in order to install skopeo
+USER root
 RUN yum -y update
 
 # The following labels are required for Redhat container certification
@@ -28,8 +30,7 @@ RUN chmod 444 /config/jvm.options
 RUN chmod 444 /config/resources/security/cacerts
 RUN rm /config/configDropins/defaults/open-default-port.xml
 
-### switch to root in order to install skopeo
-USER root
+
 ### Figure out how to build without root
 ### Add necessary Red Hat repos here
 
