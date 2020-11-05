@@ -548,7 +548,8 @@ public class KubeUtils {
      }
     
     private static Map<String,String> locateCorrectSecretUserAndPass(V1Secret v1secret, String gitURL) throws IOException {
-		V1Secret secret = null;
+		System.out.println("in locateCorrectSecretUserAndPass");
+    	V1Secret secret = null;
 		Iterator it = null;
 		try {
 			it = v1secret.getMetadata().getAnnotations().values().iterator();
@@ -559,6 +560,7 @@ public class KubeUtils {
 		boolean match = false;
 		for (;it.hasNext();) {
 			url = (String) it.next();
+			System.out.println("url="+url);
 			if (url!=null) {
 				if (url.contains("tekton.dev/docker-0:")) {
 					match = true;
@@ -569,7 +571,7 @@ public class KubeUtils {
 		if (!match) {
 			return null;
 		}
-		
+		System.out.println("after loop url="+url);
 		url = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
 		String user=null, password = null;
 		if (url.contentEquals(gitURL)) {
