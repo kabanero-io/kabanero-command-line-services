@@ -555,7 +555,21 @@ public class KubeUtils {
 		} catch (NullPointerException npe) {
 			return null;
 		}
-		String url = (String) it.next();
+		String url = "";
+		boolean match = false;
+		for (;it.hasNext();) {
+			url = (String) it.next();
+			if (url!=null) {
+				if (url.contains("tekton.dev/docker-0:")) {
+					match = false;
+					break;
+				}
+			}
+		}
+		if (!match) {
+			return null;
+		}
+		
 		url = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
 		String user=null, password = null;
 		if (url.contentEquals(gitURL)) {
