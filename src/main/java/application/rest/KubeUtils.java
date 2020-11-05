@@ -561,7 +561,7 @@ public class KubeUtils {
 			url = (String) it.next();
 			if (url!=null) {
 				if (url.contains("tekton.dev/docker-0:")) {
-					match = false;
+					match = true;
 					break;
 				}
 			}
