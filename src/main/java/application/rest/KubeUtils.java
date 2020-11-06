@@ -549,20 +549,19 @@ public class KubeUtils {
     
     private static Map<String,String> locateCorrectSecretUserAndPass(V1Secret v1secret, String gitURL) throws IOException {
 		System.out.println("in locateCorrectSecretUserAndPass");
-    	V1Secret secret = null;
 		Iterator it = null;
 		try {
 			it = v1secret.getMetadata().getAnnotations().values().iterator();
 		} catch (NullPointerException npe) {
 			return null;
 		}
-		String url = "";
+		String iter = "";
 		boolean match = false;
 		for (;it.hasNext();) {
-			url = (String) it.next();
-			System.out.println("url="+url);
-			if (url!=null) {
-				if (url.contains(gitURL) || url.contentEquals(gitURL)) {
+			iter = (String) it.next();
+			System.out.println("iter="+iter);
+			if (iter!=null) {
+				if ((iter.contains(gitURL) || iter.contentEquals(gitURL)) && iter.contains("apiVersion") && iter.contains("kind") && iter.contains("metadata")) {
 					match = true;
 					break;
 				}
@@ -571,16 +570,13 @@ public class KubeUtils {
 		if (!match) {
 			return null;
 		}
-		System.out.println("after loop url="+url);
-		url = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)", "");
-		String user=null, password = null;
-		if (url.contentEquals(gitURL)) {
-			String annotationStr = (String) it.next();
-			JSONObject jo = JSONObject.parse(annotationStr);
-			JSONObject stringData = (JSONObject) jo.get("stringData");
-			user = (String) stringData.get("username");
-			password = (String) stringData.get("password");
-		}
+		System.out.println("after loop iter="+iter);
+		
+		JSONObject jo = JSONObject.parse(iter);
+		JSONObject stringData = (JSONObject) jo.get("stringData");
+		String user = (String) stringData.get("username");
+		String password = (String) stringData.get("password");
+		
 		HashMap<String,String> m = null;
 		if (user!=null && password!=null) {
 			m = new HashMap<String,String>();
