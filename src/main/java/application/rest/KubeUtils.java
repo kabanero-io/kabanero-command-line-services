@@ -561,7 +561,7 @@ public class KubeUtils {
 			iter = (String) it.next();
 			System.out.println("iter="+iter);
 			if (iter!=null) {
-				if ((iter.contains(gitURL) || iter.contentEquals(gitURL)) && iter.contains("apiVersion") && iter.contains("kind") && iter.contains("metadata")) {
+				if ((iter.contains(gitURL) || iter.contentEquals(gitURL))) {
 					match = true;
 					break;
 				}
@@ -570,10 +570,8 @@ public class KubeUtils {
 		if (!match) {
 			return null;
 		}
-		System.out.println("after loop iter="+iter);
 		
-		JSONObject jo = JSONObject.parse(iter);
-		JSONObject stringData = (JSONObject) jo.get("stringData");
+		Map stringData=v1secret.getStringData();
 		String user = (String) stringData.get("username");
 		String password = (String) stringData.get("password");
 		
