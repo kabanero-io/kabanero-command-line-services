@@ -562,7 +562,7 @@ public class KubeUtils {
 			url = (String) it.next();
 			System.out.println("url="+url);
 			if (url!=null) {
-				if (url.contains("tekton.dev/docker-0:")) {
+				if (url.contains(gitURL) || url.contentEquals(gitURL)) {
 					match = true;
 					break;
 				}
